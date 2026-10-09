@@ -57,10 +57,11 @@ model User {
   name      String  @db.VarChar(255)
   avatarUrl String?
 
-  goals        Goal[]
-  subjects     Subject[]
-  projects     Project[]
-  workSessions ProjectWorkSession[]
+  goals                  Goal[]
+  subjects               Subject[]
+  projects               Project[]
+  workSessions           ProjectWorkSession[]
+  assistantConversations AssistantConversation[]
 
   createdAt DateTime @default(now()) @db.Timestamp(6)
   updatedAt DateTime @updatedAt @db.Timestamp(6)
@@ -413,3 +414,44 @@ model ProjectNote {
 
   @@index([projectId])
 }
+
+// ==========================================
+// Michi AI Assistant Persistence
+// ==========================================
+
+enum AssistantMessageRole {
+  USER
+  ASSISTANT
+  SYSTEM
+}
+
+model AssistantConversation {
+  id        String   @id @default(uuid()) @db.Uuid()
+  userId    String   @db.Uuid()
+  title     String   @default("New Conversation") @db.VarChar(255)
+  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages  AssistantMessage[]
+
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+  updatedAt DateTime @updatedAt @db.Timestamp(6)
+
+  @@index([userId])
+  @@index([userId, updatedAt])
+}
+
+model AssistantMessage {
+  id             String               @id @default(uuid()) @db.Uuid()
+  conversationId String               @db.Uuid()
+  role           AssistantMessageRole @default(USER)
+  content        String               @db.Text
+  tokenEstimate  Int?
+
+  conversation   AssistantConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  createdAt      DateTime             @default(now()) @db.Timestamp(6)
+
+  @@index([conversationId])
+  @@index([conversationId, createdAt])
+}
+

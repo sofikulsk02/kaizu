@@ -632,4 +632,134 @@ export const Api = {
     request<{ success: boolean }>(`/projects/${projectId}/notes/${noteId}`, {
       method: "DELETE",
     }),
+
+  // ==========================================
+  // Michi AI Assistant APIs
+  // ==========================================
+  getAssistantConversations: () =>
+    request<AssistantConversationSummary[]>("/assistant/conversations"),
+
+  getAssistantConversation: (id: string) =>
+    request<AssistantConversationDetail>(`/assistant/conversations/${id}`),
+
+  deleteAssistantConversation: (id: string) =>
+    request<{ success: boolean }>(`/assistant/conversations/${id}`, {
+      method: "DELETE",
+    }),
+
+  getAssistantUsage: () =>
+    request<AssistantUsage>("/assistant/usage"),
+
+  streamAssistantChat: async (
+    params: {
+      message: string;
+      conversationId?: string;
+      pageContext?: {
+        type?: "dashboard" | "subject" | "goal" | "project" | "activity" | "settings";
+        recordId?: string;
+        recordName?: string;
+      };
+    },
+    onChunk: (text: string) => void,
+    onDone: (data: { conversationId: string; fullResponse: string }) => void,
+    onError: (err: Error) => void
+  ) => {
+    const userId = getActiveUserId();
+    const jwtToken = getJwtToken();
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+    if (userId) headers["x-user-id"] = userId;
+    if (jwtToken) headers["Authorization"] = `Bearer ${jwtToken}`;
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/assistant/chat`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify(params),
+      });
+
+      if (!response.ok) {
+        let errMessage = `Error ${response.status}: Failed to reach Michi`;
+        try {
+          const errJson = await response.json();
+          if (errJson.message) errMessage = errJson.message;
+        } catch (_) {}
+        throw new Error(errMessage);
+      }
+
+      const reader = response.body?.getReader();
+      if (!reader) {
+        throw new Error("Streaming response not supported by browser");
+      }
+
+      const decoder = new TextDecoder("utf-8");
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
+
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (trimmed.startsWith("data: ")) {
+            const dataStr = trimmed.slice(6);
+            try {
+              const data = JSON.parse(dataStr);
+              if (data.type === "chunk" && data.text) {
+                onChunk(data.text);
+              } else if (data.type === "done") {
+                onDone({
+                  conversationId: data.conversationId,
+                  fullResponse: data.fullResponse,
+                });
+              } else if (data.type === "error") {
+                onError(new Error(data.error || "Assistant streaming error"));
+              }
+            } catch (e) {
+              console.warn("Error parsing SSE data line:", trimmed, e);
+            }
+          }
+        }
+      }
+    } catch (err: any) {
+      onError(err);
+    }
+  },
 };
+
+export interface AssistantConversationSummary {
+  id: string;
+  title: string;
+  createdAt: string;
+  updatedAt: string;
+  lastMessagePreview?: string;
+}
+
+export interface AssistantMessageItem {
+  id: string;
+  conversationId: string;
+  role: "USER" | "ASSISTANT" | "SYSTEM";
+  content: string;
+  createdAt: string;
+}
+
+export interface AssistantConversationDetail {
+  id: string;
+  title: string;
+  createdAt: string;
+  updatedAt: string;
+  messages: AssistantMessageItem[];
+}
+
+export interface AssistantUsage {
+  dailyRequestsUsed: number;
+  dailyLimit: number;
+  remaining: number;
+}
+

@@ -28,6 +28,7 @@ import { CreateSubjectModal } from "../components/CreateSubjectModal";
 import { CreateGoalModal } from "../components/CreateGoalModal";
 import { QuickCaptureModal } from "../components/QuickCaptureModal";
 import { LoginScreen } from "../components/LoginScreen";
+import { MichiAssistant } from "../components/assistant";
 
 export default function Page() {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -314,6 +315,32 @@ export default function Page() {
         goals={goals}
         onClose={() => setShowQuickCapture(false)}
         onSuccess={fetchData}
+      />
+
+      {/* Michi AI Continuous Improvement Companion */}
+      <MichiAssistant
+        pageContext={
+          selectedSubject
+            ? {
+                type: "subject",
+                recordId: selectedSubject.id,
+                recordName: selectedSubject.name,
+              }
+            : selectedGoalDetail
+            ? {
+                type: "goal",
+                recordId: selectedGoalDetail.id,
+                recordName: selectedGoalDetail.title,
+              }
+            : selectedProjectId
+            ? {
+                type: "project",
+                recordId: selectedProjectId,
+              }
+            : {
+                type: activeTab as any,
+              }
+        }
       />
     </div>
   );

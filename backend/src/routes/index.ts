@@ -5,6 +5,7 @@ import chapterRoutes from "../modules/chapters";
 import topicRoutes from "../modules/topics";
 import goalRoutes from "../modules/goals";
 import { projectRoutes } from "../modules/projects";
+import assistantRoutes from "../modules/assistant";
 
 const router = Router();
 
@@ -20,6 +21,7 @@ router.use("/api/chapters", chapterRoutes);
 router.use("/api/topics", topicRoutes);
 router.use("/api/goals", goalRoutes);
 router.use("/api/projects", projectRoutes);
+router.use("/api/assistant", assistantRoutes);
 
 export default router;
 
