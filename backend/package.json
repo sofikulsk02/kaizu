@@ -3,8 +3,10 @@
   "version": "1.0.0",
   "main": "src/server.ts",
   "scripts": {
-    "start": "nodemon --exec tsx watch src/server.ts",
     "dev": "nodemon --exec tsx watch src/server.ts",
+    "build": "prisma generate && tsc",
+    "start": "node dist/server.js",
+    "postinstall": "prisma generate",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

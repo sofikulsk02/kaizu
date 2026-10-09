@@ -18,75 +18,73 @@ export const Navbar: React.FC<NavbarProps> = ({
   onSelectTab,
 }) => {
   return (
-    <header className="fixed top-0 left-0 right-0 z-30 flex h-16 items-center justify-between px-4 sm:px-8 bg-[var(--bg-main)]/95 backdrop-blur-sm transition-colors border-b border-[var(--border-default)]">
-      <div className="flex items-center space-x-3 sm:space-x-4">
-        {/* Unhide Sidebar Button */}
-        {!isSidebarOpen && (
-          <button
-            onClick={onToggleSidebar}
-            title="Show Navigation Sidebar"
-            className="paper-btn-secondary flex h-9 w-9 items-center justify-center rounded-lg text-sm text-[var(--text-heading)] transition"
+    <header className="fixed top-0 left-0 right-0 z-30 flex h-14 sm:h-16 items-center justify-between px-3 sm:px-4 md:px-8 bg-[var(--bg-main)]/95 backdrop-blur-sm transition-colors border-b border-[var(--border-default)]">
+      <div className="flex items-center space-x-2 sm:space-x-4 min-w-0">
+        {/* Hamburger / Sidebar Toggle — always visible on mobile, conditional on desktop */}
+        <button
+          onClick={onToggleSidebar}
+          title={isSidebarOpen ? "Hide Sidebar" : "Show Sidebar"}
+          className={`flex h-9 w-9 items-center justify-center rounded-lg text-sm text-[var(--text-heading)] transition shrink-0 ${
+            isSidebarOpen ? "md:hidden" : ""
+          } paper-btn-secondary`}
+        >
+          <svg
+            className="h-4 w-4 stroke-[2.5]"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
           >
-            <svg
-              className="h-4 w-4 stroke-[2.5]"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
+            {isSidebarOpen ? (
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                d="M13 5l7 7-7 7M5 5l7 7-7 7"
+                d="M6 18L18 6M6 6l12 12"
               />
-            </svg>
-          </button>
-        )}
+            ) : (
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M4 6h16M4 12h16M4 18h16"
+              />
+            )}
+          </svg>
+        </button>
 
         {/* Logo & Branding */}
         <div
           onClick={() => onSelectTab("dashboard")}
-          className="flex cursor-pointer items-center space-x-3 transition hover:opacity-90"
+          className="flex cursor-pointer items-center space-x-2 sm:space-x-3 transition hover:opacity-90 min-w-0"
         >
-          <div className="flex h-9 w-9 items-center justify-center rounded-md bg-[var(--crimson)] text-white font-bold text-sm shadow-xs">
+          <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-md bg-[var(--crimson)] text-white font-bold text-xs sm:text-sm shadow-xs shrink-0">
             改善
           </div>
-          <div>
-            <span className="text-lg font-black tracking-tight text-[var(--text-heading)]">
+          <div className="min-w-0">
+            <span className="text-base sm:text-lg font-black tracking-tight text-[var(--text-heading)]">
               KAIZU
             </span>
-            <span className="ml-2.5 hidden text-xs font-semibold text-[var(--text-muted)] sm:inline-block">
+            <span className="ml-2 hidden text-xs font-semibold text-[var(--text-muted)] sm:inline-block">
               Continuous Improvement OS
             </span>
           </div>
         </div>
       </div>
 
-      {/* Center Workflow Philosophy */}
-      <div className="hidden lg:flex items-center space-x-2 bg-[var(--surface-secondary)] border border-[var(--border-subtle)] px-4 py-1.5 rounded-full text-xs font-semibold text-[var(--text-secondary)]">
-        <span className="text-[var(--text-heading)] font-extrabold">PLAN</span>
-        <span className="text-[var(--text-muted)]">→</span>
-        <span className="text-[var(--text-heading)] font-extrabold">DO</span>
-        <span className="text-[var(--text-muted)]">→</span>
-        <span className="text-[var(--text-heading)] font-extrabold">REFLECT</span>
-        <span className="text-[var(--text-muted)]">→</span>
-        <span className="text-[var(--text-heading)] font-extrabold">IMPROVE</span>
-      </div>
-
       {/* Right Controls */}
-      <div className="flex items-center space-x-3">
+      <div className="flex items-center space-x-2 sm:space-x-3 shrink-0">
         <button
           onClick={onOpenQuickAdd}
-          className="paper-btn-primary flex items-center space-x-1.5 px-4 py-2 text-xs font-bold shadow-xs"
+          className="paper-btn-primary flex items-center space-x-1.5 px-3 sm:px-4 py-2 text-xs font-bold shadow-xs"
         >
           <svg className="h-3.5 w-3.5 stroke-[3]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
           </svg>
-          <span>Quick Add</span>
+          <span className="hidden sm:inline">Quick Add</span>
+          <span className="sm:hidden">Add</span>
         </button>
 
         <button
           onClick={() => onSelectTab("settings")}
-          className="paper-btn-secondary flex items-center space-x-2 px-3 py-1.5 text-xs rounded-lg border border-[var(--border-default)]"
+          className="paper-btn-secondary flex items-center space-x-2 px-2 sm:px-3 py-1.5 text-xs rounded-lg border border-[var(--border-default)]"
         >
           <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[var(--forest-green)] text-white font-bold text-[10px]">
             {activeUser.name.charAt(0).toUpperCase()}

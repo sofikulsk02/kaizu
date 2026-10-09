@@ -138,18 +138,9 @@ export const ActivityHeatmap: React.FC = () => {
       {/* Top Header & Streak Stats */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center space-x-2">
-            <div className="inline-flex items-center space-x-2 bg-[var(--pale-sage)] px-3 py-1 text-xs font-bold text-[var(--forest-green)] rounded">
+          <div className="inline-flex items-center space-x-2 bg-[var(--pale-sage)] px-3 py-1 text-xs font-bold text-[var(--forest-green)] rounded">
               <span>📊 Daily Kaizen Activity</span>
             </div>
-            <button
-              onClick={handleResetHistory}
-              title="Reset grid to start fresh from today"
-              className="text-[11px] font-bold text-[var(--text-muted)] hover:text-[var(--text-heading)] underline transition-colors"
-            >
-              🔄 Reset to Today
-            </button>
-          </div>
           <h2 className="mt-2 text-xl font-black text-[var(--text-heading)] sm:text-2xl">
             Consistency & Activity Heatmap
           </h2>

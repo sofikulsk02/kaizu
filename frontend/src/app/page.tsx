@@ -31,7 +31,7 @@ import { LoginScreen } from "../components/LoginScreen";
 
 export default function Page() {
   const [activeTab, setActiveTab] = useState("dashboard");
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeUser, setActiveUser] = useState<User | null>(null);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [goals, setGoals] = useState<Goal[]>([]);
@@ -93,6 +93,11 @@ export default function Page() {
     // Initialize Theme from localStorage
     applyTheme(getActiveThemeId());
 
+    // Default sidebar open on desktop, closed on mobile
+    if (typeof window !== "undefined" && window.innerWidth >= 768) {
+      setIsSidebarOpen(true);
+    }
+
     // Process OAuth callback tokens from URL if returned from Google Login
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
@@ -113,6 +118,17 @@ export default function Page() {
       setActiveUser(null);
     }
   }, [fetchData]);
+
+  // Auto-close sidebar when resizing to mobile
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        setIsSidebarOpen(false);
+      }
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const handleSelectSubject = async (subject: Subject) => {
     try {
@@ -181,7 +197,7 @@ export default function Page() {
       />
 
       {/* Main Container */}
-      <div className="flex flex-1 pt-16">
+      <div className="flex flex-1 pt-14 sm:pt-16">
         {/* Sidebar Navigation */}
         <Sidebar
           isOpen={isSidebarOpen}
@@ -198,7 +214,7 @@ export default function Page() {
         />
 
         {/* Content Area */}
-        <main className={`flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full min-w-0 transition-all duration-300 ${isSidebarOpen ? "md:ml-60" : "ml-0"}`}>
+        <main className={`flex-1 p-3 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full min-w-0 transition-all duration-300 ${isSidebarOpen ? "md:ml-60" : "ml-0"}`}>
           {error && (
             <div className="mb-6 rounded-2xl border border-red-400/30 bg-red-500/15 p-4 text-sm text-red-200 flex items-center justify-between">
               <span>{error}</span>
