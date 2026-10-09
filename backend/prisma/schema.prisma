@@ -6,3 +6,410 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+// Enums
+
+enum GoalStatus {
+  ACTIVE
+  COMPLETED
+  PAUSED
+  STOPPED
+}
+
+enum MilestoneStatus {
+  UPCOMING
+  IN_PROGRESS
+  COMPLETED
+  PAUSED
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum TopicStatus {
+  NOT_STARTED
+  LEARNING
+  STUDIED
+  NEEDS_REVISION
+  UNDERSTOOD
+}
+
+enum ProjectStatus {
+  ACTIVE
+  IN_PROGRESS
+  COMPLETED
+  PAUSED
+  STOPPED
+}
+
+model User {
+  id        String  @id @default(uuid()) @db.Uuid()
+  email     String  @unique @db.VarChar(255)
+  name      String  @db.VarChar(255)
+  avatarUrl String?
+
+  goals        Goal[]
+  subjects     Subject[]
+  projects     Project[]
+  workSessions ProjectWorkSession[]
+
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+  updatedAt DateTime @updatedAt @db.Timestamp(6)
+}
+
+model Goal {
+  id        String  @id @default(uuid()) @db.Uuid()
+  userId    String  @db.Uuid()
+  subjectId String? @db.Uuid()
+
+  title             String  @db.VarChar(255)
+  description       String? @db.Text
+  category          String? @db.VarChar(100)
+  successDefinition String? @db.Text
+
+  targetDate DateTime?
+  status     GoalStatus @default(ACTIVE)
+
+  completedAt DateTime?
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subject Subject? @relation(fields: [subjectId], references: [id], onDelete: SetNull)
+
+  milestones    Milestone[]
+  tasks         GoalTask[]
+  dailyActions  DailyAction[]
+  reflections   Reflection[]
+  weeklyReviews WeeklyReview[]
+  projects      Project[]
+
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+  updatedAt DateTime @updatedAt @db.Timestamp(6)
+
+  @@index([userId])
+  @@index([subjectId])
+}
+
+model Milestone {
+  id     String @id @default(uuid()) @db.Uuid()
+  goalId String @db.Uuid()
+
+  title       String          @db.VarChar(255)
+  description String?         @db.Text
+  targetDate  DateTime?
+  status      MilestoneStatus @default(UPCOMING)
+  sortOrder   Int             @default(0)
+
+  goal Goal @relation(fields: [goalId], references: [id], onDelete: Cascade)
+
+  tasks        GoalTask[]
+  dailyActions DailyAction[]
+
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+  updatedAt DateTime @updatedAt @db.Timestamp(6)
+
+  @@index([goalId])
+}
+
+model GoalTask {
+  id          String  @id @default(uuid()) @db.Uuid()
+  goalId      String  @db.Uuid()
+  milestoneId String? @db.Uuid()
+
+  title           String       @db.VarChar(255)
+  description     String?      @db.Text
+  status          TaskStatus   @default(TODO)
+  priority        TaskPriority @default(MEDIUM)
+  dueDate         DateTime?
+  estimateMinutes Int?
+  sortOrder       Int          @default(0)
+  completedAt     DateTime?
+
+  goal      Goal       @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  milestone Milestone? @relation(fields: [milestoneId], references: [id], onDelete: SetNull)
+
+  dailyActions DailyAction[]
+
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+  updatedAt DateTime @updatedAt @db.Timestamp(6)
+
+  @@index([goalId])
+  @@index([milestoneId])
+}
+
+model DailyAction {
+  id          String  @id @default(uuid()) @db.Uuid()
+  goalId      String  @db.Uuid()
+  taskId      String? @db.Uuid()
+  milestoneId String? @db.Uuid()
+
+  summary         String    @db.Text
+  occurredAt      DateTime  @default(now()) @db.Timestamp(6)
+  durationMinutes Int?
+  outcome         String?   @db.Text
+  blocker         String?   @db.Text
+  nextStep        String?   @db.Text
+
+  goal      Goal       @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  task      GoalTask?  @relation(fields: [taskId], references: [id], onDelete: SetNull)
+  milestone Milestone? @relation(fields: [milestoneId], references: [id], onDelete: SetNull)
+
+  reflections Reflection[]
+
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+  updatedAt DateTime @updatedAt @db.Timestamp(6)
+
+  @@index([goalId])
+  @@index([taskId])
+  @@index([milestoneId])
+}
+
+model Reflection {
+  id            String  @id @default(uuid()) @db.Uuid()
+  goalId        String  @db.Uuid()
+  dailyActionId String? @db.Uuid()
+
+  wentWell   String? @db.Text
+  difficulty String? @db.Text
+  learning   String? @db.Text
+  nextChange String? @db.Text
+
+  goal        Goal         @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  dailyAction DailyAction? @relation(fields: [dailyActionId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+  updatedAt DateTime @updatedAt @db.Timestamp(6)
+
+  @@index([goalId])
+  @@index([dailyActionId])
+}
+
+model WeeklyReview {
+  id     String @id @default(uuid()) @db.Uuid()
+  goalId String @db.Uuid()
+
+  periodStart DateTime @db.Timestamp(6)
+  periodEnd   DateTime @db.Timestamp(6)
+
+  summary   String  @db.Text
+  blockers  String? @db.Text
+  nextFocus String? @db.Text
+
+  goal Goal @relation(fields: [goalId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+  updatedAt DateTime @updatedAt @db.Timestamp(6)
+
+  @@index([goalId])
+}
+
+model Subject {
+  id     String @id @default(uuid()) @db.Uuid()
+  userId String @db.Uuid()
+
+  name        String  @db.VarChar(255)
+  description String? @db.Text
+
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+  updatedAt DateTime @updatedAt @db.Timestamp(6)
+
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  chapters      Chapter[]
+  goals         Goal[]
+  studySessions StudySession[]
+  projects      Project[]
+
+  @@index([userId])
+}
+
+model Chapter {
+  id        String @id @default(uuid()) @db.Uuid()
+  subjectId String @db.Uuid()
+
+  title       String  @db.VarChar(255)
+  description String? @db.Text
+
+  subject Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  topics  Topic[]
+
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+  updatedAt DateTime @updatedAt @db.Timestamp(6)
+
+  @@index([subjectId])
+}
+
+model Topic {
+  id        String @id @default(uuid()) @db.Uuid()
+  chapterId String @db.Uuid()
+
+  title         String      @db.VarChar(255)
+  status        TopicStatus @default(NOT_STARTED)
+  confidence    Int?        // 1 to 5 rating
+  notes         String?     @db.Text
+  resources     String?     @db.Text
+  nextStep      String?     @db.Text
+  revisionDate  DateTime?
+  lastStudiedAt DateTime?
+
+  chapter Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  studySessions StudySession[]
+
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+  updatedAt DateTime @updatedAt @db.Timestamp(6)
+
+  @@index([chapterId])
+}
+
+model StudySession {
+  id        String  @id @default(uuid()) @db.Uuid()
+  subjectId String  @db.Uuid()
+  chapterId String? @db.Uuid()
+  topicId   String? @db.Uuid()
+
+  summary         String   @db.Text
+  durationMinutes Int
+  occurredAt      DateTime @default(now()) @db.Timestamp(6)
+  confidence      Int?     // 1-5 rating
+  outcome         String?  @db.Text
+  nextStep        String?  @db.Text
+
+  subject Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  topic   Topic?   @relation(fields: [topicId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+  updatedAt DateTime @updatedAt @db.Timestamp(6)
+
+  @@index([subjectId])
+  @@index([topicId])
+}
+
+model Project {
+  id        String  @id @default(uuid()) @db.Uuid()
+  userId    String  @db.Uuid()
+  goalId    String? @db.Uuid()
+  subjectId String? @db.Uuid()
+
+  name        String        @db.VarChar(255)
+  description String?       @db.Text
+  category    String?       @db.VarChar(100)
+  status      ProjectStatus @default(IN_PROGRESS)
+  targetDate  DateTime?
+  nextAction  String?       @db.Text
+  completedAt DateTime?
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  goal    Goal?    @relation(fields: [goalId], references: [id], onDelete: SetNull)
+  subject Subject? @relation(fields: [subjectId], references: [id], onDelete: SetNull)
+
+  milestones   ProjectMilestone[]
+  tasks        ProjectTask[]
+  workSessions ProjectWorkSession[]
+  notes        ProjectNote[]
+
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+  updatedAt DateTime @updatedAt @db.Timestamp(6)
+
+  @@index([userId])
+  @@index([goalId])
+  @@index([subjectId])
+}
+
+model ProjectMilestone {
+  id        String @id @default(uuid()) @db.Uuid()
+  projectId String @db.Uuid()
+
+  title       String          @db.VarChar(255)
+  description String?         @db.Text
+  targetDate  DateTime?
+  status      MilestoneStatus @default(UPCOMING)
+  sortOrder   Int             @default(0)
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  tasks        ProjectTask[]
+  workSessions ProjectWorkSession[]
+
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+  updatedAt DateTime @updatedAt @db.Timestamp(6)
+
+  @@index([projectId])
+}
+
+model ProjectTask {
+  id          String  @id @default(uuid()) @db.Uuid()
+  projectId   String  @db.Uuid()
+  milestoneId String? @db.Uuid()
+
+  title           String       @db.VarChar(255)
+  description     String?      @db.Text
+  status          TaskStatus   @default(TODO)
+  priority        TaskPriority @default(MEDIUM)
+  dueDate         DateTime?
+  estimateMinutes Int?
+  sortOrder       Int          @default(0)
+  completedAt     DateTime?
+
+  project   Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  milestone ProjectMilestone? @relation(fields: [milestoneId], references: [id], onDelete: SetNull)
+
+  workSessions ProjectWorkSession[]
+
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+  updatedAt DateTime @updatedAt @db.Timestamp(6)
+
+  @@index([projectId])
+  @@index([milestoneId])
+}
+
+model ProjectWorkSession {
+  id          String  @id @default(uuid()) @db.Uuid()
+  userId      String  @db.Uuid()
+  projectId   String  @db.Uuid()
+  milestoneId String? @db.Uuid()
+  taskId      String? @db.Uuid()
+
+  summary         String   @db.Text
+  occurredAt      DateTime @default(now()) @db.Timestamp(6)
+  durationMinutes Int
+  outcome         String?  @db.Text
+  blocker         String?  @db.Text
+  nextStep        String?  @db.Text
+
+  user      User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project   Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  milestone ProjectMilestone? @relation(fields: [milestoneId], references: [id], onDelete: SetNull)
+  task      ProjectTask?      @relation(fields: [taskId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+  updatedAt DateTime @updatedAt @db.Timestamp(6)
+
+  @@index([userId])
+  @@index([projectId])
+  @@index([milestoneId])
+  @@index([taskId])
+}
+
+model ProjectNote {
+  id        String @id @default(uuid()) @db.Uuid()
+  projectId String @db.Uuid()
+
+  title    String  @db.VarChar(255)
+  category String? @db.VarChar(50)
+  content  String  @db.Text
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+  updatedAt DateTime @updatedAt @db.Timestamp(6)
+
+  @@index([projectId])
+}

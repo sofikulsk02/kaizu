@@ -1,69 +1,304 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import React, { useState, useEffect, useCallback } from "react";
+import {
+  Api,
+  Subject,
+  Goal,
+  GoalDetail,
+  User,
+  setJwtToken,
+  setActiveUserId,
+  clearAuth,
+  isAuthenticated,
+} from "../lib/api";
+import { getActiveThemeId, applyTheme } from "../lib/theme";
+import { Navbar } from "../components/Navbar";
+import { Sidebar } from "../components/Sidebar";
+import { DashboardView } from "../components/DashboardView";
+import { SubjectsView } from "../components/SubjectsView";
+import { SubjectDetailView } from "../components/SubjectDetailView";
+import { GoalsView } from "../components/GoalsView";
+import { GoalDetailView } from "../components/GoalDetailView";
+import { ProjectsView } from "../components/ProjectsView";
+import { ProjectDetailView } from "../components/ProjectDetailView";
+import { ActivityView } from "../components/ActivityView";
+import { SettingsView } from "../components/SettingsView";
+import { CreateSubjectModal } from "../components/CreateSubjectModal";
+import { CreateGoalModal } from "../components/CreateGoalModal";
+import { QuickCaptureModal } from "../components/QuickCaptureModal";
+import { LoginScreen } from "../components/LoginScreen";
+
+export default function Page() {
+  const [activeTab, setActiveTab] = useState("dashboard");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [activeUser, setActiveUser] = useState<User | null>(null);
+  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [goals, setGoals] = useState<Goal[]>([]);
+  const [selectedSubject, setSelectedSubject] = useState<Subject | null>(null);
+  const [selectedGoalDetail, setSelectedGoalDetail] = useState<GoalDetail | null>(null);
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+
+  const [showCreateSubject, setShowCreateSubject] = useState(false);
+  const [showCreateGoal, setShowCreateGoal] = useState(false);
+  const [showQuickCapture, setShowQuickCapture] = useState(false);
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const user = await Api.getMe();
+      setActiveUser(user);
+
+      const [subs, gls] = await Promise.all([
+        Api.getSubjects(),
+        Api.getGoals(),
+      ]);
+
+      setSubjects(subs);
+      setGoals(gls);
+
+      // Refresh selected subject if open
+      if (selectedSubject) {
+        try {
+          const updatedSubject = await Api.getSubjectById(selectedSubject.id);
+          setSelectedSubject(updatedSubject);
+        } catch (e) {
+          setSelectedSubject(null);
+        }
+      }
+
+      // Refresh selected goal detail if open
+      if (selectedGoalDetail) {
+        try {
+          const updatedGoalDetail = await Api.getGoalById(selectedGoalDetail.id);
+          setSelectedGoalDetail(updatedGoalDetail);
+        } catch (e) {
+          setSelectedGoalDetail(null);
+        }
+      }
+    } catch (err: any) {
+      console.error("Authentication required or failed:", err);
+      clearAuth();
+      setActiveUser(null);
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedSubject?.id, selectedGoalDetail?.id]);
+
+  useEffect(() => {
+    // Initialize Theme from localStorage
+    applyTheme(getActiveThemeId());
+
+    // Process OAuth callback tokens from URL if returned from Google Login
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get("token");
+      const userId = params.get("userId");
+
+      if (token && userId) {
+        setJwtToken(token);
+        setActiveUserId(userId);
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    }
+
+    if (isAuthenticated()) {
+      fetchData();
+    } else {
+      setLoading(false);
+      setActiveUser(null);
+    }
+  }, [fetchData]);
+
+  const handleSelectSubject = async (subject: Subject) => {
+    try {
+      const detail = await Api.getSubjectById(subject.id);
+      setSelectedSubject(detail);
+      setSelectedGoalDetail(null);
+      setSelectedProjectId(null);
+      setActiveTab("subjects");
+    } catch (err: any) {
+      alert(err.message || "Failed to load subject details");
+    }
+  };
+
+  const handleSelectGoal = async (goal: Goal) => {
+    try {
+      const detail = await Api.getGoalById(goal.id);
+      setSelectedGoalDetail(detail);
+      setSelectedSubject(null);
+      setSelectedProjectId(null);
+      setActiveTab("goals");
+    } catch (err: any) {
+      alert(err.message || "Failed to load goal workspace");
+    }
+  };
+
+  const handleUserChanged = () => {
+    setSelectedSubject(null);
+    setSelectedGoalDetail(null);
+    setSelectedProjectId(null);
+    fetchData();
+  };
+
+  const resetSelection = () => {
+    setSelectedSubject(null);
+    setSelectedGoalDetail(null);
+    setSelectedProjectId(null);
+  };
+
+  // If initial auth check is running
+  if (loading && !activeUser) {
+    return (
+      <div className="flex min-h-screen items-center justify-center space-x-2 text-sm">
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-current border-t-transparent"></div>
+        <span className="font-semibold">Connecting to Kaizu OS...</span>
+      </div>
+    );
+  }
+
+  // Mandatory Authentication Gate: Unauthenticated users MUST see LoginScreen
+  if (!activeUser) {
+    return <LoginScreen onLoginSuccess={fetchData} />;
+  }
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <div className="flex min-h-screen flex-col font-sans antialiased">
+      {/* Top Navigation */}
+      <Navbar
+        activeUser={activeUser}
+        isSidebarOpen={isSidebarOpen}
+        onToggleSidebar={() => setIsSidebarOpen((prev) => !prev)}
+        onOpenQuickAdd={() => setShowQuickCapture(true)}
+        onSelectTab={(tab) => {
+          resetSelection();
+          setActiveTab(tab);
+        }}
+      />
+
+      {/* Main Container */}
+      <div className="flex flex-1 pt-16">
+        {/* Sidebar Navigation */}
+        <Sidebar
+          isOpen={isSidebarOpen}
+          onToggleSidebar={() => setIsSidebarOpen((prev) => !prev)}
+          activeTab={activeTab}
+          onSelectTab={(tab) => {
+            resetSelection();
+            setActiveTab(tab);
+          }}
+          counts={{
+            subjects: subjects.length,
+            goals: goals.length,
+          }}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
+
+        {/* Content Area */}
+        <main className={`flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full min-w-0 transition-all duration-300 ${isSidebarOpen ? "md:ml-60" : "ml-0"}`}>
+          {error && (
+            <div className="mb-6 rounded-2xl border border-red-400/30 bg-red-500/15 p-4 text-sm text-red-200 flex items-center justify-between">
+              <span>{error}</span>
+              <button
+                onClick={fetchData}
+                className="ml-4 rounded-lg bg-red-500/20 px-3 py-1 text-xs font-semibold text-white hover:bg-red-500/30"
+              >
+                Retry
+              </button>
+            </div>
+          )}
+
+          {selectedSubject ? (
+            <SubjectDetailView
+              subject={selectedSubject}
+              onBack={() => setSelectedSubject(null)}
+              onRefresh={fetchData}
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+          ) : selectedGoalDetail ? (
+            <GoalDetailView
+              goalDetail={selectedGoalDetail}
+              onBack={() => setSelectedGoalDetail(null)}
+              onRefresh={fetchData}
+            />
+          ) : selectedProjectId ? (
+            <ProjectDetailView
+              projectId={selectedProjectId}
+              onBack={() => setSelectedProjectId(null)}
+            />
+          ) : (
+            <>
+              {activeTab === "dashboard" && (
+                <DashboardView
+                  subjects={subjects}
+                  goals={goals}
+                  onSelectTab={(tab) => {
+                    resetSelection();
+                    setActiveTab(tab);
+                  }}
+                  onSelectSubject={handleSelectSubject}
+                  onSelectGoal={handleSelectGoal}
+                  onOpenCreateSubject={() => setShowCreateSubject(true)}
+                  onOpenCreateGoal={() => setShowCreateGoal(true)}
+                />
+              )}
+
+              {activeTab === "subjects" && (
+                <SubjectsView
+                  subjects={subjects}
+                  onSelectSubject={handleSelectSubject}
+                  onOpenCreateSubject={() => setShowCreateSubject(true)}
+                />
+              )}
+
+              {activeTab === "goals" && (
+                <GoalsView
+                  goals={goals}
+                  onSelectGoal={handleSelectGoal}
+                  onOpenCreateGoal={() => setShowCreateGoal(true)}
+                  onRefresh={fetchData}
+                />
+              )}
+
+              {activeTab === "projects" && (
+                <ProjectsView
+                  onSelectProject={(id) => setSelectedProjectId(id)}
+                />
+              )}
+
+              {activeTab === "activity" && (
+                <ActivityView subjects={subjects} goals={goals} />
+              )}
+
+              {activeTab === "settings" && (
+                <SettingsView onUserChanged={handleUserChanged} />
+              )}
+            </>
+          )}
+        </main>
+      </div>
+
+      {/* Modals */}
+      <CreateSubjectModal
+        isOpen={showCreateSubject}
+        onClose={() => setShowCreateSubject(false)}
+        onSuccess={fetchData}
+      />
+
+      <CreateGoalModal
+        isOpen={showCreateGoal}
+        onClose={() => setShowCreateGoal(false)}
+        onSuccess={fetchData}
+      />
+
+      <QuickCaptureModal
+        isOpen={showQuickCapture}
+        goals={goals}
+        onClose={() => setShowQuickCapture(false)}
+        onSuccess={fetchData}
+      />
     </div>
   );
 }

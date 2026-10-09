@@ -1,26 +1,444 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ==========================================================================
+   KAIZU — Japanese-Inspired Paper Minimalism Design System
+   ========================================================================== */
+
+:root,
+html[data-theme="paper-washi"],
+body[data-theme="paper-washi"] {
+  --bg-main: #F4EFE3;
+  --surface-primary: #FAF7F0;
+  --surface-hover: #F3ECE0;
+  --surface-secondary: #EDE6D8;
+  --surface-inset: #E7DFD0;
+  --surface-dialog: #FFFCF6;
+  
+  --text-primary: #26382D;
+  --text-heading: #173524;
+  --text-secondary: #59675C;
+  --text-muted: #7B8176;
+  --text-disabled: #9A9A8D;
+  
+  --forest-green: #244633;
+  --deep-forest: #173524;
+  --crimson: #B83245;
+  --crimson-hover: #A52B3C;
+  --sage: #819B7E;
+  --pale-sage: #E1E9DC;
+  
+  --border-default: #DED6C7;
+  --border-strong: #CFC5B4;
+  --border-subtle: #E7E0D4;
+  
+  --sidebar-bg: #FAF7F0;
+  --sidebar-text: #59675C;
+  --sidebar-active-bg: #E1E9DC;
+  --sidebar-active-text: #173524;
+  
+  /* Retain aliases for standard component bindings */
+  --fg-main: #26382D;
+  --surface-bg: #FAF7F0;
+  --surface-nested: #EDE6D8;
+  --badge-bg: #E1E9DC;
+  --input-bg: #FAF7F0;
+  --btn-primary-bg: #B83245;
+  --btn-primary-text: #FFFFFF;
+  --btn-secondary-bg: #EDE6D8;
+  --btn-secondary-text: #173524;
+  --accent-color: #B83245;
+  --muted-text: #7B8176;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* Theme 1: Orange / Sky Blue / Black */
+html[data-theme="theme-orange-black"],
+body[data-theme="theme-orange-black"] {
+  --bg-main: #0F1115;
+  --surface-primary: #1A1F26;
+  --surface-hover: #252E3A;
+  --surface-secondary: #14181F;
+  --surface-inset: #0C0E12;
+  --surface-dialog: #202730;
+  
+  --text-primary: #E5E7EB;
+  --text-heading: #FFFFFF;
+  --text-secondary: #CBD5E1;
+  --text-muted: #94A3B8;
+  --text-disabled: #64748B;
+  
+  --forest-green: #7DD3FC;
+  --deep-forest: #38BDF8;
+  --crimson: #FF8A3D;
+  --crimson-hover: #F97316;
+  --sage: #7DD3FC;
+  --pale-sage: #2A231F;
+  
+  --border-default: #2A323D;
+  --border-strong: #3B4654;
+  --border-subtle: #1F2630;
+  
+  --sidebar-bg: #14181F;
+  --sidebar-text: #94A3B8;
+  --sidebar-active-bg: #252E3A;
+  --sidebar-active-text: #FF8A3D;
+  
+  --fg-main: #E5E7EB;
+  --surface-bg: #1A1F26;
+  --surface-nested: #14181F;
+  --badge-bg: #2A231F;
+  --input-bg: #14181F;
+  --btn-primary-bg: #FF8A3D;
+  --btn-primary-text: #0F1115;
+  --btn-secondary-bg: #2A323D;
+  --btn-secondary-text: #E5E7EB;
+  --accent-color: #FF8A3D;
+  --muted-text: #94A3B8;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Theme 2: Olive Green / Black / Burgundy */
+html[data-theme="theme-olive-burgundy"],
+body[data-theme="theme-olive-burgundy"] {
+  --bg-main: #F8F6EE;
+  --surface-primary: #FFFFFF;
+  --surface-hover: #F3ECE2;
+  --surface-secondary: #F2EFE5;
+  --surface-inset: #EBE7DA;
+  --surface-dialog: #FFFFFF;
+  
+  --text-primary: #1F2937;
+  --text-heading: #1F2937;
+  --text-secondary: #4B5563;
+  --text-muted: #687280;
+  --text-disabled: #9CA3AF;
+  
+  --forest-green: #556B2F;
+  --deep-forest: #3B4A20;
+  --crimson: #722F37;
+  --crimson-hover: #5C252C;
+  --sage: #556B2F;
+  --pale-sage: #EBF0E6;
+  
+  --border-default: #E5E0D4;
+  --border-strong: #D5CEBF;
+  --border-subtle: #EFEBE0;
+  
+  --sidebar-bg: #3B4A25;
+  --sidebar-text: #D1DEC0;
+  --sidebar-active-bg: #4D6031;
+  --sidebar-active-text: #FFFFFF;
+  
+  --fg-main: #1F2937;
+  --surface-bg: #FFFFFF;
+  --surface-nested: #F2EFE5;
+  --badge-bg: #EBF0E6;
+  --input-bg: #FFFFFF;
+  --btn-primary-bg: #722F37;
+  --btn-primary-text: #FFFFFF;
+  --btn-secondary-bg: #F2EFE5;
+  --btn-secondary-text: #1F2937;
+  --accent-color: #722F37;
+  --muted-text: #687280;
 }
 
+/* Sage Botanical */
+html[data-theme="paper-sage"],
+body[data-theme="paper-sage"] {
+  --bg-main: #EFECE6;
+  --surface-primary: #F7F5F0;
+  --surface-hover: #EBF0E8;
+  --surface-secondary: #E1E7DE;
+  --surface-inset: #D6DEC8;
+  --surface-dialog: #FFFFFF;
+  
+  --text-primary: #1C2E24;
+  --text-heading: #122419;
+  --text-secondary: #495C50;
+  --text-muted: #6E7F74;
+  --text-disabled: #98A59C;
+  
+  --forest-green: #1F422E;
+  --deep-forest: #122419;
+  --crimson: #2D5A40;
+  --crimson-hover: #234732;
+  --sage: #6B8E67;
+  --pale-sage: #D5E3D2;
+  
+  --border-default: #D2DCD0;
+  --border-strong: #BDCBB9;
+  --border-subtle: #E4ECE2;
+  
+  --sidebar-bg: #F7F5F0;
+  --sidebar-text: #495C50;
+  --sidebar-active-bg: #D5E3D2;
+  --sidebar-active-text: #122419;
+  
+  --fg-main: #1C2E24;
+  --surface-bg: #F7F5F0;
+  --surface-nested: #E1E7DE;
+  --badge-bg: #D5E3D2;
+  --input-bg: #F7F5F0;
+  --btn-primary-bg: #2D5A40;
+  --btn-primary-text: #FFFFFF;
+  --btn-secondary-bg: #E1E7DE;
+  --btn-secondary-text: #122419;
+  --accent-color: #2D5A40;
+  --muted-text: #6E7F74;
+}
+
+/* Ink Charcoal */
+html[data-theme="paper-charcoal"],
+body[data-theme="paper-charcoal"] {
+  --bg-main: #1B211E;
+  --surface-primary: #242C28;
+  --surface-hover: #2C3531;
+  --surface-secondary: #181E1C;
+  --surface-inset: #131816;
+  --surface-dialog: #2A332F;
+  
+  --text-primary: #E8EDE9;
+  --text-heading: #F4F7F4;
+  --text-secondary: #A0ABA3;
+  --text-muted: #78857C;
+  --text-disabled: #525C55;
+  
+  --forest-green: #3D6B50;
+  --deep-forest: #A2C7B0;
+  --crimson: #C94A5C;
+  --crimson-hover: #B33D4E;
+  --sage: #7DA479;
+  --pale-sage: #27362C;
+  
+  --border-default: #313B36;
+  --border-strong: #424F49;
+  --border-subtle: #27302C;
+  
+  --sidebar-bg: #181E1C;
+  --sidebar-text: #78857C;
+  --sidebar-active-bg: #27362C;
+  --sidebar-active-text: #C94A5C;
+  
+  --fg-main: #E8EDE9;
+  --surface-bg: #242C28;
+  --surface-nested: #181E1C;
+  --badge-bg: #27362C;
+  --input-bg: #181E1C;
+  --btn-primary-bg: #C94A5C;
+  --btn-primary-text: #FFFFFF;
+  --btn-secondary-bg: #313B36;
+  --btn-secondary-text: #E8EDE9;
+  --accent-color: #C94A5C;
+  --muted-text: #A0ABA3;
+}
+
+/* Body & Washi Texture Setup */
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+  font-family: var(--font-geist-sans), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  position: relative;
+  min-height: 100vh;
+}
+
+/* Washi Paper Subtle Background Overlay */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: url("/washi-bg.jpg");
+  background-size: cover;
+  background-position: center bottom;
+  background-repeat: no-repeat;
+  opacity: 0.14;
+  pointer-events: none;
+  z-index: 0;
+}
+
+#root, main, nav {
+  position: relative;
+  z-index: 1;
+}
+
+/* Headings Styling */
+h1, h2, h3, h4, .font-heading {
+  color: var(--text-heading);
+  letter-spacing: -0.01em;
+}
+
+/* ==========================================================================
+   Paper Minimalism Utility System
+   ========================================================================== */
+
+/* Paper Card Surfaces */
+.paper-card, .clay-surface {
+  background-color: var(--surface-primary);
+  border: 1px solid var(--border-default);
+  border-radius: 0.75rem; /* 12px understated radius */
+  box-shadow: 0 1px 3px rgba(36, 70, 51, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.paper-card-interactive, .clay-surface-interactive {
+  background-color: var(--surface-primary);
+  border: 1px solid var(--border-default);
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 3px rgba(36, 70, 51, 0.04);
+  transition: all 0.2s ease;
+}
+
+.paper-card-interactive:hover, .clay-surface-interactive:hover {
+  background-color: var(--surface-hover);
+  border-color: var(--border-strong);
+  box-shadow: 0 4px 12px rgba(36, 70, 51, 0.06);
+}
+
+/* Paper Secondary Inset Surface */
+.paper-inset {
+  background-color: var(--surface-inset);
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.5rem;
+}
+
+/* Primary Crimson Paper Button */
+.paper-btn-primary, .clay-btn-primary {
+  background-color: var(--crimson);
+  color: #FFFFFF !important;
+  border-radius: 0.5rem;
+  font-weight: 700;
+  border: 1px solid transparent;
+  box-shadow: 0 1px 2px rgba(184, 50, 69, 0.2);
+  transition: all 0.15s ease;
+}
+
+.paper-btn-primary:hover, .clay-btn-primary:hover {
+  background-color: var(--crimson-hover);
+  box-shadow: 0 3px 8px rgba(184, 50, 69, 0.3);
+}
+
+.paper-btn-primary:active, .clay-btn-primary:active {
+  transform: translateY(1px);
+}
+
+/* Secondary Paper Button */
+.paper-btn-secondary, .clay-btn-secondary {
+  background-color: var(--surface-secondary);
+  color: var(--text-heading) !important;
+  border: 1px solid var(--border-default);
+  border-radius: 0.5rem;
+  font-weight: 600;
+  transition: all 0.15s ease;
+}
+
+.paper-btn-secondary:hover, .clay-btn-secondary:hover {
+  background-color: var(--surface-hover);
+  border-color: var(--border-strong);
+  color: var(--deep-forest) !important;
+}
+
+/* Danger Button */
+.paper-btn-danger, .clay-btn-danger {
+  background-color: #C0392B;
+  color: #FFFFFF !important;
+  border-radius: 0.5rem;
+  font-weight: 700;
+  transition: all 0.15s ease;
+}
+
+.paper-btn-danger:hover, .clay-btn-danger:hover {
+  background-color: #A93226;
+}
+
+/* Form Inputs */
+.paper-input, .clay-input {
+  background-color: var(--surface-primary);
+  border: 1px solid var(--border-default);
+  border-radius: 0.5rem;
+  color: var(--text-primary);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.paper-input:focus, .clay-input:focus {
+  outline: none;
+  border-color: var(--forest-green);
+  box-shadow: 0 0 0 3px rgba(36, 70, 51, 0.1);
+}
+
+/* Badges */
+.paper-badge, .clay-badge {
+  border-radius: 9999px;
+  background-color: var(--pale-sage);
+  color: var(--forest-green);
+  border: 1px solid rgba(129, 155, 126, 0.3);
+  font-weight: 700;
+}
+
+/* Modal Surface */
+.paper-modal, .clay-modal {
+  background-color: var(--surface-dialog);
+  border: 1px solid var(--border-strong);
+  border-radius: 1rem;
+  box-shadow: 0 12px 32px rgba(36, 70, 51, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+/* ==========================================================================
+   Activity Heatmap Grid Cells
+   ========================================================================== */
+
+.activity-cell {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  transition: outline 0.1s ease, transform 0.1s ease;
+  cursor: pointer;
+}
+
+.activity-cell:hover {
+  outline: 2px solid var(--forest-green);
+  outline-offset: 1px;
+  transform: scale(1.3);
+}
+
+/* Level 0 — No activity (empty cell) */
+.activity-level-0 {
+  background-color: var(--surface-inset);
+  border: 1px solid var(--border-subtle);
+}
+
+/* Level 1 — Low activity */
+.activity-level-1 {
+  background-color: var(--pale-sage);
+}
+
+/* Level 2 — Medium activity */
+.activity-level-2 {
+  background-color: var(--sage);
+}
+
+/* Level 3 — High activity */
+.activity-level-3 {
+  background-color: var(--forest-green);
+}
+
+/* Level 4 — Maximum activity */
+.activity-level-4 {
+  background-color: var(--deep-forest);
+}
+
+/* Clean Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-main);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
 }

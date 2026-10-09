@@ -1,0 +1,280 @@
+import { prisma } from "../../database/prisma";
+import { NotFoundError, BadRequestError } from "../../core/ApiError";
+import { CreateSubjectDto, UpdateSubjectDto, CreateStudySessionDto } from "./subject.schema";
+
+export class SubjectService {
+  public static async createSubject(userId: string, dto: CreateSubjectDto) {
+    return prisma.subject.create({
+      data: {
+        userId,
+        name: dto.name,
+        description: dto.description,
+      },
+    });
+  }
+
+  public static async getSubjects(userId: string) {
+    const subjects = await prisma.subject.findMany({
+      where: { userId },
+      orderBy: { createdAt: "desc" },
+      include: {
+        chapters: {
+          include: {
+            topics: true,
+          },
+        },
+        studySessions: true,
+      },
+    });
+
+    return subjects.map((subject) => {
+      const chapterCount = subject.chapters.length;
+      const allTopics = subject.chapters.flatMap((c) => c.topics);
+      const topicCount = allTopics.length;
+
+      const totalTimeStudiedMinutes = subject.studySessions.reduce(
+        (acc, s) => acc + s.durationMinutes,
+        0
+      );
+
+      const activeDaysSet = new Set(
+        subject.studySessions.map((s) => new Date(s.occurredAt).toISOString().split("T")[0])
+      );
+
+      const { chapters, studySessions, ...subjectWithoutRelations } = subject;
+
+      return {
+        ...subjectWithoutRelations,
+        chapterCount,
+        topicCount,
+        totalTimeStudiedMinutes,
+        activeDaysCount: activeDaysSet.size,
+      };
+    });
+  }
+
+  public static async getSubjectById(userId: string, id: string) {
+    const subject = await prisma.subject.findFirst({
+      where: { id, userId },
+      include: {
+        chapters: {
+          orderBy: { createdAt: "asc" },
+          include: {
+            topics: {
+              orderBy: { createdAt: "asc" },
+            },
+          },
+        },
+        studySessions: {
+          orderBy: { occurredAt: "desc" },
+          include: {
+            topic: {
+              select: { id: true, title: true, status: true },
+            },
+          },
+        },
+      },
+    });
+
+    if (!subject) {
+      throw new NotFoundError("Subject not found");
+    }
+
+    const allTopics = subject.chapters.flatMap((c) => c.topics);
+    const chapterCount = subject.chapters.length;
+    const topicsTrackedCount = allTopics.length;
+
+    const topicsStudiedCount = allTopics.filter(
+      (t) => t.status === "STUDIED" || t.status === "UNDERSTOOD"
+    ).length;
+
+    const topicsNeedingRevisionCount = allTopics.filter(
+      (t) => t.status === "NEEDS_REVISION" || t.status === "LEARNING"
+    ).length;
+
+    const totalTimeStudiedMinutes = subject.studySessions.reduce(
+      (acc, s) => acc + s.durationMinutes,
+      0
+    );
+
+    const activeDaysSet = new Set(
+      subject.studySessions.map((s) => new Date(s.occurredAt).toISOString().split("T")[0])
+    );
+
+    // Compute Continue Learning hero data
+    let continueLearning: {
+      topicId?: string;
+      topicTitle: string;
+      lastStudiedText: string;
+      durationMinutes?: number;
+      nextStep?: string;
+    } | null = null;
+
+    if (subject.studySessions.length > 0) {
+      const lastSession = subject.studySessions[0];
+      const lastTopic = allTopics.find((t) => t.id === lastSession.topicId);
+
+      const lastDateStr = new Date(lastSession.occurredAt).toLocaleDateString("en-US", {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+      });
+
+      continueLearning = {
+        topicId: lastSession.topicId || undefined,
+        topicTitle: lastTopic?.title || lastSession.summary,
+        lastStudiedText: `Last studied: ${lastDateStr} · ${lastSession.durationMinutes} mins`,
+        durationMinutes: lastSession.durationMinutes,
+        nextStep: lastSession.nextStep || lastTopic?.nextStep || undefined,
+      };
+    } else if (allTopics.length > 0) {
+      continueLearning = {
+        topicId: allTopics[0].id,
+        topicTitle: allTopics[0].title,
+        lastStudiedText: "Ready to start first session",
+        nextStep: "Begin exploring fundamental concepts",
+      };
+    }
+
+    return {
+      ...subject,
+      chapterCount,
+      topicCount: topicsTrackedCount,
+      metrics: {
+        totalTimeStudiedMinutes,
+        activeDaysCount: activeDaysSet.size,
+        topicsTrackedCount,
+        topicsStudiedCount,
+        topicsNeedingRevisionCount,
+      },
+      continueLearning,
+    };
+  }
+
+  public static async updateSubject(userId: string, id: string, dto: UpdateSubjectDto) {
+    const existing = await prisma.subject.findFirst({
+      where: { id, userId },
+    });
+
+    if (!existing) {
+      throw new NotFoundError("Subject not found");
+    }
+
+    return prisma.subject.update({
+      where: { id },
+      data: {
+        ...(dto.name !== undefined && { name: dto.name }),
+        ...(dto.description !== undefined && { description: dto.description }),
+      },
+    });
+  }
+
+  public static async deleteSubject(userId: string, id: string) {
+    const existing = await prisma.subject.findFirst({
+      where: { id, userId },
+    });
+
+    if (!existing) {
+      throw new NotFoundError("Subject not found");
+    }
+
+    await prisma.subject.delete({
+      where: { id },
+    });
+
+    return { success: true, message: "Subject deleted successfully" };
+  }
+
+  // =========================================================================
+  // Study Session Operations
+  // =========================================================================
+
+  public static async createStudySession(userId: string, subjectId: string, dto: CreateStudySessionDto) {
+    // Validate subject ownership
+    const subject = await prisma.subject.findFirst({
+      where: { id: subjectId, userId },
+    });
+
+    if (!subject) {
+      throw new NotFoundError("Subject not found");
+    }
+
+    if (dto.topicId) {
+      const topic = await prisma.topic.findFirst({
+        where: {
+          id: dto.topicId,
+          chapter: { subjectId },
+        },
+      });
+
+      if (!topic) {
+        throw new BadRequestError("Referenced topic does not belong to this subject");
+      }
+    }
+
+    const session = await prisma.studySession.create({
+      data: {
+        subjectId,
+        chapterId: dto.chapterId || null,
+        topicId: dto.topicId || null,
+        summary: dto.summary,
+        durationMinutes: dto.durationMinutes,
+        occurredAt: dto.occurredAt || new Date(),
+        confidence: dto.confidence || null,
+        outcome: dto.outcome || null,
+        nextStep: dto.nextStep || null,
+      },
+      include: {
+        topic: {
+          select: { id: true, title: true, status: true },
+        },
+      },
+    });
+
+    // Auto-update linked Topic's lastStudiedAt and status/confidence!
+    if (dto.topicId) {
+      const nextStatus =
+        dto.confidence && dto.confidence >= 4
+          ? "UNDERSTOOD"
+          : dto.confidence && dto.confidence <= 2
+          ? "NEEDS_REVISION"
+          : "STUDIED";
+
+      await prisma.topic.update({
+        where: { id: dto.topicId },
+        data: {
+          lastStudiedAt: new Date(),
+          status: nextStatus,
+          ...(dto.confidence !== undefined && { confidence: dto.confidence }),
+          ...(dto.nextStep && { nextStep: dto.nextStep }),
+        },
+      });
+    }
+
+    return session;
+  }
+
+  public static async deleteStudySession(userId: string, subjectId: string, sessionId: string) {
+    const subject = await prisma.subject.findFirst({
+      where: { id: subjectId, userId },
+    });
+
+    if (!subject) {
+      throw new NotFoundError("Subject not found");
+    }
+
+    const existing = await prisma.studySession.findFirst({
+      where: { id: sessionId, subjectId },
+    });
+
+    if (!existing) {
+      throw new NotFoundError("Study session not found");
+    }
+
+    await prisma.studySession.delete({
+      where: { id: sessionId },
+    });
+
+    return { success: true };
+  }
+}
