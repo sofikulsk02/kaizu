@@ -630,7 +630,8 @@ html[data-theme="theme-charcoal-copper"] body::before,
 html[data-theme="theme-sumi-monochrome"] body::before,
 html[data-theme="theme-orange-black"] body::before,
 html[data-theme="paper-charcoal"] body::before {
-  opacity: 0.04;
+  opacity: 0.18;
+  mix-blend-mode: screen;
 }
 
 /* Body & Washi Texture Setup */
@@ -643,7 +644,7 @@ body {
   min-height: 100vh;
 }
 
-/* Washi Paper Subtle Background Overlay */
+/* Washi Paper Visible Background Overlay */
 body::before {
   content: "";
   position: fixed;
@@ -652,7 +653,8 @@ body::before {
   background-size: cover;
   background-position: center bottom;
   background-repeat: no-repeat;
-  opacity: 0.14;
+  opacity: 0.40;
+  mix-blend-mode: multiply;
   pointer-events: none;
   z-index: 0;
 }
@@ -986,4 +988,24 @@ h1, h2, h3, h4, .font-heading {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-muted);
+}
+
+/* ==========================================================================
+   Mobile & PWA Ergonomics
+   ========================================================================== */
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button, a, input, select, textarea {
+  touch-action: manipulation;
+}
+
+/* Safe area insets for notches, Dynamic Island, and home indicator bar */
+@supports (padding-top: env(safe-area-inset-top)) {
+  body {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
 }

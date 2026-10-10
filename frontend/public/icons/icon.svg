@@ -1,0 +1,49 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#C5374C"/>
+      <stop offset="50%" stop-color="#B83245"/>
+      <stop offset="100%" stop-color="#8E1F30"/>
+    </linearGradient>
+    <radialGradient id="ambientGrad" cx="50%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.25"/>
+    </radialGradient>
+    <filter id="kanjiShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#4A0E18" flood-opacity="0.6"/>
+    </filter>
+  </defs>
+
+  <!-- Squircle Base with smooth corners -->
+  <rect x="16" y="16" width="480" height="480" rx="108" fill="url(#bgGrad)"/>
+  <rect x="16" y="16" width="480" height="480" rx="108" fill="url(#ambientGrad)"/>
+
+  <!-- Subtle refined gold rim -->
+  <rect x="22" y="22" width="468" height="468" rx="102" fill="none" stroke="#F5E6CC" stroke-width="4" stroke-opacity="0.45"/>
+
+  <!-- Japanese Kanji 改善 (Kaizen) in center -->
+  <text 
+    x="256" 
+    y="320" 
+    font-family="-apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Noto Sans JP', 'Segoe UI', sans-serif" 
+    font-size="210" 
+    font-weight="900" 
+    text-anchor="middle" 
+    fill="#FFFFFF" 
+    filter="url(#kanjiShadow)"
+    letter-spacing="2"
+  >改善</text>
+
+  <!-- Subtitle pill text "KAIZU" at bottom -->
+  <rect x="196" y="405" width="120" height="28" rx="14" fill="#FAF7F0" fill-opacity="0.2"/>
+  <text 
+    x="256" 
+    y="424" 
+    font-family="system-ui, -apple-system, sans-serif" 
+    font-size="16" 
+    font-weight="800" 
+    letter-spacing="5" 
+    text-anchor="middle" 
+    fill="#FAF7F0"
+  >KAIZU</text>
+</svg>

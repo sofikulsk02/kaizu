@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Api, setActiveUserId, setJwtToken } from "../lib/api";
+import { getActiveThemeId, applyTheme } from "../lib/theme";
 
 interface LoginScreenProps {
   onLoginSuccess: () => void;
@@ -10,6 +11,11 @@ interface LoginScreenProps {
 export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
   const [loadingGoogle, setLoadingGoogle] = useState(false);
   const [showDevLogin, setShowDevLogin] = useState(false);
+
+  useEffect(() => {
+    const savedTheme = getActiveThemeId();
+    applyTheme(savedTheme);
+  }, []);
 
   const presetUsers = [
     {
@@ -59,20 +65,15 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
   };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[var(--bg-main)] p-4 sm:p-6 font-sans">
-      {/* Background Looping Video */}
-      <video
-        autoPlay
-        loop
-        muted
-        playsInline
-        className="absolute inset-0 h-full w-full object-cover z-0 filter brightness-[0.7] contrast-[1.05] pointer-events-none scale-105"
-      >
-        <source src="/japanese-street-at-night-moewalls-com.mp4" type="video/mp4" />
-      </video>
+    <div className="relative flex min-h-screen items-center justify-center p-4 sm:p-6 font-sans overflow-hidden bg-[var(--bg-main)]">
+      {/* Washi Paper Visible Background Overlay */}
+      <div
+        className="absolute inset-0 bg-cover bg-center pointer-events-none opacity-45 mix-blend-multiply"
+        style={{ backgroundImage: `url('/washi-bg.jpg')` }}
+      />
 
-      {/* Soft warm paper overlay for contrast */}
-      <div className="absolute inset-0 bg-[#FAF7F0]/70 backdrop-blur-xs z-0"></div>
+      {/* Subtle organic radial spotlight behind card */}
+      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_center,_transparent_30%,_rgba(0,0,0,0.05)_100%)]" />
 
       {/* Login Screen Card */}
       <div className="relative z-10 w-full max-w-md space-y-6">
