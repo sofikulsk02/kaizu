@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { prisma } from "../database/prisma";
 import { AuthFailureError } from "../core/ApiError";
 import { AuthService } from "../modules/users/auth.service";
+import { CacheService } from "../core/cache.service";
 
 export async function authMiddleware(
   req: Request,
@@ -37,23 +38,31 @@ export async function authMiddleware(
       throw new AuthFailureError("Authentication required. Please sign in with Google.");
     }
 
-    let user = await prisma.user.findUnique({
-      where: { id: userId },
-    });
+    const cacheKey = `kaizu:user:${userId}:profile`;
+    let user = await CacheService.fetchOrSet<any>(
+      cacheKey,
+      async () => {
+        let dbUser = await prisma.user.findUnique({
+          where: { id: userId },
+        });
 
-    // Provision dev user if missing
-    if (!user) {
-      const email = `user_${userId.slice(0, 8)}@kaizu.app`;
-      const name = `User (${userId.slice(0, 8)})`;
+        // Provision dev user if missing
+        if (!dbUser) {
+          const email = `user_${userId.slice(0, 8)}@kaizu.app`;
+          const name = `User (${userId.slice(0, 8)})`;
 
-      user = await prisma.user.create({
-        data: {
-          id: userId,
-          email,
-          name,
-        },
-      });
-    }
+          dbUser = await prisma.user.create({
+            data: {
+              id: userId,
+              email,
+              name,
+            },
+          });
+        }
+        return dbUser;
+      },
+      600 // 10 minutes cache
+    );
 
     req.user = user;
     next();

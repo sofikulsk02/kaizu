@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useRef } from "react";
 import {
   getActivityMap,
   recordTodayActivity,
@@ -49,6 +49,7 @@ export const ActivityHeatmap: React.FC = () => {
     totalActivities: 0,
   });
   const [hoveredCell, setHoveredCell] = useState<CellInfo | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // Record today's visit automatically on mount
@@ -78,13 +79,12 @@ export const ActivityHeatmap: React.FC = () => {
 
     const weeksList: WeekInfo[] = [];
     const monthLabelsList: { colIndex: number; label: string }[] = [];
-    let lastMonthSeen = -1;
 
     let currDate = new Date(startDate);
 
     for (let w = 0; w < 52; w++) {
       const daysInWeek: (CellInfo | null)[] = [];
-      let weekMonthLabel = "";
+      let monthStartingInThisWeek: string | null = null;
 
       for (let d = 0; d < 7; d++) {
         const dateStr = getLocalDateString(currDate);
@@ -96,10 +96,9 @@ export const ActivityHeatmap: React.FC = () => {
         else if (count === 2) level = 2;
         else if (count === 1) level = 1;
 
-        const m = currDate.getMonth();
-        if (m !== lastMonthSeen) {
-          weekMonthLabel = MONTH_NAMES[m];
-          lastMonthSeen = m;
+        // If the 1st of the month falls on this day, note it for this column
+        if (currDate.getDate() === 1) {
+          monthStartingInThisWeek = MONTH_NAMES[currDate.getMonth()];
         }
 
         const formattedDate = currDate.toLocaleDateString("en-US", {
@@ -121,8 +120,11 @@ export const ActivityHeatmap: React.FC = () => {
         currDate.setDate(currDate.getDate() + 1);
       }
 
-      if (weekMonthLabel) {
-        monthLabelsList.push({ colIndex: w, label: weekMonthLabel });
+      if (monthStartingInThisWeek) {
+        const lastHeader = monthLabelsList[monthLabelsList.length - 1];
+        if (!lastHeader || w - lastHeader.colIndex >= 2) {
+          monthLabelsList.push({ colIndex: w, label: monthStartingInThisWeek });
+        }
       }
 
       weeksList.push({
@@ -131,48 +133,66 @@ export const ActivityHeatmap: React.FC = () => {
       });
     }
 
+    // If first label is >= 3 columns away, label week 0 with its starting month
+    if (monthLabelsList.length > 0 && monthLabelsList[0].colIndex >= 3) {
+      const firstWeekMonth = weeksList[0]?.days[0]?.dateObj.getMonth() ?? 0;
+      monthLabelsList.unshift({ colIndex: 0, label: MONTH_NAMES[firstWeekMonth] });
+    }
+
     return { weeks: weeksList, monthHeaders: monthLabelsList };
   }, [activityMap]);
 
+  // Auto-scroll to show recent/today activity by default on mount/load
+  useEffect(() => {
+    const scrollToLatest = () => {
+      if (scrollRef.current) {
+        scrollRef.current.scrollLeft = scrollRef.current.scrollWidth;
+      }
+    };
+    scrollToLatest();
+    const timer = setTimeout(scrollToLatest, 150);
+    return () => clearTimeout(timer);
+  }, [weeks]);
+
   return (
-    <div className="paper-card p-6 sm:p-7 space-y-6 border border-[var(--border-default)]">
+    <div className="paper-card p-3 sm:p-3.5 space-y-3 border border-[var(--border-default)]">
       {/* Top Header & Streak Stats */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div>
-          <div className="inline-flex items-center space-x-1.5 bg-[var(--pale-sage)] px-3 py-1 text-xs font-bold text-[var(--forest-green)] rounded">
-              <Activity className="h-3.5 w-3.5" />
-              <span>Daily Kaizen Activity</span>
-            </div>
-          <h2 className="mt-2 text-xl font-black text-[var(--text-heading)] sm:text-2xl">
+          <div className="inline-flex items-center space-x-1 bg-[var(--pale-sage)] px-2 py-0.5 text-[10px] font-bold text-[var(--forest-green)] rounded">
+            <Activity className="h-3 w-3" />
+            <span>Daily Kaizen Activity</span>
+          </div>
+          <h2 className="mt-1 text-base font-black text-[var(--text-heading)] sm:text-lg">
             Consistency & Activity Heatmap
           </h2>
-          <p className="text-xs text-[var(--text-muted)] mt-0.5">
+          <p className="text-[11px] text-[var(--text-muted)] mt-0.5">
             Opening Kaizu daily logs your habit loop. Visual record of your daily progress.
           </p>
         </div>
 
-        {/* Stats Badges */}
-        <div className="flex flex-wrap items-center gap-3 text-xs font-bold">
-          <div className="paper-card bg-[var(--surface-secondary)] px-4 py-2 text-center border border-[var(--border-default)]">
-            <div className="text-[var(--text-muted)] text-[10px] uppercase font-bold">Current Streak</div>
-            <div className="text-lg font-black text-[var(--crimson)] flex items-center justify-center space-x-1.5">
-              <Flame className="h-4 w-4 fill-crimson" />
-              <span>{stats.currentStreak} {stats.currentStreak === 1 ? "day" : "days"}</span>
+        {/* Stats Badges — 3 even columns on mobile */}
+        <div className="grid grid-cols-3 gap-1.5 sm:flex sm:items-center sm:gap-2.5 text-xs font-bold w-full md:w-auto">
+          <div className="paper-card bg-[var(--surface-secondary)] px-2 py-1.5 sm:px-2.5 sm:py-1 text-center border border-[var(--border-default)] flex flex-col items-center justify-center">
+            <div className="text-[var(--text-muted)] text-[9px] uppercase font-bold tracking-tight">Current Streak</div>
+            <div className="text-xs sm:text-sm font-black text-[var(--crimson)] flex items-center justify-center space-x-1 mt-0.5">
+              <Flame className="h-3 w-3 fill-crimson shrink-0" />
+              <span className="truncate">{stats.currentStreak} {stats.currentStreak === 1 ? "day" : "days"}</span>
             </div>
           </div>
 
-          <div className="paper-card bg-[var(--surface-secondary)] px-4 py-2 text-center border border-[var(--border-default)]">
-            <div className="text-[var(--text-muted)] text-[10px] uppercase font-bold">Longest Streak</div>
-            <div className="text-lg font-black text-[var(--text-heading)] flex items-center justify-center space-x-1.5">
-              <Zap className="h-4 w-4 text-amber-500 fill-amber-500" />
-              <span>{stats.longestStreak} {stats.longestStreak === 1 ? "day" : "days"}</span>
+          <div className="paper-card bg-[var(--surface-secondary)] px-2 py-1.5 sm:px-2.5 sm:py-1 text-center border border-[var(--border-default)] flex flex-col items-center justify-center">
+            <div className="text-[var(--text-muted)] text-[9px] uppercase font-bold tracking-tight">Longest Streak</div>
+            <div className="text-xs sm:text-sm font-black text-[var(--text-heading)] flex items-center justify-center space-x-1 mt-0.5">
+              <Zap className="h-3 w-3 text-amber-500 fill-amber-500 shrink-0" />
+              <span className="truncate">{stats.longestStreak} {stats.longestStreak === 1 ? "day" : "days"}</span>
             </div>
           </div>
 
-          <div className="paper-card bg-[var(--surface-secondary)] px-4 py-2 text-center border border-[var(--border-default)]">
-            <div className="text-[var(--text-muted)] text-[10px] uppercase font-bold">Active Days</div>
-            <div className="text-lg font-black text-[var(--forest-green)] flex items-center justify-center space-x-1.5">
-              <Calendar className="h-4 w-4" />
+          <div className="paper-card bg-[var(--surface-secondary)] px-2 py-1.5 sm:px-2.5 sm:py-1 text-center border border-[var(--border-default)] flex flex-col items-center justify-center">
+            <div className="text-[var(--text-muted)] text-[9px] uppercase font-bold tracking-tight">Active Days</div>
+            <div className="text-xs sm:text-sm font-black text-[var(--forest-green)] flex items-center justify-center space-x-1 mt-0.5">
+              <Calendar className="h-3 w-3 shrink-0" />
               <span>{stats.totalActiveDays}</span>
             </div>
           </div>
@@ -180,33 +200,44 @@ export const ActivityHeatmap: React.FC = () => {
       </div>
 
       {/* Grid Container */}
-      <div className="relative">
+      <div className="relative pt-0.5">
         {/* Tooltip Header / Dynamic Indicator */}
-        <div className="h-6 flex items-center justify-between text-xs mb-2">
-          <div className="font-bold text-[var(--text-heading)] transition-all">
+        <div className="min-h-[26px] flex items-center justify-between text-xs mb-1.5 gap-2">
+          <div className="font-bold text-[var(--text-heading)] transition-all flex-1 min-w-0">
             {hoveredCell ? (
-              <span className="inline-flex items-center space-x-2">
-                <span className="bg-[var(--pale-sage)] px-2.5 py-0.5 text-xs text-[var(--forest-green)] font-extrabold rounded">
+              <span className="inline-flex items-center flex-wrap gap-1.5">
+                <span className="bg-[var(--pale-sage)] px-2 py-0.5 text-[11px] text-[var(--forest-green)] font-extrabold rounded">
                   {hoveredCell.count > 0 ? `${hoveredCell.count} ${hoveredCell.count === 1 ? "activity" : "activities"}` : "No activity"}
                 </span>
-                <span className="text-[var(--text-muted)]">on {hoveredCell.formattedDate}</span>
+                <span className="text-[var(--text-muted)] text-[11px] font-semibold">{hoveredCell.formattedDate}</span>
               </span>
             ) : (
-              <span className="text-[var(--text-muted)] italic">Hover over any day to see details</span>
+              <span className="text-[var(--text-muted)] text-[11px] italic">Tap or hover over any day to see details</span>
             )}
           </div>
+
+          <span className="text-[10px] text-[var(--text-muted)] font-medium shrink-0 sm:hidden">
+            Scroll for full year →
+          </span>
         </div>
 
         {/* Scrollable Heatmap Table */}
-        <div className="overflow-x-auto pb-2 custom-scrollbar">
-          <div className="inline-block min-w-max">
-            {/* Month Labels Header Row */}
-            <div className="flex text-[10px] font-bold text-[var(--text-muted)] mb-1 pl-8">
+        <div
+          ref={scrollRef}
+          className="overflow-x-auto pb-2 custom-scrollbar rounded-md"
+        >
+          <div className="inline-block min-w-max pr-1">
+            {/* Month Labels Header Row — full visible 3-letter labels like GitHub */}
+            <div className="flex text-[10px] font-bold text-[var(--text-muted)] mb-1 pl-8 select-none h-4 relative">
               {weeks.map((w, i) => {
                 const header = monthHeaders.find((m) => m.colIndex === i);
                 return (
-                  <div key={i} className="w-[14px] text-left">
-                    {header ? <span>{header.label}</span> : null}
+                  <div key={i} className="w-[15px] shrink-0 text-left relative">
+                    {header ? (
+                      <span className="absolute left-0 top-0 whitespace-nowrap overflow-visible">
+                        {header.label}
+                      </span>
+                    ) : null}
                   </div>
                 );
               })}
@@ -215,7 +246,7 @@ export const ActivityHeatmap: React.FC = () => {
             {/* Grid Body with Day Labels on Left */}
             <div className="flex">
               {/* Day Labels Column */}
-              <div className="flex flex-col justify-between text-[10px] font-bold text-[var(--text-muted)] pr-2 select-none h-[98px]">
+              <div className="flex flex-col justify-between text-[10px] font-bold text-[var(--text-muted)] pr-2 select-none h-[98px] shrink-0">
                 <span className="h-[12px] leading-[12px]"></span>
                 <span className="h-[12px] leading-[12px]">Mon</span>
                 <span className="h-[12px] leading-[12px]"></span>
@@ -231,12 +262,16 @@ export const ActivityHeatmap: React.FC = () => {
                   <div key={week.weekIndex} className="flex flex-col space-y-[3px]">
                     {week.days.map((cell, dayIdx) => {
                       if (!cell) return <div key={dayIdx} className="w-[12px] h-[12px]" />;
+                      const isSelected = hoveredCell?.dateStr === cell.dateStr;
                       return (
                         <div
                           key={cell.dateStr}
+                          onClick={() => setHoveredCell(cell)}
                           onMouseEnter={() => setHoveredCell(cell)}
                           onMouseLeave={() => setHoveredCell(null)}
-                          className={`activity-cell activity-level-${cell.level}`}
+                          className={`activity-cell activity-level-${cell.level} cursor-pointer transition-all ${
+                            isSelected ? "ring-2 ring-[var(--crimson)] scale-125 z-10" : ""
+                          }`}
                           title={`${cell.count > 0 ? `${cell.count} activities` : "No activity"} on ${cell.formattedDate}`}
                         />
                       );
@@ -249,23 +284,29 @@ export const ActivityHeatmap: React.FC = () => {
         </div>
 
         {/* Bottom Bar & Legend */}
-        <div className="mt-4 pt-3 border-t border-[var(--border-default)] flex flex-col sm:flex-row items-center justify-between text-xs gap-3">
-          <div className="text-[var(--text-muted)] text-xs font-medium inline-flex items-center gap-1.5">
-            <Lightbulb className="h-3.5 w-3.5 text-amber-500 shrink-0" />
-            <span><strong className="text-[var(--text-heading)]">Daily Kaizen Tip:</strong> Visiting the site every day turns small daily steps into long-term mastery.</span>
+        <div className="mt-3 pt-2.5 border-t border-[var(--border-default)] flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+          {/* Daily Kaizen Tip */}
+          <div className="text-[var(--text-muted)] text-[11px] font-medium flex items-start gap-2 bg-[var(--surface-secondary)]/50 sm:bg-transparent p-2 sm:p-0 rounded-md sm:rounded-none">
+            <Lightbulb className="h-3.5 w-3.5 text-amber-500 shrink-0 mt-0.5" />
+            <span className="leading-snug">
+              <strong className="text-[var(--text-heading)]">Kaizen Tip:</strong> Visiting daily turns small habits into long-term mastery.
+            </span>
           </div>
 
           {/* Color Legend */}
-          <div className="flex items-center space-x-2 text-[11px] font-bold text-[var(--text-muted)]">
-            <span>Less</span>
-            <div className="flex items-center space-x-1">
-              <div className="activity-cell activity-level-0" title="No activity" />
-              <div className="activity-cell activity-level-1" title="Low activity" />
-              <div className="activity-cell activity-level-2" title="Medium activity" />
-              <div className="activity-cell activity-level-3" title="High activity" />
-              <div className="activity-cell activity-level-4" title="Maximum activity" />
+          <div className="flex items-center justify-between sm:justify-end gap-2 text-[11px] font-bold text-[var(--text-muted)] shrink-0">
+            <span className="text-[10px] uppercase tracking-wider text-[var(--text-muted)] sm:hidden font-semibold">Activity</span>
+            <div className="flex items-center space-x-1.5">
+              <span>Less</span>
+              <div className="flex items-center space-x-1">
+                <div className="activity-cell activity-level-0" title="No activity" />
+                <div className="activity-cell activity-level-1" title="Low activity" />
+                <div className="activity-cell activity-level-2" title="Medium activity" />
+                <div className="activity-cell activity-level-3" title="High activity" />
+                <div className="activity-cell activity-level-4" title="Maximum activity" />
+              </div>
+              <span>More</span>
             </div>
-            <span>More</span>
           </div>
         </div>
       </div>

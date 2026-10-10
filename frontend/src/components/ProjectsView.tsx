@@ -125,18 +125,18 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({ onSelectProject }) =
       )}
 
       {/* Summary Stat Counter Bar */}
-      <div className="grid grid-cols-3 gap-4">
-        <div className="paper-card bg-[var(--surface-secondary)] p-4 text-center border border-[var(--border-default)]">
-          <div className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Active / In Progress</div>
-          <div className="text-2xl font-black text-[var(--forest-green)] mt-1">{activeCount}</div>
+      <div className="grid grid-cols-3 gap-2.5">
+        <div className="paper-card bg-[var(--surface-secondary)] p-3 text-center border border-[var(--border-default)]">
+          <div className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Active / In Progress</div>
+          <div className="text-xl font-black text-[var(--forest-green)] mt-0.5">{activeCount}</div>
         </div>
-        <div className="paper-card bg-[var(--surface-secondary)] p-4 text-center border border-[var(--border-default)]">
-          <div className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Completed</div>
-          <div className="text-2xl font-black text-[#122419] mt-1">{completedCount}</div>
+        <div className="paper-card bg-[var(--surface-secondary)] p-3 text-center border border-[var(--border-default)]">
+          <div className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Completed</div>
+          <div className="text-xl font-black text-[#122419] mt-0.5">{completedCount}</div>
         </div>
-        <div className="paper-card bg-[var(--surface-secondary)] p-4 text-center border border-[var(--border-default)]">
-          <div className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Paused / Stopped</div>
-          <div className="text-2xl font-black text-[var(--crimson)] mt-1">{pausedCount}</div>
+        <div className="paper-card bg-[var(--surface-secondary)] p-3 text-center border border-[var(--border-default)]">
+          <div className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Paused / Stopped</div>
+          <div className="text-xl font-black text-[var(--crimson)] mt-0.5">{pausedCount}</div>
         </div>
       </div>
 
@@ -200,19 +200,19 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({ onSelectProject }) =
           )}
         </div>
       ) : (
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-2">
+        <div className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-2">
           {filteredProjects.map((project) => {
             const statusInfo = STATUS_CONFIG[project.status] || STATUS_CONFIG.IN_PROGRESS;
             return (
               <div
                 key={project.id}
                 onClick={() => onSelectProject(project.id)}
-                className="group paper-card-interactive p-6 space-y-5 cursor-pointer hover:border-[var(--forest-green)] transition-all border border-[var(--border-default)] flex flex-col justify-between"
+                className="group paper-card-interactive p-3.5 sm:p-4 space-y-3 cursor-pointer hover:border-[var(--forest-green)] transition-all border border-[var(--border-default)] flex flex-col justify-between"
               >
-                <div className="space-y-3">
+                <div className="space-y-2">
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <h2 className="text-xl font-bold text-[var(--text-heading)] group-hover:text-[var(--crimson)] transition-colors">
+                      <h2 className="text-lg font-bold text-[var(--text-heading)] group-hover:text-[var(--crimson)] transition-colors">
                         {project.name}
                       </h2>
                       {project.category && (

@@ -12,7 +12,24 @@ import {
   TaskPriority,
   CoachAnalysis,
 } from "../lib/api";
-import { ArrowLeft, Pencil, Clock, Target, AlertTriangle, Sparkles, Lightbulb, Zap, Sprout, Map, Check, Plus, Bot } from "lucide-react";
+import {
+  ArrowLeft,
+  Pencil,
+  Clock,
+  Target,
+  AlertTriangle,
+  Sparkles,
+  Lightbulb,
+  Zap,
+  Sprout,
+  Map,
+  Check,
+  Plus,
+  Bot,
+  Trash2,
+  Calendar,
+  X,
+} from "lucide-react";
 
 interface GoalDetailViewProps {
   goalDetail: GoalDetail;
@@ -263,165 +280,197 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
     : null;
 
   return (
-    <div className="space-y-8 pb-12">
-      {/* Top Breadcrumb & Actions */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
+    <div className="space-y-4 sm:space-y-6 pb-8">
+      {/* Top Header Navigation & Action Bar */}
+      <div className="flex items-center justify-between gap-2">
+        {/* Back Button */}
         <button
           onClick={onBack}
-          className="inline-flex items-center space-x-1.5 text-xs font-bold text-[var(--text-secondary)] hover:text-[var(--crimson)] transition-colors cursor-pointer group"
+          className="paper-btn-secondary px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs font-bold flex items-center space-x-1.5 group shadow-2xs cursor-pointer active:scale-95 shrink-0"
         >
           <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-1 text-[var(--crimson)]" />
-          <span className="group-hover:underline">Back to Goals</span>
-          <span className="text-[var(--border-strong)] mx-1">/</span>
-          <span className="text-[var(--text-heading)] font-black">
-            {goalDetail.category || "General"}
-          </span>
+          <span className="hidden sm:inline">Back to Goals</span>
+          <span className="sm:hidden">Goals</span>
+          {goalDetail.category && (
+            <span className="hidden md:inline text-[var(--text-muted)] font-normal ml-1">
+              / {goalDetail.category}
+            </span>
+          )}
         </button>
 
-        <div className="flex items-center space-x-2 sm:space-x-3">
-          <button
-            onClick={() => setShowEditGoal(true)}
-            className="paper-btn-secondary inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold cursor-pointer"
-          >
-            <Pencil className="h-3.5 w-3.5" />
-            <span>Edit Goal</span>
-          </button>
+        {/* Action Group */}
+        <div className="flex items-center space-x-1.5 sm:space-x-2 shrink-0">
           <button
             onClick={() => setShowLogAction(true)}
-            className="paper-btn-primary inline-flex items-center gap-1.5 px-4 py-1.5 text-xs font-bold shadow-xs cursor-pointer active:scale-95 transition-all"
+            className="paper-btn-primary px-3 sm:px-4 py-1.5 sm:py-2 text-xs font-bold shadow-xs flex items-center space-x-1.5 cursor-pointer active:scale-95"
           >
             <Clock className="h-3.5 w-3.5" />
-            <span>Log Work / Action</span>
+            <span className="hidden sm:inline">Log Work / Action</span>
+            <span className="sm:hidden">Log Action</span>
+          </button>
+
+          <button
+            onClick={() => setShowEditGoal(true)}
+            className="paper-btn-secondary px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs font-bold flex items-center space-x-1 cursor-pointer active:scale-95"
+            title="Edit Goal"
+          >
+            <Pencil className="h-3 w-3" />
+            <span className="hidden sm:inline">Edit</span>
+          </button>
+
+          <button
+            onClick={handleDeleteGoal}
+            className="paper-btn-danger px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs font-bold flex items-center space-x-1 cursor-pointer active:scale-95"
+            title="Delete Goal"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Delete</span>
           </button>
         </div>
       </div>
 
-      {/* Goal Header Panel */}
-      <div className="clay-surface p-7 sm:p-8 space-y-6">
-        <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
-          <div className="space-y-3 max-w-3xl">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="clay-badge bg-[var(--badge-bg)] px-3 py-0.5 text-xs font-black text-[var(--accent-color)]">
-                {goalDetail.category || "Career / Goal"}
+      {/* Goal Hero Header & Analytics */}
+      <div className="paper-card p-3.5 sm:p-5 space-y-3 sm:space-y-4 border border-[var(--border-default)]">
+        <div className="space-y-2">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="paper-badge px-2.5 py-0.5 text-[11px] font-bold text-[var(--forest-green)]">
+              {goalDetail.category || "Career / Goal"}
+            </span>
+            <span
+              className={`px-2.5 py-0.5 text-[11px] font-extrabold rounded-md ${
+                goalDetail.status === "COMPLETED"
+                  ? "bg-emerald-500/20 text-emerald-400"
+                  : goalDetail.status === "PAUSED"
+                  ? "bg-amber-500/20 text-amber-400"
+                  : goalDetail.status === "STOPPED"
+                  ? "bg-red-500/20 text-red-400"
+                  : "bg-[var(--surface-secondary)] text-[var(--text-heading)] border border-[var(--border-default)]"
+              }`}
+            >
+              {goalDetail.status}
+            </span>
+            {formattedTargetDate && (
+              <span className="text-[11px] font-medium text-[var(--text-muted)] inline-flex items-center gap-1 ml-1">
+                <Calendar className="h-3 w-3" />
+                Target: {formattedTargetDate}
               </span>
-              <span
-                className={`clay-badge px-3 py-0.5 text-xs font-extrabold ${
-                  goalDetail.status === "COMPLETED"
-                    ? "bg-emerald-500/20 text-emerald-300"
-                    : goalDetail.status === "PAUSED"
-                    ? "bg-amber-500/20 text-amber-300"
-                    : goalDetail.status === "STOPPED"
-                    ? "bg-red-500/20 text-red-300"
-                    : "bg-[var(--badge-bg)] text-[var(--fg-main)]"
-                }`}
-              >
-                {goalDetail.status}
-              </span>
-              {formattedTargetDate && (
-                <span className="text-xs font-bold text-[var(--muted-text)]">
-                  Target: {formattedTargetDate}
-                </span>
-              )}
-            </div>
-
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight text-[var(--text-heading)]">
-              {goalDetail.title}
-            </h1>
-
-            {goalDetail.description && (
-              <p className="text-sm text-[var(--muted-text)] leading-relaxed">
-                {goalDetail.description}
-              </p>
-            )}
-
-            {goalDetail.successDefinition && (
-              <div className="clay-surface bg-[var(--surface-nested)] p-4 text-xs space-y-1">
-                <div className="font-black uppercase tracking-wider text-[var(--accent-color)] inline-flex items-center gap-1.5">
-                  <Target className="h-3.5 w-3.5" />
-                  <span>Success Criteria / Desired Outcome</span>
-                </div>
-                <div className="text-[var(--text-primary)] font-medium">{goalDetail.successDefinition}</div>
-              </div>
             )}
           </div>
 
-          {/* Header Quick Status Control */}
-          <div className="clay-surface bg-[var(--surface-nested)] p-5 text-center min-w-[200px] space-y-3">
-            <div className="text-[10px] font-black uppercase tracking-wider text-[var(--muted-text)]">
-              Execution Progress
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-[var(--text-heading)] leading-tight">
+            {goalDetail.title}
+          </h1>
+
+          {goalDetail.description && (
+            <p className="text-xs sm:text-sm text-[var(--text-secondary)] max-w-3xl leading-relaxed">
+              {goalDetail.description}
+            </p>
+          )}
+
+          {goalDetail.successDefinition && (
+            <div className="paper-inset bg-[var(--surface-secondary)] p-2.5 sm:p-3 rounded-lg text-xs space-y-1 border border-[var(--border-subtle)]">
+              <div className="font-extrabold uppercase tracking-wider text-[var(--crimson)] inline-flex items-center gap-1.5 text-[10px] sm:text-[11px]">
+                <Target className="h-3.5 w-3.5" />
+                <span>Success Criteria / Desired Outcome</span>
+              </div>
+              <div className="text-[var(--text-heading)] font-medium leading-relaxed">
+                {goalDetail.successDefinition}
+              </div>
             </div>
-            <div className="text-2xl font-black text-[var(--accent-color)]">
-              {metrics.taskProgressPercentage !== null
-                ? `${metrics.taskProgressPercentage}%`
-                : "Plan your first step"}
+          )}
+
+          {/* Integrated Execution Progress Bar */}
+          <div className="mt-2 p-2.5 sm:p-3 rounded-xl bg-[var(--surface-secondary)] border border-[var(--border-default)] flex items-center justify-between gap-3">
+            <div className="flex items-center space-x-2 min-w-0">
+              <Sparkles className="h-4 w-4 text-[var(--forest-green)] shrink-0" />
+              <div className="min-w-0">
+                <span className="text-xs font-bold text-[var(--text-heading)] truncate block">
+                  Execution Progress
+                </span>
+                <span className="text-[10px] sm:text-[11px] text-[var(--text-muted)] block truncate">
+                  {metrics.completedTasksCount} of {metrics.totalTasksCount} tasks completed
+                </span>
+              </div>
             </div>
-            <div className="text-xs font-bold text-[var(--muted-text)]">
-              {metrics.completedTasksCount} of {metrics.totalTasksCount} tasks completed
+            <div className="flex items-center space-x-2.5 shrink-0">
+              <div className="w-20 sm:w-36 h-2 bg-[var(--border-default)] rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-[var(--forest-green)] transition-all duration-500 rounded-full"
+                  style={{ width: `${metrics.taskProgressPercentage ?? 0}%` }}
+                />
+              </div>
+              <span className="text-xs font-black text-[var(--forest-green)] min-w-[32px] text-right">
+                {metrics.taskProgressPercentage !== null ? `${metrics.taskProgressPercentage}%` : "0%"}
+              </span>
             </div>
           </div>
         </div>
 
-        {/* Explainable Summary Metrics Grid */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 pt-4 border-t border-[var(--inset-highlight)]">
-          <div className="clay-surface bg-[var(--surface-nested)] p-4 space-y-1">
-            <div className="text-[10px] font-black uppercase text-[var(--muted-text)]">
-              Milestones Completed
+        {/* 4 Analytics Metrics Cards with Balanced 2x2 Mobile Proportions */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 pt-1 border-t border-[var(--border-subtle)]">
+          <div className="paper-card bg-[var(--surface-secondary)] p-2.5 sm:p-3.5 border border-[var(--border-default)] card-lift">
+            <div className="flex items-center justify-between text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
+              <span>Milestones</span>
+              <Map className="h-3.5 w-3.5 text-[var(--forest-green)]" />
             </div>
-            <div className="text-xl font-black text-[var(--text-heading)]">
+            <div className="text-lg sm:text-2xl font-black text-[var(--text-heading)] mt-1">
               {metrics.completedMilestonesCount} / {metrics.totalMilestonesCount}
             </div>
-            <div className="text-[11px] text-[var(--muted-text)]">
-              {metrics.totalMilestonesCount > 0 ? "Stages reached" : "No milestones created"}
+            <div className="text-[10px] text-[var(--text-muted)] truncate">
+              {metrics.totalMilestonesCount > 0 ? "Stages reached" : "No milestones"}
             </div>
           </div>
 
-          <div className="clay-surface bg-[var(--surface-nested)] p-4 space-y-1">
-            <div className="text-[10px] font-black uppercase text-[var(--muted-text)]">
-              Task Execution
+          <div className="paper-card bg-[var(--surface-secondary)] p-2.5 sm:p-3.5 border border-[var(--border-default)] card-lift">
+            <div className="flex items-center justify-between text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
+              <span>Tasks Done</span>
+              <Check className="h-3.5 w-3.5 text-[var(--forest-green)]" />
             </div>
-            <div className="text-xl font-black text-[var(--text-heading)]">
+            <div className="text-lg sm:text-2xl font-black text-[var(--forest-green)] mt-1">
               {metrics.completedTasksCount} / {metrics.totalTasksCount}
             </div>
-            <div className="text-[11px] text-[var(--muted-text)]">Actionable work items</div>
+            <div className="text-[10px] text-[var(--text-muted)] truncate">Actionable items</div>
           </div>
 
-          <div className="clay-surface bg-[var(--surface-nested)] p-4 space-y-1">
-            <div className="text-[10px] font-black uppercase text-[var(--muted-text)]">
-              Logged Effort
+          <div className="paper-card bg-[var(--surface-secondary)] p-2.5 sm:p-3.5 border border-[var(--border-default)] card-lift">
+            <div className="flex items-center justify-between text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
+              <span>Logged Effort</span>
+              <Clock className="h-3.5 w-3.5 text-[var(--crimson)]" />
             </div>
-            <div className="text-xl font-black text-[var(--accent-color)]">
+            <div className="text-lg sm:text-2xl font-black text-[var(--crimson)] mt-1">
               {metrics.totalDurationMinutes > 0
                 ? `${Math.floor(metrics.totalDurationMinutes / 60)}h ${metrics.totalDurationMinutes % 60}m`
-                : "Not logged yet"}
+                : "0m"}
             </div>
-            <div className="text-[11px] text-[var(--muted-text)]">Actual time recorded</div>
+            <div className="text-[10px] text-[var(--text-muted)] truncate">Actual time recorded</div>
           </div>
 
-          <div className="clay-surface bg-[var(--surface-nested)] p-4 space-y-1">
-            <div className="text-[10px] font-black uppercase text-[var(--muted-text)]">
-              Consistency
+          <div className="paper-card bg-[var(--surface-secondary)] p-2.5 sm:p-3.5 border border-[var(--border-default)] card-lift">
+            <div className="flex items-center justify-between text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
+              <span>Consistency</span>
+              <Zap className="h-3.5 w-3.5 text-[var(--forest-green)]" />
             </div>
-            <div className="text-xl font-black text-[var(--text-heading)]">
-              {metrics.activeDaysCount} {metrics.activeDaysCount === 1 ? "active day" : "active days"}
+            <div className="text-lg sm:text-2xl font-black text-[var(--text-heading)] mt-1">
+              {metrics.activeDaysCount} {metrics.activeDaysCount === 1 ? "day" : "days"}
             </div>
-            <div className="text-[11px] text-[var(--muted-text)]">Days with logged action</div>
+            <div className="text-[10px] text-[var(--text-muted)] truncate">Active effort days</div>
           </div>
         </div>
       </div>
 
-      {/* INTELLIGENT GOAL COACH WIDGET (Kaizu V2 Feature) */}
+      {/* INTELLIGENT GOAL COACH WIDGET */}
       {coachAnalysis && (
-        <div className="clay-surface p-6 space-y-4 bg-gradient-to-r from-[var(--surface-bg)] to-[var(--surface-nested)] border border-[var(--accent-color)]/40">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div className="flex items-center space-x-2">
-              <span className="clay-badge bg-[var(--badge-bg)] px-3 py-1 text-xs font-black text-[var(--accent-color)] inline-flex items-center gap-1.5">
+        <div className="paper-card p-3.5 sm:p-5 space-y-3 bg-[var(--surface-secondary)] border border-[var(--forest-green)]/30 rounded-xl card-lift">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+            <div className="flex items-center space-x-2 flex-wrap gap-y-1">
+              <span className="paper-badge bg-[var(--surface-primary)] px-2.5 py-0.5 text-xs font-black text-[var(--forest-green)] inline-flex items-center gap-1.5 border border-[var(--border-default)]">
                 <Bot className="h-3.5 w-3.5" />
-                <span>INTELLIGENT GOAL COACH</span>
+                <span>GOAL COACH</span>
               </span>
               {coachAnalysis.isStalled && (
-                <span className="clay-badge bg-red-500/20 text-red-300 px-2.5 py-0.5 text-xs font-extrabold inline-flex items-center gap-1">
+                <span className="px-2 py-0.5 rounded-md text-[10px] sm:text-xs font-extrabold inline-flex items-center gap-1 bg-red-500/20 text-red-300 border border-red-500/30">
                   <AlertTriangle className="h-3 w-3" />
-                  <span>STALLED GOAL DETECTED</span>
+                  <span>STALLED GOAL</span>
                 </span>
               )}
             </div>
@@ -429,37 +478,38 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
             <button
               onClick={handleGenerateBreakdown}
               disabled={generatingBreakdown}
-              className="clay-btn-primary px-3.5 py-1.5 text-xs font-extrabold text-[var(--btn-primary-text)] shadow cursor-pointer inline-flex items-center gap-1.5"
+              className="paper-btn-primary px-3 sm:px-3.5 py-1.5 text-xs font-extrabold shadow-xs cursor-pointer inline-flex items-center justify-center gap-1.5 active:scale-95 self-start sm:self-auto"
             >
               {generatingBreakdown ? (
                 "Generating..."
               ) : (
                 <>
                   <Sparkles className="h-3.5 w-3.5" />
-                  <span>Auto-Breakdown into Milestones & Tasks</span>
+                  <span className="sm:hidden">Auto-Breakdown</span>
+                  <span className="hidden sm:inline">Auto-Breakdown into Milestones & Tasks</span>
                 </>
               )}
             </button>
           </div>
 
-          <div className="text-xs text-[var(--text-secondary)] leading-relaxed space-y-2">
-            <div className="font-semibold text-sm text-[var(--fg-main)] inline-flex items-start gap-1.5">
+          <div className="text-xs text-[var(--text-secondary)] leading-relaxed space-y-1.5">
+            <div className="font-semibold text-xs sm:text-sm text-[var(--text-heading)] inline-flex items-start gap-1.5">
               <Lightbulb className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
               <span>{coachAnalysis.advice}</span>
             </div>
             {coachAnalysis.stalledReason && (
-              <p className="text-amber-600 dark:text-amber-300 font-medium">
+              <p className="text-amber-500 text-xs font-medium pl-5">
                 {coachAnalysis.stalledReason}
               </p>
             )}
           </div>
 
           {coachAnalysis.recurringBlockers.length > 0 && (
-            <div className="pt-2 text-xs">
-              <span className="font-bold text-[var(--muted-text)]">Recurring Blockers Detected: </span>
+            <div className="pt-1 text-xs">
+              <span className="font-bold text-[var(--text-muted)] text-[11px]">Recurring Blockers: </span>
               <div className="flex flex-wrap gap-1.5 mt-1">
                 {coachAnalysis.recurringBlockers.map((b, i) => (
-                  <span key={i} className="clay-badge bg-amber-500/15 text-amber-700 dark:text-amber-300 px-2 py-0.5 text-[10px]">
+                  <span key={i} className="px-2 py-0.5 text-[10px] font-medium rounded bg-amber-500/15 text-amber-400 border border-amber-500/30">
                     {b}
                   </span>
                 ))}
@@ -469,25 +519,25 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
         </div>
       )}
 
-      {/* 1. TODAY'S FOCUS SECTION (Most Prominent Action Area) */}
-      <div className="clay-surface p-7 space-y-5 border-2 border-[var(--accent-color)]/30">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      {/* 1. TODAY'S FOCUS SECTION */}
+      <div className="paper-card bg-[var(--surface-secondary)] p-3.5 sm:p-5 space-y-3.5 border border-[var(--border-default)] card-lift">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
           <div>
-            <div className="inline-flex items-center space-x-2 clay-badge bg-[var(--badge-bg)] px-3.5 py-1 text-xs font-bold text-[var(--accent-color)]">
+            <div className="inline-flex items-center space-x-1.5 paper-badge px-2.5 py-0.5 text-[11px] font-bold text-[var(--forest-green)]">
               <Zap className="h-3.5 w-3.5" />
               <span>TODAY'S FOCUS WORKFLOW</span>
             </div>
-            <h2 className="mt-2 text-xl font-black text-[var(--text-heading)] sm:text-2xl">
+            <h2 className="mt-1 text-base sm:text-xl font-black text-[var(--text-heading)] leading-snug">
               What is one meaningful action you can do next?
             </h2>
-            <p className="text-xs text-[var(--muted-text)] mt-0.5">
+            <p className="text-xs text-[var(--text-muted)] mt-0.5">
               Focus on execution over clutter. Choose your next step and record your actual effort.
             </p>
           </div>
 
           <button
             onClick={() => setShowLogAction(true)}
-            className="paper-btn-primary px-5 py-3 text-xs font-black shadow-xs self-start sm:self-auto cursor-pointer inline-flex items-center gap-1.5"
+            className="paper-btn-primary px-3.5 sm:px-4 py-2 text-xs font-black shadow-xs self-start sm:self-auto cursor-pointer inline-flex items-center gap-1.5 active:scale-95 shrink-0"
           >
             <Plus className="h-3.5 w-3.5" />
             <span>Log What I Did Today</span>
@@ -495,29 +545,29 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
         </div>
 
         {todaysFocusTask ? (
-          <div className="clay-surface bg-[var(--surface-nested)] p-6 flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div className="space-y-2">
-              <div className="flex items-center space-x-2.5">
-                <span className="clay-badge bg-[var(--badge-bg)] px-2.5 py-0.5 text-[10px] font-black text-[var(--accent-color)]">
+          <div className="paper-card bg-[var(--surface-primary)] p-3.5 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-3.5 rounded-xl border border-[var(--border-default)]">
+            <div className="space-y-1.5 min-w-0">
+              <div className="flex items-center space-x-2">
+                <span className="px-2 py-0.5 text-[10px] font-black rounded bg-[var(--surface-secondary)] text-[var(--forest-green)] border border-[var(--border-default)]">
                   {todaysFocusTask.priority} PRIORITY
                 </span>
                 {todaysFocusTask.estimateMinutes && (
-                  <span className="text-xs text-[var(--muted-text)] font-semibold inline-flex items-center gap-1">
+                  <span className="text-[11px] text-[var(--text-muted)] font-semibold inline-flex items-center gap-1">
                     <Clock className="h-3 w-3" />
-                    ~{todaysFocusTask.estimateMinutes} min estimate
+                    ~{todaysFocusTask.estimateMinutes}m est.
                   </span>
                 )}
               </div>
-              <h3 className="text-lg font-black text-[var(--text-heading)]">{todaysFocusTask.title}</h3>
+              <h3 className="text-sm sm:text-base font-black text-[var(--text-heading)] truncate">{todaysFocusTask.title}</h3>
               {todaysFocusTask.description && (
-                <p className="text-xs text-[var(--muted-text)]">{todaysFocusTask.description}</p>
+                <p className="text-xs text-[var(--text-muted)] line-clamp-2">{todaysFocusTask.description}</p>
               )}
             </div>
 
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2 shrink-0">
               <button
                 onClick={() => handleToggleTaskStatus(todaysFocusTask)}
-                className="paper-btn-primary px-4 py-2.5 text-xs font-extrabold cursor-pointer inline-flex items-center gap-1.5"
+                className="paper-btn-primary px-3 sm:px-4 py-1.5 sm:py-2 text-xs font-extrabold cursor-pointer inline-flex items-center gap-1.5 active:scale-95"
               >
                 <Check className="h-3.5 w-3.5" />
                 <span>Complete Task</span>
@@ -528,39 +578,39 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
                   setActSummary(`Worked on: ${todaysFocusTask.title}`);
                   setShowLogAction(true);
                 }}
-                className="paper-btn-secondary px-4 py-2.5 text-xs font-extrabold cursor-pointer inline-flex items-center gap-1.5"
+                className="paper-btn-secondary px-3 sm:px-4 py-1.5 sm:py-2 text-xs font-extrabold cursor-pointer inline-flex items-center gap-1.5 active:scale-95"
               >
                 <Clock className="h-3.5 w-3.5" />
-                <span>Log Work Against Task</span>
+                <span>Log Work</span>
               </button>
             </div>
           </div>
         ) : (
-          <div className="clay-surface bg-[var(--surface-nested)] p-6 text-center space-y-3">
+          <div className="paper-card bg-[var(--surface-primary)] p-4 sm:p-6 text-center space-y-2 rounded-xl border border-dashed border-[var(--border-default)]">
             <div className="flex justify-center">
-              <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--badge-bg)] text-[var(--accent-color)] shadow-xs">
-                <Sprout className="h-6 w-6" strokeWidth={1.8} />
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--surface-secondary)] text-[var(--forest-green)] shadow-2xs">
+                <Sprout className="h-5 w-5" strokeWidth={1.8} />
               </span>
             </div>
-            <div className="font-bold text-[var(--text-heading)] text-sm">
+            <div className="font-bold text-[var(--text-heading)] text-xs sm:text-sm">
               No tasks planned yet. Choose your next step.
             </div>
-            <p className="text-xs text-[var(--muted-text)] max-w-md mx-auto">
+            <p className="text-xs text-[var(--text-muted)] max-w-sm mx-auto">
               Start by adding a task or milestone, or log work directly without needing a predefined plan.
             </p>
-            <div className="flex justify-center gap-3 pt-2">
+            <div className="flex justify-center gap-2 pt-1">
               <button
                 onClick={() => {
                   setTargetMilestoneId(undefined);
                   setShowAddTask(true);
                 }}
-                className="paper-btn-secondary px-4 py-2 text-xs font-bold cursor-pointer"
+                className="paper-btn-secondary px-3 py-1.5 text-xs font-bold cursor-pointer"
               >
                 + Add Task
               </button>
               <button
                 onClick={() => setShowAddMilestone(true)}
-                className="paper-btn-secondary px-4 py-2 text-xs font-bold cursor-pointer"
+                className="paper-btn-secondary px-3 py-1.5 text-xs font-bold cursor-pointer"
               >
                 + Add Milestone
               </button>
@@ -569,80 +619,103 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
         )}
       </div>
 
-      {/* Navigation Sub-Tabs for Goal Sections */}
-      <div className="flex space-x-2 border-b border-[var(--border-subtle)] pb-3 overflow-x-auto">
+      {/* Navigation Sub-Tabs matching SubjectDetailView */}
+      <div className="flex space-x-1 sm:space-x-4 border-b border-[var(--border-default)] text-xs font-bold overflow-x-auto no-scrollbar scroll-smooth">
         <button
           onClick={() => setActiveTabSection("focus")}
-          className={`px-4 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer ${
-            activeTabSection === "focus"
-              ? "bg-[var(--forest-green)] text-white shadow-xs"
-              : "text-[var(--text-secondary)] hover:text-[var(--text-heading)] hover:bg-[var(--surface-hover)]"
+          className={`pb-2.5 pt-1 px-2.5 sm:px-2 transition-all flex items-center space-x-1.5 border-b-2 whitespace-nowrap cursor-pointer shrink-0 ${
+            activeTabSection === "focus" || activeTabSection === "plan"
+              ? "border-[var(--forest-green)] text-[var(--text-heading)] font-black"
+              : "border-transparent text-[var(--text-secondary)] hover:text-[var(--text-heading)]"
           }`}
         >
-          Plan & Milestones ({goalDetail.milestones.length})
+          <Map className="h-3.5 w-3.5 text-[var(--forest-green)]" />
+          <span className="sm:hidden">Milestones</span>
+          <span className="hidden sm:inline">Plan & Milestones</span>
+          <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-[var(--surface-secondary)] text-[var(--text-muted)]">
+            {goalDetail.milestones.length}
+          </span>
         </button>
+
         <button
           onClick={() => setActiveTabSection("tasks")}
-          className={`px-4 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer ${
+          className={`pb-2.5 pt-1 px-2.5 sm:px-2 transition-all flex items-center space-x-1.5 border-b-2 whitespace-nowrap cursor-pointer shrink-0 ${
             activeTabSection === "tasks"
-              ? "bg-[var(--forest-green)] text-white shadow-xs"
-              : "text-[var(--text-secondary)] hover:text-[var(--text-heading)] hover:bg-[var(--surface-hover)]"
+              ? "border-[var(--forest-green)] text-[var(--text-heading)] font-black"
+              : "border-transparent text-[var(--text-secondary)] hover:text-[var(--text-heading)]"
           }`}
         >
-          Tasks ({goalDetail.tasks.length})
+          <Check className="h-3.5 w-3.5 text-[var(--forest-green)]" />
+          <span>Tasks</span>
+          <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-[var(--surface-secondary)] text-[var(--text-muted)]">
+            {goalDetail.tasks.length}
+          </span>
         </button>
+
         <button
           onClick={() => setActiveTabSection("actions")}
-          className={`px-4 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer ${
+          className={`pb-2.5 pt-1 px-2.5 sm:px-2 transition-all flex items-center space-x-1.5 border-b-2 whitespace-nowrap cursor-pointer shrink-0 ${
             activeTabSection === "actions"
-              ? "bg-[var(--forest-green)] text-white shadow-xs"
-              : "text-[var(--text-secondary)] hover:text-[var(--text-heading)] hover:bg-[var(--surface-hover)]"
+              ? "border-[var(--forest-green)] text-[var(--text-heading)] font-black"
+              : "border-transparent text-[var(--text-secondary)] hover:text-[var(--text-heading)]"
           }`}
         >
-          Daily Actions ({goalDetail.dailyActions.length})
+          <Clock className="h-3.5 w-3.5 text-[var(--crimson)]" />
+          <span className="sm:hidden">Actions</span>
+          <span className="hidden sm:inline">Daily Actions</span>
+          <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-[var(--surface-secondary)] text-[var(--text-muted)]">
+            {goalDetail.dailyActions.length}
+          </span>
         </button>
+
         <button
           onClick={() => setActiveTabSection("reflection")}
-          className={`px-4 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer ${
+          className={`pb-2.5 pt-1 px-2.5 sm:px-2 transition-all flex items-center space-x-1.5 border-b-2 whitespace-nowrap cursor-pointer shrink-0 ${
             activeTabSection === "reflection"
-              ? "bg-[var(--forest-green)] text-white shadow-xs"
-              : "text-[var(--text-secondary)] hover:text-[var(--text-heading)] hover:bg-[var(--surface-hover)]"
+              ? "border-[var(--forest-green)] text-[var(--text-heading)] font-black"
+              : "border-transparent text-[var(--text-secondary)] hover:text-[var(--text-heading)]"
           }`}
         >
-          Hansei & Reflections ({goalDetail.reflections.length})
+          <Lightbulb className="h-3.5 w-3.5 text-amber-500" />
+          <span className="sm:hidden">Reflections</span>
+          <span className="hidden sm:inline">Hansei & Reflections</span>
+          <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-[var(--surface-secondary)] text-[var(--text-muted)]">
+            {goalDetail.reflections.length}
+          </span>
         </button>
       </div>
 
       {/* 2. PLAN & MILESTONES SECTION */}
       {(activeTabSection === "focus" || activeTabSection === "plan") && (
-        <div className="space-y-6">
-          <div className="flex items-center justify-between">
+        <div className="space-y-4 sm:space-y-6">
+          <div className="flex items-center justify-between gap-2 pb-2 border-b border-[var(--border-subtle)]">
             <div>
-              <h2 className="text-xl font-bold text-[var(--text-heading)]">Plan & Milestones</h2>
-              <p className="text-xs text-[var(--muted-text)]">
+              <h2 className="text-base sm:text-xl font-black text-[var(--text-heading)]">Plan & Milestones</h2>
+              <p className="text-[11px] sm:text-xs text-[var(--text-muted)]">
                 Break the outcome into meaningful stages
               </p>
             </div>
             <button
               onClick={() => setShowAddMilestone(true)}
-              className="paper-btn-primary px-4 py-2 text-xs font-bold cursor-pointer"
+              className="paper-btn-primary px-3 sm:px-4 py-1.5 sm:py-2 text-xs font-bold flex items-center space-x-1 shadow-xs shrink-0 cursor-pointer active:scale-95"
             >
-              + Add Milestone
+              <Plus className="h-3.5 w-3.5" />
+              <span>Add Milestone</span>
             </button>
           </div>
 
           {goalDetail.milestones.length === 0 ? (
-            <div className="clay-surface p-8 text-center space-y-3 bg-[var(--surface-nested)]">
+            <div className="paper-card p-6 sm:p-8 text-center space-y-3 bg-[var(--surface-secondary)] border border-[var(--border-default)] rounded-xl">
               <div className="flex justify-center">
-                <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--badge-bg)] text-[var(--accent-color)] shadow-xs">
+                <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--surface-primary)] text-[var(--forest-green)] shadow-xs">
                   <Map className="h-6 w-6" strokeWidth={1.8} />
                 </span>
               </div>
-              <div className="font-bold text-[var(--text-heading)] text-sm">No milestones added yet</div>
-              <p className="text-xs text-[var(--muted-text)]">
+              <div className="font-bold text-[var(--text-heading)] text-base">No milestones added yet</div>
+              <p className="text-xs text-[var(--text-muted)] max-w-sm mx-auto">
                 Add milestones when you know the major stages required to achieve this goal.
               </p>
-              <div className="flex justify-center gap-3 pt-2">
+              <div className="flex justify-center gap-2 pt-2">
                 <button
                   onClick={() => setShowAddMilestone(true)}
                   className="paper-btn-secondary px-4 py-2 text-xs font-bold cursor-pointer inline-flex items-center gap-1.5"
@@ -661,73 +734,71 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
               </div>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3.5 sm:space-y-4">
               {goalDetail.milestones.map((ms, idx) => {
                 const msCompletedTasks = ms.tasks.filter((t) => t.status === "COMPLETED").length;
                 return (
-                  <div key={ms.id} className="clay-surface p-6 space-y-4">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                      <div className="space-y-1">
-                        <div className="flex items-center space-x-2">
-                          <span className="clay-badge bg-[var(--badge-bg)] px-2.5 py-0.5 text-[10px] font-black text-[var(--accent-color)]">
-                            STAGE {idx + 1}
-                          </span>
-                          <span
-                            className={`clay-badge px-2.5 py-0.5 text-[10px] font-bold ${
-                              ms.status === "COMPLETED"
-                                ? "bg-emerald-500/20 text-emerald-300"
-                                : "bg-[var(--badge-bg)] text-[var(--muted-text)]"
-                            }`}
-                          >
-                            {ms.status}
-                          </span>
+                  <div key={ms.id} className="paper-card p-3.5 sm:p-5 space-y-3 border border-[var(--border-default)] rounded-xl shadow-2xs hover:border-[var(--border-strong)] transition-all">
+                    <div className="flex items-center justify-between gap-2 pb-2 border-b border-[var(--border-subtle)]">
+                      <div className="flex items-center space-x-2.5 min-w-0">
+                        <div className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-lg bg-[var(--forest-green)] text-white font-black text-xs shrink-0 shadow-2xs">
+                          {String(idx + 1).padStart(2, "0")}
                         </div>
-                        <h3 className="text-lg font-black text-[var(--text-heading)]">{ms.title}</h3>
-                        {ms.description && (
-                          <p className="text-xs text-[var(--muted-text)]">{ms.description}</p>
-                        )}
-                      </div>
-
-                      <div className="flex items-center space-x-3">
-                        <div className="text-right text-xs text-[var(--muted-text)]">
-                          <div className="font-bold text-[var(--text-heading)]">
-                            {msCompletedTasks} / {ms.tasks.length} tasks
+                        <div className="min-w-0">
+                          <div className="flex items-center space-x-2 flex-wrap">
+                            <h3 className="font-extrabold text-[var(--text-heading)] text-sm sm:text-base truncate">{ms.title}</h3>
+                            <span
+                              className={`px-1.5 py-0.5 text-[10px] font-bold rounded shrink-0 ${
+                                ms.status === "COMPLETED"
+                                  ? "bg-emerald-500/20 text-emerald-400"
+                                  : "bg-[var(--surface-secondary)] text-[var(--text-muted)]"
+                              }`}
+                            >
+                              {ms.status}
+                            </span>
                           </div>
-                          {ms.targetDate && (
-                            <div>Target: {new Date(ms.targetDate).toLocaleDateString()}</div>
+                          {ms.description && (
+                            <p className="text-[11px] text-[var(--text-muted)] truncate">{ms.description}</p>
                           )}
                         </div>
+                      </div>
+
+                      <div className="flex items-center space-x-2 shrink-0">
+                        <span className="hidden sm:inline text-xs font-bold text-[var(--text-muted)]">
+                          {msCompletedTasks} / {ms.tasks.length} tasks
+                        </span>
                         <button
                           onClick={() => {
                             setTargetMilestoneId(ms.id);
                             setShowAddTask(true);
                           }}
-                          className="paper-btn-secondary px-3 py-1.5 text-xs font-bold cursor-pointer"
+                          className="btn-pill-action px-2.5 py-1 text-xs font-bold space-x-1 cursor-pointer active:scale-95"
                         >
-                          + Task
+                          <Plus className="h-3 w-3" />
+                          <span>Task</span>
                         </button>
                       </div>
                     </div>
 
                     {/* Milestone Child Tasks */}
-                    {ms.tasks.length > 0 && (
-                      <div className="space-y-2 pt-2">
+                    {ms.tasks.length > 0 ? (
+                      <div className="space-y-2 pt-1">
                         {ms.tasks.map((task) => (
                           <div
                             key={task.id}
-                            className="clay-surface bg-[var(--surface-nested)] p-3 flex items-center justify-between gap-3 text-xs"
+                            className="paper-card bg-[var(--surface-primary)] p-2.5 sm:p-3 rounded-lg border border-[var(--border-default)] flex items-center justify-between gap-2.5 text-xs hover:border-[var(--forest-green)] transition-all"
                           >
-                            <div className="flex items-center space-x-3">
+                            <div className="flex items-center space-x-2.5 min-w-0">
                               <input
                                 type="checkbox"
                                 checked={task.status === "COMPLETED"}
                                 onChange={() => handleToggleTaskStatus(task)}
-                                className="h-4 w-4 rounded accent-[var(--accent-color)] cursor-pointer"
+                                className="h-4 w-4 rounded accent-[var(--forest-green)] cursor-pointer shrink-0"
                               />
                               <span
-                                className={`font-bold ${
+                                className={`font-bold truncate ${
                                   task.status === "COMPLETED"
-                                    ? "line-through text-[var(--muted-text)]"
+                                    ? "line-through text-[var(--text-muted)]"
                                     : "text-[var(--text-heading)]"
                                 }`}
                               >
@@ -735,18 +806,22 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
                               </span>
                             </div>
 
-                            <div className="flex items-center space-x-2">
-                              <span className="clay-badge bg-[var(--badge-bg)] px-2 py-0.5 text-[10px] font-extrabold text-[var(--muted-text)]">
+                            <div className="flex items-center space-x-2 shrink-0">
+                              <span className="px-1.5 py-0.5 text-[9px] font-black rounded bg-[var(--surface-secondary)] text-[var(--text-muted)]">
                                 {task.priority}
                               </span>
                               {task.estimateMinutes && (
-                                <span className="text-[10px] text-[var(--muted-text)] font-semibold">
+                                <span className="text-[10px] text-[var(--text-muted)] font-semibold">
                                   {task.estimateMinutes}m
                                 </span>
                               )}
                             </div>
                           </div>
                         ))}
+                      </div>
+                    ) : (
+                      <div className="text-xs text-[var(--text-muted)] italic py-2 px-3 bg-[var(--surface-secondary)]/50 rounded-lg border border-dashed border-[var(--border-default)]">
+                        No tasks in this milestone yet. Click "+ Task" to add one.
                       </div>
                     )}
                   </div>
@@ -759,11 +834,11 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
 
       {/* 3. TASKS SECTION (Unfinished / All Tasks) */}
       {activeTabSection === "tasks" && (
-        <div className="clay-surface p-6 space-y-5">
-          <div className="flex items-center justify-between">
+        <div className="space-y-4 sm:space-y-6">
+          <div className="flex items-center justify-between gap-2 pb-2 border-b border-[var(--border-subtle)]">
             <div>
-              <h2 className="text-xl font-bold text-[var(--text-heading)]">Tasks & Actionable Work</h2>
-              <p className="text-xs text-[var(--muted-text)]">
+              <h2 className="text-base sm:text-xl font-black text-[var(--text-heading)]">Tasks & Actionable Work</h2>
+              <p className="text-[11px] sm:text-xs text-[var(--text-muted)]">
                 Manage specific steps required for this goal
               </p>
             </div>
@@ -772,57 +847,58 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
                 setTargetMilestoneId(undefined);
                 setShowAddTask(true);
               }}
-              className="paper-btn-primary px-4 py-2 text-xs font-bold cursor-pointer"
+              className="paper-btn-primary px-3 sm:px-4 py-1.5 sm:py-2 text-xs font-bold flex items-center space-x-1 shadow-xs shrink-0 cursor-pointer active:scale-95"
             >
-              + Add Task
+              <Plus className="h-3.5 w-3.5" />
+              <span>Add Task</span>
             </button>
           </div>
 
           {goalDetail.tasks.length === 0 ? (
-            <div className="clay-surface bg-[var(--surface-nested)] p-6 text-center text-xs text-[var(--muted-text)]">
+            <div className="paper-card bg-[var(--surface-secondary)] p-6 sm:p-8 text-center text-xs text-[var(--text-muted)] rounded-xl border border-[var(--border-default)]">
               No tasks defined yet. Click "+ Add Task" to create one.
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               {goalDetail.tasks.map((task) => (
                 <div
                   key={task.id}
-                  className="clay-surface bg-[var(--surface-nested)] p-4 flex items-center justify-between text-xs"
+                  className="paper-card bg-[var(--surface-primary)] p-3 sm:p-3.5 rounded-xl border border-[var(--border-default)] flex items-center justify-between gap-3 text-xs shadow-2xs hover:border-[var(--forest-green)] transition-all"
                 >
-                  <div className="flex items-center space-x-3">
+                  <div className="flex items-center space-x-3 min-w-0">
                     <input
                       type="checkbox"
                       checked={task.status === "COMPLETED"}
                       onChange={() => handleToggleTaskStatus(task)}
-                      className="h-4 w-4 rounded accent-[var(--accent-color)] cursor-pointer"
+                      className="h-4 w-4 rounded accent-[var(--forest-green)] cursor-pointer shrink-0"
                     />
-                    <div>
+                    <div className="min-w-0">
                       <div
-                        className={`font-bold ${
+                        className={`font-bold truncate ${
                           task.status === "COMPLETED"
-                            ? "line-through text-[var(--muted-text)]"
+                            ? "line-through text-[var(--text-muted)]"
                             : "text-[var(--text-heading)]"
                         }`}
                       >
                         {task.title}
                       </div>
                       {task.description && (
-                        <div className="text-[11px] text-[var(--muted-text)] mt-0.5">
+                        <div className="text-[11px] text-[var(--text-muted)] mt-0.5 truncate">
                           {task.description}
                         </div>
                       )}
                     </div>
                   </div>
 
-                  <div className="flex items-center space-x-3">
-                    <span className="clay-badge bg-[var(--badge-bg)] px-2.5 py-0.5 text-[10px] font-black text-[var(--accent-color)]">
+                  <div className="flex items-center space-x-2 shrink-0">
+                    <span className="px-1.5 py-0.5 text-[9px] font-black rounded bg-[var(--surface-secondary)] text-[var(--forest-green)] border border-[var(--border-default)]">
                       {task.priority}
                     </span>
                     <button
                       onClick={() => Api.deleteGoalTask(goalDetail.id, task.id).then(onRefresh)}
-                      className="text-[10px] font-bold text-red-400 hover:underline cursor-pointer"
+                      className="text-[11px] font-bold text-red-400 hover:underline cursor-pointer p-1"
                     >
-                      Delete
+                      <Trash2 className="h-3.5 w-3.5" />
                     </button>
                   </div>
                 </div>
@@ -834,76 +910,80 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
 
       {/* 4. DAILY ACTIONS SECTION */}
       {activeTabSection === "actions" && (
-        <div className="clay-surface p-6 space-y-5">
-          <div className="flex items-center justify-between">
+        <div className="space-y-4 sm:space-y-6">
+          <div className="flex items-center justify-between gap-2 pb-2 border-b border-[var(--border-subtle)]">
             <div>
-              <h2 className="text-xl font-bold text-[var(--text-heading)]">Daily Actions Log</h2>
-              <p className="text-xs text-[var(--muted-text)]">
+              <h2 className="text-base sm:text-xl font-black text-[var(--text-heading)]">Daily Actions Log</h2>
+              <p className="text-[11px] sm:text-xs text-[var(--text-muted)]">
                 Record of work actually performed toward this goal
               </p>
             </div>
             <button
               onClick={() => setShowLogAction(true)}
-              className="paper-btn-primary px-4 py-2 text-xs font-bold cursor-pointer"
+              className="paper-btn-primary px-3 sm:px-4 py-1.5 sm:py-2 text-xs font-bold flex items-center space-x-1 shadow-xs shrink-0 cursor-pointer active:scale-95"
             >
-              + Log Work
+              <Plus className="h-3.5 w-3.5" />
+              <span>Log Work</span>
             </button>
           </div>
 
           {goalDetail.dailyActions.length === 0 ? (
-            <div className="clay-surface bg-[var(--surface-nested)] p-6 text-center text-xs text-[var(--muted-text)]">
+            <div className="paper-card bg-[var(--surface-secondary)] p-6 sm:p-8 text-center text-xs text-[var(--text-muted)] rounded-xl border border-[var(--border-default)]">
               No daily actions logged yet. Log what you actually did today to build evidence of progress!
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {goalDetail.dailyActions.map((action) => (
-                <div key={action.id} className="clay-surface bg-[var(--surface-nested)] p-5 space-y-3">
-                  <div className="flex items-start justify-between gap-4">
+                <div key={action.id} className="paper-card bg-[var(--surface-primary)] p-3.5 sm:p-4 space-y-2.5 rounded-xl border border-[var(--border-default)] shadow-2xs">
+                  <div className="flex items-start justify-between gap-3">
                     <div>
-                      <div className="text-xs font-bold text-[var(--accent-color)]">
-                        {new Date(action.occurredAt).toLocaleDateString("en-US", {
-                          weekday: "short",
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric",
-                        })}
+                      <div className="text-xs font-bold text-[var(--forest-green)] flex items-center gap-1.5">
+                        <span>
+                          {new Date(action.occurredAt).toLocaleDateString("en-US", {
+                            weekday: "short",
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          })}
+                        </span>
                         {action.durationMinutes && (
-                          <span className="inline-flex items-center gap-1 ml-1.5">
+                          <span className="text-[var(--text-muted)] font-normal inline-flex items-center gap-1">
                             · <Clock className="h-3 w-3 inline" /> {action.durationMinutes} mins
                           </span>
                         )}
                       </div>
-                      <h4 className="text-sm font-black text-[var(--text-heading)] mt-1">{action.summary}</h4>
+                      <h4 className="text-sm font-black text-[var(--text-heading)] mt-0.5">{action.summary}</h4>
                     </div>
                     <button
                       onClick={() => Api.deleteDailyAction(goalDetail.id, action.id).then(onRefresh)}
-                      className="text-[10px] text-red-400 font-bold hover:underline cursor-pointer"
+                      className="text-red-400 hover:text-red-500 cursor-pointer p-1 shrink-0"
+                      title="Delete action"
                     >
-                      Delete
+                      <Trash2 className="h-3.5 w-3.5" />
                     </button>
                   </div>
 
                   {action.outcome && (
-                    <div className="text-xs text-[var(--fg-main)] bg-black/10 dark:bg-black/30 p-2.5 rounded-lg border border-[var(--border-subtle)]">
-                      <strong className="text-[var(--forest-green)] dark:text-emerald-400">Accomplishment / Result:</strong>{" "}
+                    <div className="paper-inset bg-[var(--surface-secondary)] p-2.5 rounded-lg text-xs border border-[var(--border-subtle)] text-[var(--text-secondary)]">
+                      <strong className="text-[var(--forest-green)]">Accomplishment:</strong>{" "}
                       {action.outcome}
                     </div>
                   )}
 
                   {action.blocker && (
-                    <div className="text-xs text-amber-800 dark:text-amber-200 bg-amber-500/10 p-2.5 rounded-lg border border-amber-500/20">
+                    <div className="paper-inset bg-amber-500/10 p-2.5 rounded-lg text-xs border border-amber-500/20 text-amber-300">
                       <strong>Blocker / Difficulty:</strong> {action.blocker}
                     </div>
                   )}
 
                   {action.nextStep && (
-                    <div className="flex items-center justify-between text-xs text-sky-800 dark:text-sky-200 bg-sky-500/10 p-2.5 rounded-lg border border-sky-500/20">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs bg-[var(--pale-sage)] text-[var(--forest-green)] p-2.5 rounded-lg border border-[var(--sage)]/40">
                       <div>
                         <strong>Next Step:</strong> {action.nextStep}
                       </div>
                       <button
                         onClick={() => handleCreateTaskFromNextStep(action.nextStep!)}
-                        className="paper-btn-secondary px-2.5 py-1 text-[10px] font-bold cursor-pointer"
+                        className="paper-btn-secondary px-2.5 py-1 text-[10px] font-bold cursor-pointer self-start sm:self-auto shrink-0"
                       >
                         + Convert to Task
                       </button>
@@ -918,42 +998,42 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
 
       {/* 5. REFLECTION & HANSEI SECTION */}
       {activeTabSection === "reflection" && (
-        <div className="clay-surface p-6 space-y-5">
-          <div>
-            <h2 className="text-xl font-bold text-[var(--text-heading)]">Hansei & Reflections</h2>
-            <p className="text-xs text-[var(--muted-text)]">
+        <div className="space-y-4 sm:space-y-6">
+          <div className="pb-2 border-b border-[var(--border-subtle)]">
+            <h2 className="text-base sm:text-xl font-black text-[var(--text-heading)]">Hansei & Reflections</h2>
+            <p className="text-[11px] sm:text-xs text-[var(--text-muted)]">
               Interpret what happened, capture learnings, and adjust your execution loop.
             </p>
           </div>
 
           {goalDetail.reflections.length === 0 ? (
-            <div className="clay-surface bg-[var(--surface-nested)] p-6 text-center text-xs text-[var(--muted-text)]">
+            <div className="paper-card bg-[var(--surface-secondary)] p-6 sm:p-8 text-center text-xs text-[var(--text-muted)] rounded-xl border border-[var(--border-default)]">
               No reflections recorded yet. Add a reflection when logging work or reviewing progress.
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {goalDetail.reflections.map((ref) => (
-                <div key={ref.id} className="clay-surface bg-[var(--surface-nested)] p-5 space-y-3">
-                  <div className="text-xs font-bold text-[var(--accent-color)]">
+                <div key={ref.id} className="paper-card bg-[var(--surface-primary)] p-3.5 sm:p-4 space-y-2 rounded-xl border border-[var(--border-default)] shadow-2xs">
+                  <div className="text-xs font-bold text-[var(--forest-green)]">
                     Reflection on {new Date(ref.createdAt).toLocaleDateString()}
                   </div>
                   {ref.wentWell && (
-                    <div className="text-xs text-emerald-300">
+                    <div className="text-xs text-emerald-400">
                       <strong>What went well?</strong> {ref.wentWell}
                     </div>
                   )}
                   {ref.difficulty && (
-                    <div className="text-xs text-amber-300">
+                    <div className="text-xs text-amber-400">
                       <strong>What was difficult?</strong> {ref.difficulty}
                     </div>
                   )}
                   {ref.learning && (
-                    <div className="text-xs text-sky-300">
+                    <div className="text-xs text-sky-400">
                       <strong>What did I learn?</strong> {ref.learning}
                     </div>
                   )}
                   {ref.nextChange && (
-                    <div className="text-xs text-rose-300">
+                    <div className="text-xs text-rose-400">
                       <strong>What will I change next time?</strong> {ref.nextChange}
                     </div>
                   )}
@@ -967,53 +1047,69 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
       {/* MODAL: ADD MILESTONE */}
       {showAddMilestone && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="clay-modal w-full max-w-md p-6 space-y-5">
-            <h3 className="text-lg font-black text-[var(--text-heading)]">Add Milestone / Stage</h3>
-            <form onSubmit={handleCreateMilestone} className="space-y-4 text-xs font-bold">
+          <div className="paper-card bg-[var(--surface-primary)] w-full max-w-md p-5 sm:p-6 space-y-4 rounded-2xl border border-[var(--border-default)] shadow-xl">
+            <div className="flex items-center justify-between pb-2 border-b border-[var(--border-subtle)]">
+              <h3 className="text-base font-black text-[var(--text-heading)]">Add Milestone / Stage</h3>
+              <button
+                type="button"
+                onClick={() => setShowAddMilestone(false)}
+                className="text-xs text-[var(--text-muted)] hover:text-[var(--text-heading)] cursor-pointer"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <form onSubmit={handleCreateMilestone} className="space-y-3.5 text-xs font-bold">
               <div>
-                <label className="block text-[var(--muted-text)] mb-1">Milestone Title *</label>
+                <label className="block text-[var(--text-muted)] mb-1 uppercase tracking-wider text-[10px]">
+                  Milestone Title *
+                </label>
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Milestone 1 — Choose an organization"
+                  placeholder="e.g. Choose target repository and contribute PR"
                   value={msTitle}
                   onChange={(e) => setMsTitle(e.target.value)}
-                  className="clay-input w-full p-3 text-xs"
+                  className="paper-input w-full p-2.5 text-xs font-semibold"
+                  autoFocus
                 />
               </div>
 
               <div>
-                <label className="block text-[var(--muted-text)] mb-1">Description (Optional)</label>
+                <label className="block text-[var(--text-muted)] mb-1 uppercase tracking-wider text-[10px]">
+                  Description (Optional)
+                </label>
                 <textarea
                   placeholder="What major outcome must happen in this stage?"
                   value={msDesc}
                   onChange={(e) => setMsDesc(e.target.value)}
-                  className="clay-input w-full p-3 text-xs h-20"
+                  className="paper-input w-full p-2.5 text-xs h-20"
                 />
               </div>
 
               <div>
-                <label className="block text-[var(--muted-text)] mb-1">Target Date (Optional)</label>
+                <label className="block text-[var(--text-muted)] mb-1 uppercase tracking-wider text-[10px]">
+                  Target Date (Optional)
+                </label>
                 <input
                   type="date"
                   value={msTargetDate}
                   onChange={(e) => setMsTargetDate(e.target.value)}
-                  className="clay-input w-full p-3 text-xs"
+                  className="paper-input w-full p-2.5 text-xs"
                 />
               </div>
 
-              <div className="flex justify-end space-x-3 pt-2">
+              <div className="flex justify-end space-x-2.5 pt-2">
                 <button
                   type="button"
                   onClick={() => setShowAddMilestone(false)}
-                  className="clay-btn-secondary px-4 py-2"
+                  className="paper-btn-secondary px-4 py-2 text-xs font-bold cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={loadingMilestone}
-                  className="clay-btn-primary px-5 py-2 font-extrabold"
+                  className="paper-btn-primary px-5 py-2 text-xs font-extrabold cursor-pointer"
                 >
                   {loadingMilestone ? "Creating..." : "Save Milestone"}
                 </button>
@@ -1026,27 +1122,41 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
       {/* MODAL: ADD TASK */}
       {showAddTask && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="clay-modal w-full max-w-md p-6 space-y-5">
-            <h3 className="text-lg font-black text-[var(--text-heading)]">Add Actionable Task</h3>
-            <form onSubmit={handleCreateTask} className="space-y-4 text-xs font-bold">
+          <div className="paper-card bg-[var(--surface-primary)] w-full max-w-md p-5 sm:p-6 space-y-4 rounded-2xl border border-[var(--border-default)] shadow-xl">
+            <div className="flex items-center justify-between pb-2 border-b border-[var(--border-subtle)]">
+              <h3 className="text-base font-black text-[var(--text-heading)]">Add Actionable Task</h3>
+              <button
+                type="button"
+                onClick={() => setShowAddTask(false)}
+                className="text-xs text-[var(--text-muted)] hover:text-[var(--text-heading)] cursor-pointer"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <form onSubmit={handleCreateTask} className="space-y-3.5 text-xs font-bold">
               <div>
-                <label className="block text-[var(--muted-text)] mb-1">Task Title *</label>
+                <label className="block text-[var(--text-muted)] mb-1 uppercase tracking-wider text-[10px]">
+                  Task Title *
+                </label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. Read contribution guide"
                   value={taskTitle}
                   onChange={(e) => setTaskTitle(e.target.value)}
-                  className="clay-input w-full p-3 text-xs"
+                  className="paper-input w-full p-2.5 text-xs font-semibold"
+                  autoFocus
                 />
               </div>
 
               <div>
-                <label className="block text-[var(--muted-text)] mb-1">Priority</label>
+                <label className="block text-[var(--text-muted)] mb-1 uppercase tracking-wider text-[10px]">
+                  Priority
+                </label>
                 <select
                   value={taskPriority}
                   onChange={(e) => setTaskPriority(e.target.value as TaskPriority)}
-                  className="clay-input w-full p-3 text-xs bg-[var(--input-bg)]"
+                  className="paper-input w-full p-2.5 text-xs"
                 >
                   <option value="LOW">Low Priority</option>
                   <option value="MEDIUM">Medium Priority</option>
@@ -1055,11 +1165,13 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
               </div>
 
               <div>
-                <label className="block text-[var(--muted-text)] mb-1">Milestone (Optional)</label>
+                <label className="block text-[var(--text-muted)] mb-1 uppercase tracking-wider text-[10px]">
+                  Milestone (Optional)
+                </label>
                 <select
                   value={targetMilestoneId || ""}
                   onChange={(e) => setTargetMilestoneId(e.target.value || undefined)}
-                  className="clay-input w-full p-3 text-xs bg-[var(--input-bg)]"
+                  className="paper-input w-full p-2.5 text-xs"
                 >
                   <option value="">Direct Goal Task (No Milestone)</option>
                   {goalDetail.milestones.map((m) => (
@@ -1070,9 +1182,11 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
                 </select>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-2.5">
                 <div>
-                  <label className="block text-[var(--muted-text)] mb-1">Estimate (Mins)</label>
+                  <label className="block text-[var(--text-muted)] mb-1 uppercase tracking-wider text-[10px]">
+                    Estimate (Mins)
+                  </label>
                   <input
                     type="number"
                     placeholder="e.g. 45"
@@ -1080,32 +1194,34 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
                     onChange={(e) =>
                       setTaskEstimate(e.target.value ? parseInt(e.target.value) : "")
                     }
-                    className="clay-input w-full p-3 text-xs"
+                    className="paper-input w-full p-2.5 text-xs"
                   />
                 </div>
                 <div>
-                  <label className="block text-[var(--muted-text)] mb-1">Due Date</label>
+                  <label className="block text-[var(--text-muted)] mb-1 uppercase tracking-wider text-[10px]">
+                    Due Date
+                  </label>
                   <input
                     type="date"
                     value={taskDueDate}
                     onChange={(e) => setTaskDueDate(e.target.value)}
-                    className="clay-input w-full p-3 text-xs"
+                    className="paper-input w-full p-2.5 text-xs"
                   />
                 </div>
               </div>
 
-              <div className="flex justify-end space-x-3 pt-2">
+              <div className="flex justify-end space-x-2.5 pt-2">
                 <button
                   type="button"
                   onClick={() => setShowAddTask(false)}
-                  className="clay-btn-secondary px-4 py-2"
+                  className="paper-btn-secondary px-4 py-2 text-xs font-bold cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={loadingTask}
-                  className="clay-btn-primary px-5 py-2 font-extrabold"
+                  className="paper-btn-primary px-5 py-2 text-xs font-extrabold cursor-pointer"
                 >
                   {loadingTask ? "Saving..." : "Save Task"}
                 </button>
@@ -1118,24 +1234,38 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
       {/* MODAL: LOG DAILY ACTION & WORK */}
       {showLogAction && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
-          <div className="clay-modal w-full max-w-lg p-6 space-y-5 my-8">
-            <h3 className="text-lg font-black text-[var(--text-heading)]">Log Work & Action</h3>
-            <form onSubmit={handleLogDailyAction} className="space-y-4 text-xs font-bold">
+          <div className="paper-card bg-[var(--surface-primary)] w-full max-w-lg p-5 sm:p-6 space-y-4 rounded-2xl border border-[var(--border-default)] shadow-xl my-6">
+            <div className="flex items-center justify-between pb-2 border-b border-[var(--border-subtle)]">
+              <h3 className="text-base font-black text-[var(--text-heading)]">Log Work & Action</h3>
+              <button
+                type="button"
+                onClick={() => setShowLogAction(false)}
+                className="text-xs text-[var(--text-muted)] hover:text-[var(--text-heading)] cursor-pointer"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <form onSubmit={handleLogDailyAction} className="space-y-3.5 text-xs font-bold">
               <div>
-                <label className="block text-[var(--muted-text)] mb-1">What did you work on today? *</label>
+                <label className="block text-[var(--text-muted)] mb-1 uppercase tracking-wider text-[10px]">
+                  What did you work on today? *
+                </label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. Read contribution guide and explored issue tracker"
                   value={actSummary}
                   onChange={(e) => setActSummary(e.target.value)}
-                  className="clay-input w-full p-3 text-xs"
+                  className="paper-input w-full p-2.5 text-xs font-semibold"
+                  autoFocus
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-2.5">
                 <div>
-                  <label className="block text-[var(--muted-text)] mb-1">Actual Time Spent (Mins)</label>
+                  <label className="block text-[var(--text-muted)] mb-1 uppercase tracking-wider text-[10px]">
+                    Time Spent (Mins)
+                  </label>
                   <input
                     type="number"
                     placeholder="e.g. 45"
@@ -1143,17 +1273,19 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
                     onChange={(e) =>
                       setActDuration(e.target.value ? parseInt(e.target.value) : "")
                     }
-                    className="clay-input w-full p-3 text-xs"
+                    className="paper-input w-full p-2.5 text-xs"
                   />
                 </div>
                 <div>
-                  <label className="block text-[var(--muted-text)] mb-1">Related Task (Optional)</label>
+                  <label className="block text-[var(--text-muted)] mb-1 uppercase tracking-wider text-[10px]">
+                    Related Task (Optional)
+                  </label>
                   <select
                     value={actTaskId}
                     onChange={(e) => setActTaskId(e.target.value)}
-                    className="clay-input w-full p-3 text-xs bg-[var(--input-bg)]"
+                    className="paper-input w-full p-2.5 text-xs"
                   >
-                    <option value="">None / General Goal Work</option>
+                    <option value="">None / General Work</option>
                     {goalDetail.tasks.map((t) => (
                       <option key={t.id} value={t.id}>
                         {t.title}
@@ -1164,93 +1296,105 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
               </div>
 
               <div>
-                <label className="block text-[var(--muted-text)] mb-1">What did you accomplish / outcome?</label>
+                <label className="block text-[var(--text-muted)] mb-1 uppercase tracking-wider text-[10px]">
+                  What did you accomplish / outcome?
+                </label>
                 <input
                   type="text"
                   placeholder="e.g. Understood repo structure and found 3 issues"
                   value={actOutcome}
                   onChange={(e) => setActOutcome(e.target.value)}
-                  className="clay-input w-full p-3 text-xs"
+                  className="paper-input w-full p-2.5 text-xs"
                 />
               </div>
 
               <div>
-                <label className="block text-[var(--muted-text)] mb-1">Blockers / Difficulties (Optional)</label>
+                <label className="block text-[var(--text-muted)] mb-1 uppercase tracking-wider text-[10px]">
+                  Blockers / Difficulties (Optional)
+                </label>
                 <input
                   type="text"
                   placeholder="e.g. Build setup failed initially"
                   value={actBlocker}
                   onChange={(e) => setActBlocker(e.target.value)}
-                  className="clay-input w-full p-3 text-xs"
+                  className="paper-input w-full p-2.5 text-xs"
                 />
               </div>
 
               <div>
-                <label className="block text-[var(--muted-text)] mb-1">What is the next step? (Optional)</label>
+                <label className="block text-[var(--text-muted)] mb-1 uppercase tracking-wider text-[10px]">
+                  What is the next step? (Optional)
+                </label>
                 <input
                   type="text"
                   placeholder="e.g. Set up project locally and reproduce issue #12"
                   value={actNextStep}
                   onChange={(e) => setActNextStep(e.target.value)}
-                  className="clay-input w-full p-3 text-xs"
+                  className="paper-input w-full p-2.5 text-xs"
                 />
               </div>
 
               {/* Optional Hansei Reflection Toggle */}
-              <div className="pt-2 border-t border-[var(--inset-highlight)]">
+              <div className="pt-2 border-t border-[var(--border-subtle)]">
                 <button
                   type="button"
                   onClick={() => setShowReflectionInputs(!showReflectionInputs)}
-                  className="text-xs font-bold text-[var(--accent-color)] hover:underline flex items-center space-x-1"
+                  className="text-xs font-bold text-[var(--forest-green)] hover:underline flex items-center space-x-1 cursor-pointer"
                 >
-                  <span>{showReflectionInputs ? "▼ Hide" : "▶ Add Optional Reflection (Hansei)"}</span>
+                  <span>{showReflectionInputs ? "▼ Hide Reflection" : "▶ Add Optional Reflection (Hansei)"}</span>
                 </button>
 
                 {showReflectionInputs && (
-                  <div className="space-y-3 pt-3 pl-2 border-l-2 border-[var(--accent-color)]">
+                  <div className="space-y-2.5 pt-2.5 pl-2.5 border-l-2 border-[var(--forest-green)]">
                     <div>
-                      <label className="block text-[var(--muted-text)] mb-1">What went well?</label>
+                      <label className="block text-[var(--text-muted)] mb-1 uppercase tracking-wider text-[10px]">
+                        What went well?
+                      </label>
                       <input
                         type="text"
                         value={refWentWell}
                         onChange={(e) => setRefWentWell(e.target.value)}
-                        className="clay-input w-full p-2.5 text-xs"
+                        className="paper-input w-full p-2 text-xs"
                       />
                     </div>
                     <div>
-                      <label className="block text-[var(--muted-text)] mb-1">What did you learn?</label>
+                      <label className="block text-[var(--text-muted)] mb-1 uppercase tracking-wider text-[10px]">
+                        What did you learn?
+                      </label>
                       <input
                         type="text"
                         value={refLearning}
                         onChange={(e) => setRefLearning(e.target.value)}
-                        className="clay-input w-full p-2.5 text-xs"
+                        className="paper-input w-full p-2 text-xs"
                       />
                     </div>
                     <div>
-                      <label className="block text-[var(--muted-text)] mb-1">What should you do differently next time?</label>
+                      <label className="block text-[var(--text-muted)] mb-1 uppercase tracking-wider text-[10px]">
+                        What should you do differently next time?
+                      </label>
                       <input
                         type="text"
                         value={refNextChange}
                         onChange={(e) => setRefNextChange(e.target.value)}
-                        className="clay-input w-full p-2.5 text-xs"
+                        className="paper-input w-full p-2 text-xs"
                       />
                     </div>
                   </div>
                 )}
               </div>
 
-              <div className="flex justify-end space-x-3 pt-3">
+              <div className="flex justify-end space-x-2.5 pt-2">
                 <button
                   type="button"
                   onClick={() => setShowLogAction(false)}
-                  className="clay-btn-secondary px-4 py-2"
+                  className="paper-btn-secondary px-4 py-2 text-xs font-bold cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={loadingAction}
-                  className="clay-btn-primary px-5 py-2 font-extrabold"
+                  className="paper-btn-primary px-5 py-2 text-xs font-extrabold cursor-pointer"
                 >
                   {loadingAction ? "Saving..." : "Save Daily Work"}
                 </button>
@@ -1263,37 +1407,52 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
       {/* MODAL: EDIT GOAL */}
       {showEditGoal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
-          <div className="clay-modal w-full max-w-lg p-6 space-y-5 my-8">
-            <h3 className="text-lg font-black text-[var(--text-heading)]">Edit Goal Details</h3>
-            <form onSubmit={handleSaveGoalEdit} className="space-y-4 text-xs font-bold">
+          <div className="paper-card bg-[var(--surface-primary)] w-full max-w-lg p-5 sm:p-6 space-y-4 rounded-2xl border border-[var(--border-default)] shadow-xl my-6">
+            <div className="flex items-center justify-between pb-2 border-b border-[var(--border-subtle)]">
+              <h3 className="text-base font-black text-[var(--text-heading)]">Edit Goal Details</h3>
+              <button
+                type="button"
+                onClick={() => setShowEditGoal(false)}
+                className="text-xs text-[var(--text-muted)] hover:text-[var(--text-heading)] cursor-pointer"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <form onSubmit={handleSaveGoalEdit} className="space-y-3.5 text-xs font-bold">
               <div>
-                <label className="block text-[var(--muted-text)] mb-1">Goal Title *</label>
+                <label className="block text-[var(--text-muted)] mb-1 uppercase tracking-wider text-[10px]">
+                  Goal Title *
+                </label>
                 <input
                   type="text"
                   required
                   value={editTitle}
                   onChange={(e) => setEditTitle(e.target.value)}
-                  className="clay-input w-full p-3 text-xs"
+                  className="paper-input w-full p-2.5 text-xs font-semibold"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-2.5">
                 <div>
-                  <label className="block text-[var(--muted-text)] mb-1">Category</label>
+                  <label className="block text-[var(--text-muted)] mb-1 uppercase tracking-wider text-[10px]">
+                    Category
+                  </label>
                   <input
                     type="text"
                     placeholder="e.g. Career, Learning"
                     value={editCategory}
                     onChange={(e) => setEditCategory(e.target.value)}
-                    className="clay-input w-full p-3 text-xs"
+                    className="paper-input w-full p-2.5 text-xs"
                   />
                 </div>
                 <div>
-                  <label className="block text-[var(--muted-text)] mb-1">Status</label>
+                  <label className="block text-[var(--text-muted)] mb-1 uppercase tracking-wider text-[10px]">
+                    Status
+                  </label>
                   <select
                     value={editStatus}
                     onChange={(e) => setEditStatus(e.target.value as GoalStatus)}
-                    className="clay-input w-full p-3 text-xs bg-[var(--input-bg)]"
+                    className="paper-input w-full p-2.5 text-xs"
                   >
                     <option value="ACTIVE">ACTIVE</option>
                     <option value="PAUSED">PAUSED</option>
@@ -1304,55 +1463,61 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
               </div>
 
               <div>
-                <label className="block text-[var(--muted-text)] mb-1">Reason / Description</label>
+                <label className="block text-[var(--text-muted)] mb-1 uppercase tracking-wider text-[10px]">
+                  Reason / Description
+                </label>
                 <textarea
                   value={editDesc}
                   onChange={(e) => setEditDesc(e.target.value)}
-                  className="clay-input w-full p-3 text-xs h-20"
+                  className="paper-input w-full p-2.5 text-xs h-20"
                 />
               </div>
 
               <div>
-                <label className="block text-[var(--muted-text)] mb-1">Success Definition / Outcome</label>
+                <label className="block text-[var(--text-muted)] mb-1 uppercase tracking-wider text-[10px]">
+                  Success Definition / Outcome
+                </label>
                 <input
                   type="text"
                   placeholder="e.g. Submit a strong proposal and get accepted"
                   value={editSuccess}
                   onChange={(e) => setEditSuccess(e.target.value)}
-                  className="clay-input w-full p-3 text-xs"
+                  className="paper-input w-full p-2.5 text-xs"
                 />
               </div>
 
               <div>
-                <label className="block text-[var(--muted-text)] mb-1">Target Date</label>
+                <label className="block text-[var(--text-muted)] mb-1 uppercase tracking-wider text-[10px]">
+                  Target Date
+                </label>
                 <input
                   type="date"
                   value={editTargetDate}
                   onChange={(e) => setEditTargetDate(e.target.value)}
-                  className="clay-input w-full p-3 text-xs"
+                  className="paper-input w-full p-2.5 text-xs"
                 />
               </div>
 
-              <div className="flex items-center justify-between pt-3 border-t border-[var(--inset-highlight)]">
+              <div className="flex items-center justify-between pt-3 border-t border-[var(--border-subtle)]">
                 <button
                   type="button"
                   onClick={handleDeleteGoal}
-                  className="text-xs font-bold text-red-400 hover:underline"
+                  className="text-xs font-bold text-red-400 hover:underline cursor-pointer"
                 >
                   Delete Goal
                 </button>
-                <div className="flex space-x-3">
+                <div className="flex space-x-2.5">
                   <button
                     type="button"
                     onClick={() => setShowEditGoal(false)}
-                    className="clay-btn-secondary px-4 py-2"
+                    className="paper-btn-secondary px-4 py-2 text-xs font-bold cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={loadingEdit}
-                    className="clay-btn-primary px-5 py-2 font-extrabold"
+                    className="paper-btn-primary px-5 py-2 text-xs font-extrabold cursor-pointer"
                   >
                     {loadingEdit ? "Saving..." : "Save Changes"}
                   </button>

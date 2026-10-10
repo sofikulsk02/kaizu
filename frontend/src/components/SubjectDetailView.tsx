@@ -337,39 +337,43 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Top Header Navigation & Action Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="flex items-center justify-between gap-2">
         {/* Back Button with Tactile Hover */}
         <button
           onClick={onBack}
-          className="paper-btn-secondary px-3.5 py-2 text-xs font-bold self-start flex items-center space-x-2 group shadow-2xs cursor-pointer"
+          className="paper-btn-secondary px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs font-bold flex items-center space-x-1.5 group shadow-2xs cursor-pointer active:scale-95"
         >
           <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-1" />
-          <span>Back to Subjects</span>
+          <span className="hidden sm:inline">Back to Subjects</span>
+          <span className="sm:hidden">Back</span>
         </button>
 
         {/* Action Group */}
-        <div className="flex items-center space-x-2 self-end sm:self-center">
+        <div className="flex items-center space-x-1.5 sm:space-x-2">
           <button
             onClick={() => setShowSessionModal(true)}
-            className="paper-btn-primary px-4 py-2 text-xs font-bold shadow-xs flex items-center space-x-1.5"
+            className="paper-btn-primary px-3 sm:px-4 py-1.5 sm:py-2 text-xs font-bold shadow-xs flex items-center space-x-1.5 cursor-pointer active:scale-95"
           >
             <Clock className="h-3.5 w-3.5" />
-            <span>Log Study Session</span>
+            <span className="hidden sm:inline">Log Study Session</span>
+            <span className="sm:hidden">Log Session</span>
           </button>
 
           <button
             onClick={() => setEditingSubject(!editingSubject)}
-            className="paper-btn-secondary px-3 py-2 text-xs font-bold flex items-center space-x-1.5"
+            className="paper-btn-secondary px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs font-bold flex items-center space-x-1 cursor-pointer active:scale-95"
+            title="Edit Subject"
           >
             <Pencil className="h-3 w-3" />
-            <span>{editingSubject ? "Cancel" : "Edit"}</span>
+            <span className="hidden sm:inline">{editingSubject ? "Cancel" : "Edit"}</span>
           </button>
 
           <button
             onClick={handleDeleteSubject}
-            className="paper-btn-danger px-3 py-2 text-xs font-bold flex items-center space-x-1"
+            className="paper-btn-danger px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs font-bold flex items-center space-x-1 cursor-pointer active:scale-95"
+            title="Delete Subject"
           >
             <Trash2 className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">Delete</span>
@@ -378,7 +382,7 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
       </div>
 
       {error && (
-        <div className="p-4 rounded-xl border border-red-500/30 bg-red-500/10 text-xs font-semibold text-red-400 flex items-center justify-between">
+        <div className="p-3.5 rounded-xl border border-red-500/30 bg-red-500/10 text-xs font-semibold text-red-400 flex items-center justify-between">
           <span className="inline-flex items-center gap-1.5">
             <AlertTriangle className="h-4 w-4 shrink-0 text-red-500" />
             <span>{error}</span>
@@ -390,7 +394,7 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
       )}
 
       {/* Subject Hero Header & Analytics */}
-      <div className="paper-card p-6 sm:p-7 space-y-6 border border-[var(--border-default)]">
+      <div className="paper-card p-3.5 sm:p-5 space-y-3 sm:space-y-4 border border-[var(--border-default)]">
         {editingSubject ? (
           <form onSubmit={handleUpdateSubject} className="space-y-4">
             <div>
@@ -435,85 +439,84 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
           </form>
         ) : (
           <div>
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div>
-                <div className="inline-flex items-center space-x-1.5 paper-badge px-3 py-1 text-xs font-bold mb-2">
-                  <BookOpen className="h-3 w-3 text-[var(--forest-green)]" />
-                  <span>Learning Area</span>
-                </div>
-                <h1 className="text-2xl sm:text-3xl font-black text-[var(--text-heading)]">
-                  {subject.name}
-                </h1>
-                {subject.description ? (
-                  <p className="mt-1 text-sm text-[var(--text-secondary)] max-w-2xl leading-relaxed">
-                    {subject.description}
-                  </p>
-                ) : (
-                  <p className="mt-1 text-xs text-[var(--text-muted)] italic">
-                    Add chapters and study topics below to map out your mastery path.
-                  </p>
-                )}
+            <div className="space-y-1.5">
+              <div className="inline-flex items-center space-x-1.5 paper-badge px-2.5 py-0.5 text-[11px] font-bold">
+                <BookOpen className="h-3 w-3 text-[var(--forest-green)]" />
+                <span>Learning Area</span>
               </div>
+              <h1 className="text-xl sm:text-3xl font-black text-[var(--text-heading)] leading-tight">
+                {subject.name}
+              </h1>
+              {subject.description ? (
+                <p className="text-xs sm:text-sm text-[var(--text-secondary)] max-w-2xl leading-relaxed">
+                  {subject.description}
+                </p>
+              ) : (
+                <p className="text-xs text-[var(--text-muted)] italic">
+                  Add chapters and study topics below to map out your mastery path.
+                </p>
+              )}
+            </div>
 
-              {/* Progress Summary Pill */}
-              <div className="self-start sm:self-center flex items-center space-x-3 bg-[var(--surface-secondary)] border border-[var(--border-default)] p-3 rounded-xl shadow-2xs">
-                <div className="text-right">
-                  <div className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
-                    Mastery
-                  </div>
-                  <div className="text-lg font-black text-[var(--forest-green)]">
-                    {overallMasteryPct}%
-                  </div>
-                </div>
-                <div className="w-16 h-2 bg-[var(--border-default)] rounded-full overflow-hidden">
+            {/* Seamless Overall Mastery Progress Bar */}
+            <div className="mt-3 p-2.5 sm:p-3 rounded-xl bg-[var(--surface-secondary)] border border-[var(--border-default)] flex items-center justify-between gap-3">
+              <div className="flex items-center space-x-2 min-w-0">
+                <Sparkles className="h-4 w-4 text-[var(--forest-green)] shrink-0" />
+                <span className="text-xs font-bold text-[var(--text-heading)] truncate">Overall Mastery</span>
+              </div>
+              <div className="flex items-center space-x-2.5 shrink-0">
+                <div className="w-24 sm:w-36 h-2 bg-[var(--border-default)] rounded-full overflow-hidden">
                   <div
                     className="h-full bg-[var(--forest-green)] transition-all duration-500 rounded-full"
                     style={{ width: `${overallMasteryPct}%` }}
                   />
                 </div>
+                <span className="text-xs font-black text-[var(--forest-green)] min-w-[32px] text-right">
+                  {overallMasteryPct}%
+                </span>
               </div>
             </div>
           </div>
         )}
 
-        {/* 4 Analytics Metrics Cards with Micro-hover */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
-          <div className="paper-card bg-[var(--surface-secondary)] p-4 border border-[var(--border-default)] card-lift">
-            <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
+        {/* 4 Analytics Metrics Cards with Balanced Proportions */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 pt-1">
+          <div className="paper-card bg-[var(--surface-secondary)] p-2.5 sm:p-3.5 border border-[var(--border-default)] card-lift">
+            <div className="flex items-center justify-between text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
               <span>Time Studied</span>
               <Clock className="h-3.5 w-3.5 text-[var(--forest-green)]" />
             </div>
-            <div className="text-xl sm:text-2xl font-black text-[var(--text-heading)] mt-1.5">
+            <div className="text-lg sm:text-2xl font-black text-[var(--text-heading)] mt-1">
               {formatMinutes(metrics.totalTimeStudiedMinutes)}
             </div>
           </div>
 
-          <div className="paper-card bg-[var(--surface-secondary)] p-4 border border-[var(--border-default)] card-lift">
-            <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
+          <div className="paper-card bg-[var(--surface-secondary)] p-2.5 sm:p-3.5 border border-[var(--border-default)] card-lift">
+            <div className="flex items-center justify-between text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
               <span>Topics Tracked</span>
               <BookOpen className="h-3.5 w-3.5 text-[var(--forest-green)]" />
             </div>
-            <div className="text-xl sm:text-2xl font-black text-[var(--forest-green)] mt-1.5">
+            <div className="text-lg sm:text-2xl font-black text-[var(--forest-green)] mt-1">
               {metrics.topicsTrackedCount}
             </div>
           </div>
 
-          <div className="paper-card bg-[var(--surface-secondary)] p-4 border border-[var(--border-default)] card-lift">
-            <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
+          <div className="paper-card bg-[var(--surface-secondary)] p-2.5 sm:p-3.5 border border-[var(--border-default)] card-lift">
+            <div className="flex items-center justify-between text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
               <span>Active Days</span>
               <Zap className="h-3.5 w-3.5 text-[var(--forest-green)]" />
             </div>
-            <div className="text-xl sm:text-2xl font-black text-[var(--forest-green)] mt-1.5">
+            <div className="text-lg sm:text-2xl font-black text-[var(--forest-green)] mt-1">
               {metrics.activeDaysCount}
             </div>
           </div>
 
-          <div className="paper-card bg-[var(--surface-secondary)] p-4 border border-[var(--border-default)] card-lift">
-            <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
+          <div className="paper-card bg-[var(--surface-secondary)] p-2.5 sm:p-3.5 border border-[var(--border-default)] card-lift">
+            <div className="flex items-center justify-between text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
               <span>Needs Revision</span>
               <Flame className="h-3.5 w-3.5 text-[#C2410C]" />
             </div>
-            <div className="text-xl sm:text-2xl font-black text-[#C2410C] mt-1.5">
+            <div className="text-lg sm:text-2xl font-black text-[#C2410C] mt-1">
               {metrics.topicsNeedingRevisionCount}
             </div>
           </div>
@@ -521,16 +524,16 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
       </div>
 
       {/* Continue Learning Spotlight Hero Card */}
-      <div className="paper-card bg-[var(--surface-secondary)] p-5 sm:p-6 border border-[var(--border-default)] card-lift">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="space-y-1.5">
-            <div className="text-xs font-extrabold uppercase tracking-wider text-[var(--forest-green)] flex items-center space-x-2">
+      <div className="paper-card bg-[var(--surface-secondary)] p-3.5 sm:p-5 border border-[var(--border-default)] card-lift">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="space-y-1">
+            <div className="text-[11px] font-extrabold uppercase tracking-wider text-[var(--forest-green)] flex items-center space-x-1.5">
               <span className="flex h-2 w-2 rounded-full bg-[var(--forest-green)] animate-pulse" />
               <span>Next Recommended Action</span>
             </div>
             {continueLearning && continueLearning.lastTopicTitle ? (
               <div>
-                <h3 className="text-lg font-bold text-[var(--text-heading)]">
+                <h3 className="text-base sm:text-lg font-bold text-[var(--text-heading)]">
                   {continueLearning.lastTopicTitle}
                 </h3>
                 <div className="text-xs text-[var(--text-muted)] mt-0.5">
@@ -543,15 +546,15 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
                     : ""}
                 </div>
                 {continueLearning.nextStep && (
-                  <div className="mt-2 text-xs text-[var(--forest-green)] bg-[var(--pale-sage)] border border-[var(--sage)]/40 px-3 py-1.5 rounded-md inline-flex items-center space-x-1.5 font-bold">
+                  <div className="mt-2 text-xs text-[var(--forest-green)] bg-[var(--pale-sage)] border border-[var(--sage)]/40 px-2.5 py-1 rounded-md inline-flex items-center space-x-1.5 font-bold">
                     <Target className="h-3.5 w-3.5 text-[var(--crimson)]" />
-                    <span>Next Step: {continueLearning.nextStep}</span>
+                    <span>Next: {continueLearning.nextStep}</span>
                   </div>
                 )}
               </div>
             ) : (
               <div>
-                <h3 className="text-base font-bold text-[var(--text-heading)]">
+                <h3 className="text-sm sm:text-base font-bold text-[var(--text-heading)]">
                   Ready to study {subject.name}?
                 </h3>
                 <p className="text-xs text-[var(--text-muted)]">
@@ -569,7 +572,7 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
               }
               setShowSessionModal(true);
             }}
-            className="paper-btn-primary px-5 py-3 text-xs font-bold shadow-xs flex items-center justify-center space-x-2 self-start md:self-center shrink-0"
+            className="paper-btn-primary px-4 py-2 sm:px-5 sm:py-2.5 text-xs font-bold shadow-xs flex items-center justify-center space-x-2 shrink-0 cursor-pointer active:scale-95"
           >
             <Play className="h-3.5 w-3.5 fill-current" />
             <span>Resume Learning</span>
@@ -577,20 +580,21 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
         </div>
       </div>
 
-      {/* Workspace Tabs with Badge Counters */}
-      <div className="flex border-b border-[var(--border-default)] space-x-2 sm:space-x-6 text-xs sm:text-sm font-bold text-[var(--text-muted)] overflow-x-auto custom-scrollbar">
+      {/* Workspace Tabs with Responsive Titles */}
+      <div className="flex border-b border-[var(--border-default)] space-x-1 sm:space-x-6 text-xs sm:text-sm font-bold text-[var(--text-muted)] overflow-x-auto custom-scrollbar">
         <button
           onClick={() => setActiveTab("structure")}
-          className={`pb-3 pt-1 px-2 transition-all flex items-center space-x-2 border-b-2 whitespace-nowrap cursor-pointer ${
+          className={`pb-2.5 pt-1 px-2.5 sm:px-2 transition-all flex items-center space-x-1.5 border-b-2 whitespace-nowrap cursor-pointer shrink-0 ${
             activeTab === "structure"
               ? "border-[var(--forest-green)] text-[var(--text-heading)] font-black"
               : "border-transparent hover:text-[var(--text-heading)]"
           }`}
         >
-          <Layers className="h-4 w-4" />
-          <span>Learning Structure</span>
+          <Layers className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+          <span className="sm:hidden">Structure</span>
+          <span className="hidden sm:inline">Learning Structure</span>
           <span
-            className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${
+            className={`px-1.5 py-0.2 rounded-full text-[10px] sm:text-[11px] font-bold ${
               activeTab === "structure"
                 ? "bg-[var(--forest-green)] text-white"
                 : "bg-[var(--surface-secondary)] text-[var(--text-muted)]"
@@ -602,16 +606,17 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
 
         <button
           onClick={() => setActiveTab("sessions")}
-          className={`pb-3 pt-1 px-2 transition-all flex items-center space-x-2 border-b-2 whitespace-nowrap cursor-pointer ${
+          className={`pb-2.5 pt-1 px-2.5 sm:px-2 transition-all flex items-center space-x-1.5 border-b-2 whitespace-nowrap cursor-pointer shrink-0 ${
             activeTab === "sessions"
               ? "border-[var(--forest-green)] text-[var(--text-heading)] font-black"
               : "border-transparent hover:text-[var(--text-heading)]"
           }`}
         >
-          <History className="h-4 w-4" />
-          <span>Study Sessions</span>
+          <History className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+          <span className="sm:hidden">Sessions</span>
+          <span className="hidden sm:inline">Study Sessions</span>
           <span
-            className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${
+            className={`px-1.5 py-0.2 rounded-full text-[10px] sm:text-[11px] font-bold ${
               activeTab === "sessions"
                 ? "bg-[var(--forest-green)] text-white"
                 : "bg-[var(--surface-secondary)] text-[var(--text-muted)]"
@@ -623,16 +628,17 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
 
         <button
           onClick={() => setActiveTab("revision")}
-          className={`pb-3 pt-1 px-2 transition-all flex items-center space-x-2 border-b-2 whitespace-nowrap cursor-pointer ${
+          className={`pb-2.5 pt-1 px-2.5 sm:px-2 transition-all flex items-center space-x-1.5 border-b-2 whitespace-nowrap cursor-pointer shrink-0 ${
             activeTab === "revision"
               ? "border-[var(--forest-green)] text-[var(--text-heading)] font-black"
               : "border-transparent hover:text-[var(--text-heading)]"
           }`}
         >
-          <Flame className="h-4 w-4 text-[#C2410C]" />
-          <span>Understanding & Revision</span>
+          <Flame className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#C2410C]" />
+          <span className="sm:hidden">Revision</span>
+          <span className="hidden sm:inline">Understanding & Revision</span>
           <span
-            className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${
+            className={`px-1.5 py-0.2 rounded-full text-[10px] sm:text-[11px] font-bold ${
               topicsNeedingRevision.length > 0
                 ? "bg-amber-600 text-white"
                 : "bg-[var(--surface-secondary)] text-[var(--text-muted)]"
@@ -647,20 +653,20 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
           TAB 1: STRUCTURE & TOPICS (REDESIGNED)
           ========================================== */}
       {activeTab === "structure" && (
-        <div className="paper-card p-5 sm:p-7 space-y-6 border border-[var(--border-default)]">
+        <div className="space-y-4 sm:space-y-6">
           {/* Section Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-[var(--border-subtle)]">
+          <div className="flex items-center justify-between gap-2 pb-2 border-b border-[var(--border-subtle)]">
             <div>
-              <h2 className="text-lg sm:text-xl font-black text-[var(--text-heading)]">
+              <h2 className="text-base sm:text-xl font-black text-[var(--text-heading)]">
                 Learning Structure
               </h2>
-              <p className="text-xs text-[var(--text-muted)]">
+              <p className="text-[11px] sm:text-xs text-[var(--text-muted)]">
                 Organize your study into chapters, topics, mastery ratings, and next actions.
               </p>
             </div>
             <button
               onClick={() => setShowAddChapter(true)}
-              className="paper-btn-primary px-4 py-2 text-xs font-bold flex items-center space-x-1.5 self-start sm:self-center shadow-xs"
+              className="paper-btn-primary px-3 sm:px-4 py-1.5 sm:py-2 text-xs font-bold flex items-center space-x-1 shadow-xs shrink-0 cursor-pointer active:scale-95"
             >
               <Plus className="h-3.5 w-3.5" />
               <span>Add Chapter</span>
@@ -671,7 +677,7 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
           {showAddChapter && (
             <form
               onSubmit={handleCreateChapter}
-              className="paper-card bg-[var(--surface-secondary)] p-5 sm:p-6 space-y-3.5 border-2 border-[var(--forest-green)]/40 rounded-xl shadow-sm"
+              className="paper-card bg-[var(--surface-secondary)] p-4 sm:p-6 space-y-3.5 border-2 border-[var(--forest-green)]/40 rounded-xl shadow-sm"
             >
               <div className="flex items-center justify-between">
                 <h3 className="text-xs font-extrabold uppercase tracking-wider text-[var(--forest-green)] flex items-center space-x-2">
@@ -727,13 +733,13 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
 
           {/* Empty State */}
           {chapters.length === 0 && !showAddChapter ? (
-            <div className="paper-card bg-[var(--surface-secondary)] p-10 text-center space-y-3 border border-[var(--border-default)] rounded-xl">
+            <div className="paper-card bg-[var(--surface-secondary)] p-8 sm:p-10 text-center space-y-3 border border-[var(--border-default)] rounded-xl">
               <div className="flex justify-center">
                 <div className="h-12 w-12 rounded-full bg-[var(--pale-sage)] flex items-center justify-center text-[var(--forest-green)]">
                   <BookOpen className="h-6 w-6" />
                 </div>
               </div>
-              <div className="font-bold text-[var(--text-heading)] text-lg">
+              <div className="font-bold text-[var(--text-heading)] text-base sm:text-lg">
                 Start building your syllabus naturally.
               </div>
               <p className="text-xs text-[var(--text-muted)] max-w-md mx-auto">
@@ -749,33 +755,33 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
               </button>
             </div>
           ) : (
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               {chapters.map((chapter, cIndex) => {
                 const chapterTopics = chapter.topics || [];
 
                 return (
                   <div
                     key={chapter.id}
-                    className="paper-card p-5 sm:p-6 space-y-4 border border-[var(--border-default)] rounded-xl shadow-2xs hover:border-[var(--border-strong)] transition-all"
+                    className="paper-card p-3.5 sm:p-5 space-y-3 border border-[var(--border-default)] rounded-xl shadow-2xs hover:border-[var(--border-strong)] transition-all"
                   >
                     {/* Chapter Header Card */}
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[var(--border-subtle)]">
-                      <div className="flex items-start space-x-3">
+                    <div className="flex items-center justify-between gap-2 pb-2.5 border-b border-[var(--border-subtle)]">
+                      <div className="flex items-center space-x-2.5 min-w-0">
                         {/* Chapter Number Badge */}
-                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--forest-green)] text-white font-black text-xs shrink-0 shadow-2xs">
+                        <div className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-lg bg-[var(--forest-green)] text-white font-black text-xs shrink-0 shadow-2xs">
                           {String(cIndex + 1).padStart(2, "0")}
                         </div>
-                        <div>
-                          <div className="flex items-center space-x-2">
-                            <h3 className="font-extrabold text-[var(--text-heading)] text-base">
+                        <div className="min-w-0">
+                          <div className="flex items-center space-x-2 flex-wrap">
+                            <h3 className="font-extrabold text-[var(--text-heading)] text-sm sm:text-base truncate">
                               {chapter.title}
                             </h3>
-                            <span className="text-[11px] font-bold text-[var(--text-muted)] bg-[var(--surface-secondary)] px-2 py-0.5 rounded">
+                            <span className="text-[10px] font-bold text-[var(--text-muted)] bg-[var(--surface-secondary)] px-1.5 py-0.5 rounded shrink-0">
                               {chapterTopics.length} {chapterTopics.length === 1 ? "topic" : "topics"}
                             </span>
                           </div>
                           {chapter.description && (
-                            <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                            <p className="text-[11px] text-[var(--text-muted)] truncate">
                               {chapter.description}
                             </p>
                           )}
@@ -783,10 +789,10 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
                       </div>
 
                       {/* Chapter Action Buttons */}
-                      <div className="flex items-center space-x-2 self-end sm:self-center">
+                      <div className="flex items-center space-x-1.5 shrink-0">
                         <button
                           onClick={() => setActiveChapterForTopic(chapter.id)}
-                          className="btn-pill-action px-3 py-1.5 text-xs font-bold space-x-1"
+                          className="btn-pill-action px-2.5 py-1 text-xs font-bold space-x-1 cursor-pointer active:scale-95"
                         >
                           <Plus className="h-3 w-3" />
                           <span>Add Topic</span>
@@ -795,7 +801,7 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
                         <button
                           onClick={() => handleDeleteChapter(chapter)}
                           title="Delete Chapter"
-                          className="btn-icon-subtle text-xs"
+                          className="btn-icon-subtle text-xs cursor-pointer active:scale-95"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                         </button>
@@ -803,7 +809,7 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
                     </div>
 
                     {/* Topics List Container */}
-                    <div className="space-y-3">
+                    <div className="space-y-2.5">
                       {chapterTopics.length > 0 ? (
                         chapterTopics.map((topic) => {
                           const statusInfo = STATUS_CONFIG[topic.status || "NOT_STARTED"];
@@ -812,108 +818,70 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
                           return (
                             <div
                               key={topic.id}
-                              className="paper-card bg-[var(--surface-primary)] p-4 sm:p-4.5 rounded-xl border border-[var(--border-default)] hover:border-[var(--forest-green)] transition-all card-lift space-y-3 shadow-2xs"
+                              className="paper-card bg-[var(--surface-primary)] p-3 sm:p-4 rounded-xl border border-[var(--border-default)] hover:border-[var(--forest-green)] transition-all card-lift space-y-2.5 shadow-2xs"
                             >
-                              {/* Topic Main Row (Responsive: stacks on mobile, clean row on desktop) */}
-                              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                                {/* Left: Status Badge & Title */}
-                                <div className="flex items-start sm:items-center space-x-2.5 min-w-0">
-                                  {/* Status Pill Badge */}
-                                  <span
-                                    className={`px-2.5 py-1 rounded-md text-[11px] font-bold inline-flex items-center space-x-1.5 shrink-0 ${statusInfo.badgeClass}`}
-                                  >
-                                    <StatusIcon className="h-3 w-3" />
-                                    <span>{statusInfo.label}</span>
-                                  </span>
+                              {/* Row 1: Status Pill (left) & 5-Star Confidence (right) */}
+                              <div className="flex items-center justify-between gap-2">
+                                <span
+                                  className={`px-2 py-0.5 rounded-md text-[10px] sm:text-[11px] font-bold inline-flex items-center space-x-1 shrink-0 ${statusInfo.badgeClass}`}
+                                >
+                                  <StatusIcon className="h-3 w-3" />
+                                  <span>{statusInfo.label}</span>
+                                </span>
 
-                                  {/* Topic Title */}
-                                  <span className="font-bold text-[var(--text-heading)] text-sm leading-snug break-words">
-                                    {topic.title}
-                                  </span>
-                                </div>
-
-                                {/* Right: Confidence Stars & Action Buttons */}
-                                <div className="flex items-center justify-between sm:justify-end space-x-2.5 pt-2 sm:pt-0 border-t sm:border-t-0 border-[var(--border-subtle)]">
-                                  {/* 5-Star Confidence Rating using Lucide Star */}
-                                  <div
-                                    className="flex items-center space-x-0.5"
-                                    title={`Confidence Rating: ${topic.confidence || 0} of 5`}
-                                  >
-                                    {[1, 2, 3, 4, 5].map((starIdx) => (
-                                      <Star
-                                        key={starIdx}
-                                        className={`h-3 w-3 ${
-                                          starIdx <= (topic.confidence || 0)
-                                            ? "fill-amber-400 text-amber-500"
-                                            : "text-[var(--border-strong)] opacity-35"
-                                        }`}
-                                      />
-                                    ))}
-                                  </div>
-
-                                  {/* Action Buttons Group */}
-                                  <div className="flex items-center space-x-2">
-                                    {/* Tactile Study Button */}
-                                    <button
-                                      onClick={() => startQuickSessionForTopic(topic)}
-                                      className="btn-study px-3 py-1.5 text-xs font-bold space-x-1"
-                                      title="Log a study session for this topic"
-                                    >
-                                      <Play className="h-3 w-3 fill-current" />
-                                      <span>Study</span>
-                                    </button>
-
-                                    {/* Tactile Edit Button */}
-                                    <button
-                                      onClick={() => openEditTopicModal(topic)}
-                                      className="btn-edit px-3 py-1.5 text-xs font-bold space-x-1"
-                                      title="Edit details, notes, and mastery"
-                                    >
-                                      <Pencil className="h-3 w-3" />
-                                      <span>Details</span>
-                                    </button>
-
-                                    {/* Delete Button */}
-                                    <button
-                                      onClick={() => handleDeleteTopic(topic.id)}
-                                      title="Delete Topic"
-                                      className="btn-icon-subtle text-xs"
-                                    >
-                                      <Trash2 className="h-3.5 w-3.5" />
-                                    </button>
-                                  </div>
+                                <div
+                                  className="flex items-center space-x-0.5 shrink-0"
+                                  title={`Confidence Rating: ${topic.confidence || 0} of 5`}
+                                >
+                                  {[1, 2, 3, 4, 5].map((starIdx) => (
+                                    <Star
+                                      key={starIdx}
+                                      className={`h-3 w-3 ${
+                                        starIdx <= (topic.confidence || 0)
+                                          ? "fill-amber-400 text-amber-500"
+                                          : "text-[var(--border-strong)] opacity-35"
+                                      }`}
+                                    />
+                                  ))}
                                 </div>
                               </div>
 
-                              {/* Structured Notes & Next Steps Inset */}
+                              {/* Row 2: Topic Title */}
+                              <div>
+                                <h4 className="font-extrabold text-[var(--text-heading)] text-sm sm:text-base leading-snug break-words">
+                                  {topic.title}
+                                </h4>
+                              </div>
+
+                              {/* Row 3: Structured Notes & Next Steps Inset */}
                               {(topic.notes || topic.resources || topic.nextStep) && (
-                                <div className="paper-inset bg-[var(--surface-secondary)] p-3 rounded-lg text-xs space-y-1.5 border border-[var(--border-subtle)] text-[var(--text-secondary)]">
+                                <div className="paper-inset bg-[var(--surface-secondary)] p-2.5 rounded-lg text-xs space-y-1 border border-[var(--border-subtle)] text-[var(--text-secondary)]">
                                   {topic.notes && (
-                                    <div className="flex items-start space-x-2">
+                                    <div className="flex items-start space-x-1.5">
                                       <span className="font-bold text-[var(--text-heading)] shrink-0 flex items-center space-x-1">
-                                        <FileText className="h-3 w-3 text-[var(--text-muted)]" />
+                                        <FileText className="h-3 w-3 text-[var(--text-muted)] mt-0.5" />
                                         <span>Notes:</span>
                                       </span>
-                                      <span className="leading-relaxed">{topic.notes}</span>
+                                      <span className="leading-relaxed break-words">{topic.notes}</span>
                                     </div>
                                   )}
 
                                   {topic.nextStep && (
-                                    <div className="flex items-start space-x-2">
+                                    <div className="flex items-start space-x-1.5">
                                       <span className="font-bold text-[var(--crimson)] shrink-0 flex items-center space-x-1">
-                                        <Target className="h-3 w-3 text-[var(--crimson)]" />
-                                        <span>Next Step:</span>
+                                        <Target className="h-3 w-3 text-[var(--crimson)] mt-0.5" />
+                                        <span>Next:</span>
                                       </span>
-                                      <span className="font-medium text-[var(--text-heading)]">
+                                      <span className="font-medium text-[var(--text-heading)] break-words">
                                         {topic.nextStep}
                                       </span>
                                     </div>
                                   )}
 
                                   {topic.resources && (
-                                    <div className="flex items-start space-x-2">
+                                    <div className="flex items-start space-x-1.5">
                                       <span className="font-bold text-[var(--forest-green)] shrink-0 flex items-center space-x-1">
-                                        <ExternalLink className="h-3 w-3 text-[var(--forest-green)]" />
+                                        <ExternalLink className="h-3 w-3 text-[var(--forest-green)] mt-0.5" />
                                         <span>Resources:</span>
                                       </span>
                                       <span className="truncate">{topic.resources}</span>
@@ -921,6 +889,37 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
                                   )}
                                 </div>
                               )}
+
+                              {/* Row 4: Action Buttons (Study, Details, Delete) */}
+                              <div className="flex items-center justify-between pt-1 border-t border-[var(--border-subtle)]/60">
+                                <div className="flex items-center space-x-2">
+                                  <button
+                                    onClick={() => startQuickSessionForTopic(topic)}
+                                    className="btn-study px-3 py-1.5 text-xs font-bold space-x-1 cursor-pointer active:scale-95"
+                                    title="Log a study session for this topic"
+                                  >
+                                    <Play className="h-3 w-3 fill-current" />
+                                    <span>Study</span>
+                                  </button>
+
+                                  <button
+                                    onClick={() => openEditTopicModal(topic)}
+                                    className="btn-edit px-2.5 py-1.5 text-xs font-bold space-x-1 cursor-pointer active:scale-95"
+                                    title="Edit details, notes, and mastery"
+                                  >
+                                    <Pencil className="h-3 w-3" />
+                                    <span>Details</span>
+                                  </button>
+                                </div>
+
+                                <button
+                                  onClick={() => handleDeleteTopic(topic.id)}
+                                  title="Delete Topic"
+                                  className="btn-icon-subtle text-xs p-1.5 cursor-pointer active:scale-95"
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </button>
+                              </div>
                             </div>
                           );
                         })
@@ -981,22 +980,22 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
           TAB 2: STUDY SESSIONS LOG
           ========================================== */}
       {activeTab === "sessions" && (
-        <div className="paper-card p-5 sm:p-7 space-y-6 border border-[var(--border-default)]">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-[var(--border-subtle)]">
+        <div className="space-y-4 sm:space-y-6">
+          <div className="flex items-center justify-between gap-2 pb-2 border-b border-[var(--border-subtle)]">
             <div>
-              <h2 className="text-lg sm:text-xl font-black text-[var(--text-heading)]">
+              <h2 className="text-base sm:text-xl font-black text-[var(--text-heading)]">
                 Study Sessions
               </h2>
-              <p className="text-xs text-[var(--text-muted)]">
+              <p className="text-[11px] sm:text-xs text-[var(--text-muted)]">
                 Tangible proof of learning time and focused sessions in {subject.name}.
               </p>
             </div>
             <button
               onClick={() => setShowSessionModal(true)}
-              className="paper-btn-primary px-4 py-2 text-xs font-bold flex items-center space-x-1.5 self-start sm:self-center shadow-xs"
+              className="paper-btn-primary px-3 sm:px-4 py-1.5 sm:py-2 text-xs font-bold flex items-center space-x-1 shadow-xs shrink-0 cursor-pointer active:scale-95"
             >
               <Plus className="h-3.5 w-3.5" />
-              <span>Log Study Session</span>
+              <span>Log Session</span>
             </button>
           </div>
 
@@ -1106,12 +1105,12 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
           TAB 3: UNDERSTANDING & REVISION FOCUS
           ========================================== */}
       {activeTab === "revision" && (
-        <div className="paper-card p-5 sm:p-7 space-y-6 border border-[var(--border-default)]">
+        <div className="space-y-4 sm:space-y-6">
           <div className="pb-2 border-b border-[var(--border-subtle)]">
-            <h2 className="text-lg sm:text-xl font-black text-[var(--text-heading)]">
+            <h2 className="text-base sm:text-xl font-black text-[var(--text-heading)]">
               Understanding & Revision Focus
             </h2>
-            <p className="text-xs text-[var(--text-muted)]">
+            <p className="text-[11px] sm:text-xs text-[var(--text-muted)]">
               Topics flagged for review or rated with lower confidence. Revisit these to build true
               mastery.
             </p>

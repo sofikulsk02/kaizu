@@ -36,18 +36,18 @@ export const GoalsView: React.FC<GoalsViewProps> = ({
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="space-y-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-black text-[var(--text-heading)] sm:text-3xl">Goals Workspace</h1>
-          <p className="text-sm text-[var(--text-muted)]">
+          <h1 className="text-xl font-black text-[var(--text-heading)] sm:text-2xl">Goals Workspace</h1>
+          <p className="text-xs text-[var(--text-muted)]">
             Connect desired outcomes to milestones, tasks, daily actions, and evidence-backed progress.
           </p>
         </div>
 
         <button
           onClick={onOpenCreateGoal}
-          className="paper-btn-primary inline-flex items-center gap-1.5 px-4 py-2.5 text-xs font-bold shadow-xs self-start sm:self-center cursor-pointer active:scale-95 transition-all"
+          className="paper-btn-primary inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold shadow-xs self-start sm:self-center cursor-pointer active:scale-95 transition-all"
         >
           <Plus className="h-4 w-4" />
           <span>Create Goal</span>
@@ -55,12 +55,12 @@ export const GoalsView: React.FC<GoalsViewProps> = ({
       </div>
 
       {/* Status Filter Tabs */}
-      <div className="paper-card p-1.5 flex space-x-1.5 overflow-x-auto border border-[var(--border-default)]">
+      <div className="paper-card p-1 flex space-x-1 overflow-x-auto border border-[var(--border-default)]">
         {["ALL", "ACTIVE", "COMPLETED", "PAUSED", "STOPPED"].map((status) => (
           <button
             key={status}
             onClick={() => setStatusFilter(status)}
-            className={`px-3.5 py-1.5 text-xs font-bold transition rounded cursor-pointer ${
+            className={`px-3 py-1 text-xs font-bold transition rounded cursor-pointer ${
               statusFilter === status
                 ? "bg-[var(--forest-green)] text-white shadow-xs"
                 : "text-[var(--text-muted)] hover:text-[var(--text-heading)] hover:bg-[var(--surface-hover)]"
@@ -73,13 +73,13 @@ export const GoalsView: React.FC<GoalsViewProps> = ({
 
       {/* Goals Grid */}
       {filteredGoals.length === 0 ? (
-        <div className="paper-card p-12 text-center space-y-4">
+        <div className="paper-card p-8 text-center space-y-3">
           <div className="flex justify-center">
-            <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#FFEAE8] text-[var(--crimson)] shadow-xs">
-              <Target className="h-7 w-7" strokeWidth={1.8} />
+            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#FFEAE8] text-[var(--crimson)] shadow-xs">
+              <Target className="h-6 w-6" strokeWidth={1.8} />
             </span>
           </div>
-          <div className="text-lg font-bold text-[var(--text-heading)]">No goals found.</div>
+          <div className="text-base font-bold text-[var(--text-heading)]">No goals found.</div>
           <p className="text-xs text-[var(--text-muted)] max-w-md mx-auto">
             {statusFilter !== "ALL"
               ? `No goals with status '${statusFilter}'.`
@@ -87,34 +87,34 @@ export const GoalsView: React.FC<GoalsViewProps> = ({
           </p>
           <button
             onClick={onOpenCreateGoal}
-            className="paper-btn-primary inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold cursor-pointer"
+            className="paper-btn-primary inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold cursor-pointer"
           >
             <Plus className="h-3.5 w-3.5" />
             <span>Create Goal</span>
           </button>
         </div>
       ) : (
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {filteredGoals.map((goal) => (
             <div
               key={goal.id}
               onClick={() => onSelectGoal(goal)}
-              className="group paper-card-interactive cursor-pointer p-6 flex flex-col justify-between space-y-4 border border-[var(--border-default)] transition-all hover:border-[var(--forest-green)]"
+              className="group paper-card-interactive cursor-pointer p-3.5 sm:p-4 flex flex-col justify-between space-y-3 border border-[var(--border-default)] transition-all hover:border-[var(--forest-green)]"
             >
-              <div className="space-y-3">
+              <div className="space-y-2">
                 <div className="flex items-start justify-between gap-2">
-                  <div className="space-y-1">
+                  <div className="space-y-0.5">
                     {goal.category && (
-                      <span className="paper-badge px-2.5 py-0.5 text-[10px] font-bold">
+                      <span className="paper-badge px-2 py-0.5 text-[9px] font-bold">
                         {goal.category}
                       </span>
                     )}
-                    <h2 className="text-lg font-bold text-[var(--text-heading)] group-hover:text-[var(--crimson)] transition-colors">
+                    <h2 className="text-base font-bold text-[var(--text-heading)] group-hover:text-[var(--crimson)] transition-colors">
                       {goal.title}
                     </h2>
                   </div>
                   <span
-                    className={`paper-badge px-2.5 py-0.5 text-[10px] font-bold ${
+                    className={`paper-badge px-2 py-0.5 text-[10px] font-bold shrink-0 ${
                       goal.status === "COMPLETED"
                         ? "bg-[#D5E3D2] text-[#122419]"
                         : goal.status === "PAUSED"
@@ -133,17 +133,17 @@ export const GoalsView: React.FC<GoalsViewProps> = ({
                 )}
 
                 {goal.targetDate && (
-                  <div className="text-xs text-[var(--text-muted)]">
+                  <div className="text-[11px] text-[var(--text-muted)]">
                     Target: <span className="text-[var(--text-heading)] font-semibold">{new Date(goal.targetDate).toLocaleDateString()}</span>
                   </div>
                 )}
               </div>
 
               {/* Progress Summary Footer */}
-              <div className="pt-3 border-t border-[var(--border-subtle)] flex items-center justify-between text-xs">
-                <div className="inline-flex items-center gap-1 text-[var(--crimson)] font-bold">
-                  <span>Open Goal Workspace</span>
-                  <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+              <div className="pt-2.5 border-t border-[var(--border-subtle)] flex items-center justify-between text-xs">
+                <div className="inline-flex items-center gap-1 text-[var(--crimson)] font-bold text-xs">
+                  <span>Open Workspace</span>
+                  <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
                 </div>
 
                 <button

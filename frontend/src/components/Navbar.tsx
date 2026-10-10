@@ -9,6 +9,8 @@ interface NavbarProps {
   onToggleSidebar: () => void;
   onOpenQuickAdd: () => void;
   onSelectTab: (tab: string) => void;
+  onToggleSettings?: () => void;
+  isSettingsOpen?: boolean;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -17,6 +19,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   onToggleSidebar,
   onOpenQuickAdd,
   onSelectTab,
+  onToggleSettings,
+  isSettingsOpen = false,
 }) => {
   return (
     <header className="fixed top-0 left-0 right-0 z-30 flex h-14 sm:h-16 items-center justify-between px-3 sm:px-4 md:px-8 bg-[var(--bg-main)]/95 backdrop-blur-sm transition-colors border-b border-[var(--border-default)]">
@@ -65,8 +69,13 @@ export const Navbar: React.FC<NavbarProps> = ({
         </button>
 
         <button
-          onClick={() => onSelectTab("settings")}
-          className="paper-btn-secondary flex items-center space-x-2 px-2 sm:px-3 py-1.5 text-xs rounded-lg border border-[var(--border-default)]"
+          onClick={onToggleSettings || (() => onSelectTab("settings"))}
+          title={isSettingsOpen ? "Close Settings (return to previous page)" : "Settings & Profile"}
+          className={`paper-btn-secondary flex items-center space-x-2 px-2 sm:px-3 py-1.5 text-xs rounded-lg border transition-all cursor-pointer active:scale-95 ${
+            isSettingsOpen
+              ? "border-[var(--forest-green)] bg-[var(--surface-secondary)] ring-2 ring-[var(--forest-green)]/30 text-[var(--forest-green)]"
+              : "border-[var(--border-default)]"
+          }`}
         >
           <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[var(--forest-green)] text-white font-bold text-[10px]">
             {activeUser.name.charAt(0).toUpperCase()}

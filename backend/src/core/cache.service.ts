@@ -108,7 +108,9 @@ export class CacheService {
     return fresh;
   }
 
-  // --- Domain-Specific Invalidation Helpers ---
+  public static async invalidateUserProfile(userId: string): Promise<void> {
+    await this.del(`kaizu:user:${userId}:profile`);
+  }
 
   public static async invalidateUserSubjects(userId: string): Promise<void> {
     await this.delPattern(`kaizu:user:${userId}:subjects*`);

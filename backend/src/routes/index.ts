@@ -10,8 +10,8 @@ import assistantRoutes from "../modules/assistant";
 
 const router = Router();
 
-// Health check endpoint
-router.get("/health", (_req, res) => {
+// Health check endpoint (for Render keep-alive pings & Redis status verification)
+router.get(["/health", "/api/health"], (_req, res) => {
   res.json({
     status: "ok",
     service: "Kaizu API",

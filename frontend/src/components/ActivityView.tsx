@@ -12,10 +12,10 @@ interface ActivityViewProps {
 
 export const ActivityView: React.FC<ActivityViewProps> = ({ subjects, goals }) => {
   return (
-    <div className="space-y-8">
+    <div className="space-y-4">
       <div>
-        <h1 className="text-2xl font-black text-[var(--text-heading)] sm:text-3xl">Activity & Progress Log</h1>
-        <p className="text-sm text-[var(--text-muted)] mt-1">
+        <h1 className="text-xl font-black text-[var(--text-heading)] sm:text-2xl">Activity & Progress Log</h1>
+        <p className="text-xs text-[var(--text-muted)] mt-0.5">
           Cross-cutting evidence of your daily learning, goals, and consistency history.
         </p>
       </div>
@@ -24,24 +24,24 @@ export const ActivityView: React.FC<ActivityViewProps> = ({ subjects, goals }) =
       <ActivityHeatmap />
 
       {/* Action Evidence List */}
-      <div className="paper-card p-6 space-y-4 border border-[var(--border-default)]">
+      <div className="paper-card p-4 sm:p-5 space-y-3.5 border border-[var(--border-default)]">
         <h2 className="text-xs font-bold uppercase tracking-wider text-[var(--forest-green)]">
           Recent Action Evidence
         </h2>
 
         {subjects.length === 0 && goals.length === 0 ? (
-          <div className="paper-card bg-[var(--surface-secondary)] p-6 text-center text-xs text-[var(--text-muted)] border border-[var(--border-default)]">
+          <div className="paper-card bg-[var(--surface-secondary)] p-5 text-center text-xs text-[var(--text-muted)] border border-[var(--border-default)]">
             No tracked activity log items yet. Start by creating subjects or goals!
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             {subjects.map((sub) => (
               <div
                 key={sub.id}
-                className="paper-card bg-[var(--surface-secondary)] p-4 flex items-center justify-between border border-[var(--border-default)]"
+                className="paper-card bg-[var(--surface-secondary)] p-3 sm:p-3.5 flex items-center justify-between border border-[var(--border-default)]"
               >
                 <div className="flex items-center space-x-3">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--pale-sage)] text-[var(--forest-green)]">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--pale-sage)] text-[var(--forest-green)]">
                     <BookOpen className="h-4 w-4" />
                   </div>
                   <div>

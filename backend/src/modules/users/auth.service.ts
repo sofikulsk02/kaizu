@@ -4,6 +4,7 @@ import { prisma } from "../../database/prisma";
 import { googleClientId, googleClientSecret, googleCallbackUrl, jwtSecret } from "../../config";
 import { AuthFailureError, BadRequestError } from "../../core/ApiError";
 import { User } from "../../generated/prisma/client";
+import { CacheService } from "../../core/cache.service";
 
 const oauth2Client = new OAuth2Client(
   googleClientId,
@@ -98,6 +99,7 @@ export class AuthService {
         where: { id: user.id },
         data: { name, avatarUrl },
       });
+      await CacheService.invalidateUserProfile(user.id);
     }
 
     const token = this.generateJwtToken(user);
@@ -144,6 +146,7 @@ export class AuthService {
         where: { id: user.id },
         data: { name, avatarUrl },
       });
+      await CacheService.invalidateUserProfile(user.id);
     }
 
     const token = this.generateJwtToken(user);

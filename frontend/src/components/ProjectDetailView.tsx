@@ -324,43 +324,43 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({ projectId,
   const statusInfo = PROJECT_STATUS_CONFIG[project.status] || PROJECT_STATUS_CONFIG.IN_PROGRESS;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Top Header Bar */}
       <div className="flex items-center justify-between">
         <button
           onClick={onBack}
-          className="clay-btn-secondary px-4 py-2 text-xs font-bold flex items-center space-x-2"
+          className="clay-btn-secondary px-3.5 py-1.5 text-xs font-bold flex items-center space-x-2"
         >
           <span>← Back to Projects</span>
         </button>
 
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-2 sm:space-x-3">
           <button
             onClick={() => setShowWorkModal(true)}
-            className="clay-btn-primary px-4 py-2 text-xs font-bold flex items-center space-x-1.5"
+            className="clay-btn-primary px-3.5 py-1.5 text-xs font-bold flex items-center space-x-1.5"
           >
             <span>⏱ Log Work Session</span>
           </button>
           <button
             onClick={() => setEditingProject(!editingProject)}
-            className="clay-btn-secondary px-4 py-2 text-xs font-bold"
+            className="clay-btn-secondary px-3 py-1.5 text-xs font-bold"
           >
             {editingProject ? "Cancel Edit" : "Edit Project"}
           </button>
-          <button onClick={handleDeleteProject} className="clay-btn-danger px-4 py-2 text-xs font-bold">
+          <button onClick={handleDeleteProject} className="clay-btn-danger px-3 py-1.5 text-xs font-bold">
             Delete
           </button>
         </div>
       </div>
 
       {error && (
-        <div className="clay-surface bg-red-500/10 p-4 text-xs font-semibold text-red-300">
+        <div className="clay-surface bg-red-500/10 p-3.5 text-xs font-semibold text-red-300">
           {error}
         </div>
       )}
 
       {/* Project Header Info */}
-      <div className="clay-surface p-7 space-y-5 border border-[#232d39]">
+      <div className="clay-surface p-4 sm:p-5 space-y-4 border border-[#232d39]">
         {editingProject ? (
           <form onSubmit={handleUpdateProject} className="space-y-4">
             <div>

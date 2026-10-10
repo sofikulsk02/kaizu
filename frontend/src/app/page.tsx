@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   Api,
   Subject,
@@ -39,6 +39,12 @@ export default function Page() {
   const [selectedSubject, setSelectedSubject] = useState<Subject | null>(null);
   const [selectedGoalDetail, setSelectedGoalDetail] = useState<GoalDetail | null>(null);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+  const [previousView, setPreviousView] = useState<{
+    tab: string;
+    selectedSubject: Subject | null;
+    selectedGoalDetail: GoalDetail | null;
+    selectedProjectId: string | null;
+  } | null>(null);
 
   const [showCreateSubject, setShowCreateSubject] = useState(false);
   const [showCreateGoal, setShowCreateGoal] = useState(false);
@@ -47,48 +53,120 @@ export default function Page() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Synchronization refs to eliminate stale closure overwrites
+  const selectedSubjectRef = useRef<Subject | null>(null);
+  const selectedGoalDetailRef = useRef<GoalDetail | null>(null);
+  const activeTabRef = useRef<string>(activeTab);
+
+  useEffect(() => {
+    selectedSubjectRef.current = selectedSubject;
+  }, [selectedSubject]);
+
+  useEffect(() => {
+    selectedGoalDetailRef.current = selectedGoalDetail;
+  }, [selectedGoalDetail]);
+
+  useEffect(() => {
+    activeTabRef.current = activeTab;
+  }, [activeTab]);
+
+  // 1. Instant Client Hydration: Load cached state immediately (0ms start on mobile)
+  useEffect(() => {
+    try {
+      const cachedUser = localStorage.getItem("kaizu_cached_user");
+      const cachedSubs = localStorage.getItem("kaizu_cached_subjects");
+      const cachedGoals = localStorage.getItem("kaizu_cached_goals");
+
+      if (cachedUser) {
+        setActiveUser(JSON.parse(cachedUser));
+        if (cachedSubs) setSubjects(JSON.parse(cachedSubs));
+        if (cachedGoals) setGoals(JSON.parse(cachedGoals));
+        // Unblock UI immediately so user sees their dashboard in 0ms!
+        setLoading(false);
+      }
+    } catch (e) {
+      // Ignore cache parse errors
+    }
+  }, []);
+
+  const refreshCurrentSubject = useCallback(async () => {
+    if (!selectedSubjectRef.current) return;
+    try {
+      const updated = await Api.getSubjectById(selectedSubjectRef.current.id);
+      setSelectedSubject(updated);
+      Api.getSubjects().then((subs) => setSubjects(subs)).catch(() => {});
+    } catch (e) {}
+  }, []);
+
+  const refreshCurrentGoal = useCallback(async () => {
+    if (!selectedGoalDetailRef.current) return;
+    try {
+      const updated = await Api.getGoalById(selectedGoalDetailRef.current.id);
+      setSelectedGoalDetail(updated);
+      Api.getGoals().then((gls) => setGoals(gls)).catch(() => {});
+    } catch (e) {}
+  }, []);
+
   const fetchData = useCallback(async () => {
-    setLoading(true);
+    if (!activeUser && !localStorage.getItem("kaizu_cached_user")) {
+      setLoading(true);
+    }
     setError(null);
     try {
-      const user = await Api.getMe();
-      setActiveUser(user);
-
-      const [subs, gls] = await Promise.all([
+      // Parallelize profile, subjects, and goals into 1 single roundtrip
+      const [user, subs, gls] = await Promise.all([
+        Api.getMe(),
         Api.getSubjects(),
         Api.getGoals(),
       ]);
 
+      setActiveUser(user);
       setSubjects(subs);
       setGoals(gls);
 
-      // Refresh selected subject if open
-      if (selectedSubject) {
+      // Save fresh data to client cache for next instant startup
+      try {
+        localStorage.setItem("kaizu_cached_user", JSON.stringify(user));
+        localStorage.setItem("kaizu_cached_subjects", JSON.stringify(subs));
+        localStorage.setItem("kaizu_cached_goals", JSON.stringify(gls));
+      } catch (e) {}
+
+      // Refresh currently open subject if still viewing it
+      if (activeTabRef.current === "subjects" && selectedSubjectRef.current) {
         try {
-          const updatedSubject = await Api.getSubjectById(selectedSubject.id);
-          setSelectedSubject(updatedSubject);
-        } catch (e) {
-          setSelectedSubject(null);
-        }
+          const updatedSubject = await Api.getSubjectById(selectedSubjectRef.current.id);
+          if (activeTabRef.current === "subjects" && selectedSubjectRef.current?.id === updatedSubject.id) {
+            setSelectedSubject(updatedSubject);
+          }
+        } catch (e) {}
       }
 
-      // Refresh selected goal detail if open
-      if (selectedGoalDetail) {
+      // Refresh currently open goal if still viewing it
+      if (activeTabRef.current === "goals" && selectedGoalDetailRef.current) {
         try {
-          const updatedGoalDetail = await Api.getGoalById(selectedGoalDetail.id);
-          setSelectedGoalDetail(updatedGoalDetail);
-        } catch (e) {
-          setSelectedGoalDetail(null);
-        }
+          const updatedGoalDetail = await Api.getGoalById(selectedGoalDetailRef.current.id);
+          if (activeTabRef.current === "goals" && selectedGoalDetailRef.current?.id === updatedGoalDetail.id) {
+            setSelectedGoalDetail(updatedGoalDetail);
+          }
+        } catch (e) {}
       }
     } catch (err: any) {
       console.error("Authentication required or failed:", err);
-      clearAuth();
-      setActiveUser(null);
+      if (err.message?.includes("Authentication required") || err.message?.includes("Invalid or expired")) {
+        clearAuth();
+        try {
+          localStorage.removeItem("kaizu_cached_user");
+          localStorage.removeItem("kaizu_cached_subjects");
+          localStorage.removeItem("kaizu_cached_goals");
+        } catch (e) {}
+        setActiveUser(null);
+      } else {
+        setError(err.message || "Failed to sync with cloud server. Server may be spinning up.");
+      }
     } finally {
       setLoading(false);
     }
-  }, [selectedSubject?.id, selectedGoalDetail?.id]);
+  }, []);
 
   useEffect(() => {
     // Initialize Theme from localStorage
@@ -168,12 +246,54 @@ export default function Page() {
     setSelectedProjectId(null);
   };
 
+  const handleSelectTab = (tab: string) => {
+    resetSelection();
+    setActiveTab(tab);
+    if (tab !== "settings") {
+      setPreviousView(null);
+    }
+  };
+
+  const isSettingsOpen =
+    activeTab === "settings" &&
+    !selectedSubject &&
+    !selectedGoalDetail &&
+    !selectedProjectId;
+
+  const handleToggleSettings = () => {
+    if (isSettingsOpen) {
+      // Toggle back to earlier view
+      if (previousView) {
+        setActiveTab(previousView.tab);
+        setSelectedSubject(previousView.selectedSubject);
+        setSelectedGoalDetail(previousView.selectedGoalDetail);
+        setSelectedProjectId(previousView.selectedProjectId);
+        setPreviousView(null);
+      } else {
+        handleSelectTab("dashboard");
+      }
+    } else {
+      // Save snapshot of earlier view and open settings
+      setPreviousView({
+        tab: activeTab,
+        selectedSubject,
+        selectedGoalDetail,
+        selectedProjectId,
+      });
+      resetSelection();
+      setActiveTab("settings");
+    }
+  };
+
   // If initial auth check is running
   if (loading && !activeUser) {
     return (
-      <div className="flex min-h-screen items-center justify-center space-x-2 text-sm">
-        <div className="h-6 w-6 animate-spin rounded-full border-2 border-current border-t-transparent"></div>
-        <span className="font-semibold">Connecting to Kaizu OS...</span>
+      <div className="flex min-h-screen flex-col items-center justify-center p-6 text-center bg-[var(--bg-main)]">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--forest-green)] border-t-transparent mb-4"></div>
+        <span className="font-bold text-sm text-[var(--text-heading)]">Connecting to Kaizu Cloud OS...</span>
+        <span className="text-xs text-[var(--text-muted)] mt-1.5 max-w-xs">
+          Waking up cloud server. (Render free tier cold starts may take ~30–45 seconds if inactive).
+        </span>
       </div>
     );
   }
@@ -189,12 +309,11 @@ export default function Page() {
       <Navbar
         activeUser={activeUser}
         isSidebarOpen={isSidebarOpen}
+        isSettingsOpen={isSettingsOpen}
         onToggleSidebar={() => setIsSidebarOpen((prev) => !prev)}
         onOpenQuickAdd={() => setShowQuickCapture(true)}
-        onSelectTab={(tab) => {
-          resetSelection();
-          setActiveTab(tab);
-        }}
+        onToggleSettings={handleToggleSettings}
+        onSelectTab={handleSelectTab}
       />
 
       {/* Main Container */}
@@ -204,10 +323,7 @@ export default function Page() {
           isOpen={isSidebarOpen}
           onToggleSidebar={() => setIsSidebarOpen((prev) => !prev)}
           activeTab={activeTab}
-          onSelectTab={(tab) => {
-            resetSelection();
-            setActiveTab(tab);
-          }}
+          onSelectTab={handleSelectTab}
           counts={{
             subjects: subjects.length,
             goals: goals.length,
@@ -215,7 +331,7 @@ export default function Page() {
         />
 
         {/* Content Area */}
-        <main className={`flex-1 p-3 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full min-w-0 transition-all duration-300 ${isSidebarOpen ? "md:ml-60" : "ml-0"}`}>
+        <main className={`flex-1 px-2 pt-3.5 pb-3 sm:px-3 sm:pt-4 sm:pb-4 lg:p-3.5 max-w-7xl mx-auto w-full min-w-0 transition-all duration-300 ${isSidebarOpen ? "md:ml-60" : "ml-0"}`}>
           {error && (
             <div className="mb-6 rounded-2xl border border-red-400/30 bg-red-500/15 p-4 text-sm text-red-200 flex items-center justify-between">
               <span>{error}</span>
@@ -228,71 +344,71 @@ export default function Page() {
             </div>
           )}
 
-          {selectedSubject ? (
-            <SubjectDetailView
-              subject={selectedSubject}
-              onBack={() => setSelectedSubject(null)}
-              onRefresh={fetchData}
+          {/* Active Tab View Routing */}
+          {activeTab === "dashboard" && (
+            <DashboardView
+              subjects={subjects}
+              goals={goals}
+              onSelectTab={handleSelectTab}
+              onSelectSubject={handleSelectSubject}
+              onSelectGoal={handleSelectGoal}
+              onOpenCreateSubject={() => setShowCreateSubject(true)}
+              onOpenCreateGoal={() => setShowCreateGoal(true)}
             />
-          ) : selectedGoalDetail ? (
-            <GoalDetailView
-              goalDetail={selectedGoalDetail}
-              onBack={() => setSelectedGoalDetail(null)}
-              onRefresh={fetchData}
-            />
-          ) : selectedProjectId ? (
-            <ProjectDetailView
-              projectId={selectedProjectId}
-              onBack={() => setSelectedProjectId(null)}
-            />
-          ) : (
-            <>
-              {activeTab === "dashboard" && (
-                <DashboardView
-                  subjects={subjects}
-                  goals={goals}
-                  onSelectTab={(tab) => {
-                    resetSelection();
-                    setActiveTab(tab);
-                  }}
-                  onSelectSubject={handleSelectSubject}
-                  onSelectGoal={handleSelectGoal}
-                  onOpenCreateSubject={() => setShowCreateSubject(true)}
-                  onOpenCreateGoal={() => setShowCreateGoal(true)}
-                />
-              )}
+          )}
 
-              {activeTab === "subjects" && (
-                <SubjectsView
-                  subjects={subjects}
-                  onSelectSubject={handleSelectSubject}
-                  onOpenCreateSubject={() => setShowCreateSubject(true)}
-                />
-              )}
+          {activeTab === "subjects" && (
+            selectedSubject ? (
+              <SubjectDetailView
+                subject={selectedSubject}
+                onBack={() => setSelectedSubject(null)}
+                onRefresh={refreshCurrentSubject}
+              />
+            ) : (
+              <SubjectsView
+                subjects={subjects}
+                onSelectSubject={handleSelectSubject}
+                onOpenCreateSubject={() => setShowCreateSubject(true)}
+              />
+            )
+          )}
 
-              {activeTab === "goals" && (
-                <GoalsView
-                  goals={goals}
-                  onSelectGoal={handleSelectGoal}
-                  onOpenCreateGoal={() => setShowCreateGoal(true)}
-                  onRefresh={fetchData}
-                />
-              )}
+          {activeTab === "goals" && (
+            selectedGoalDetail ? (
+              <GoalDetailView
+                goalDetail={selectedGoalDetail}
+                onBack={() => setSelectedGoalDetail(null)}
+                onRefresh={refreshCurrentGoal}
+              />
+            ) : (
+              <GoalsView
+                goals={goals}
+                onSelectGoal={handleSelectGoal}
+                onOpenCreateGoal={() => setShowCreateGoal(true)}
+                onRefresh={fetchData}
+              />
+            )
+          )}
 
-              {activeTab === "projects" && (
-                <ProjectsView
-                  onSelectProject={(id) => setSelectedProjectId(id)}
-                />
-              )}
+          {activeTab === "projects" && (
+            selectedProjectId ? (
+              <ProjectDetailView
+                projectId={selectedProjectId}
+                onBack={() => setSelectedProjectId(null)}
+              />
+            ) : (
+              <ProjectsView
+                onSelectProject={(id) => setSelectedProjectId(id)}
+              />
+            )
+          )}
 
-              {activeTab === "activity" && (
-                <ActivityView subjects={subjects} goals={goals} />
-              )}
+          {activeTab === "activity" && (
+            <ActivityView subjects={subjects} goals={goals} />
+          )}
 
-              {activeTab === "settings" && (
-                <SettingsView onUserChanged={handleUserChanged} />
-              )}
-            </>
+          {activeTab === "settings" && (
+            <SettingsView onUserChanged={handleUserChanged} />
           )}
         </main>
       </div>
@@ -320,19 +436,19 @@ export default function Page() {
       {/* Michi AI Continuous Improvement Companion */}
       <MichiAssistant
         pageContext={
-          selectedSubject
+          activeTab === "subjects" && selectedSubject
             ? {
                 type: "subject",
                 recordId: selectedSubject.id,
                 recordName: selectedSubject.name,
               }
-            : selectedGoalDetail
+            : activeTab === "goals" && selectedGoalDetail
             ? {
                 type: "goal",
                 recordId: selectedGoalDetail.id,
                 recordName: selectedGoalDetail.title,
               }
-            : selectedProjectId
+            : activeTab === "projects" && selectedProjectId
             ? {
                 type: "project",
                 recordId: selectedProjectId,
