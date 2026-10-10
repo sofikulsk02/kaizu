@@ -9,6 +9,7 @@ import {
   getLocalDateString,
   ActivityStats,
 } from "../lib/activityStorage";
+import { Flame, Zap, Calendar, Activity, Lightbulb } from "lucide-react";
 
 const MONTH_NAMES = [
   "Jan",
@@ -138,8 +139,9 @@ export const ActivityHeatmap: React.FC = () => {
       {/* Top Header & Streak Stats */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="inline-flex items-center space-x-2 bg-[var(--pale-sage)] px-3 py-1 text-xs font-bold text-[var(--forest-green)] rounded">
-              <span>📊 Daily Kaizen Activity</span>
+          <div className="inline-flex items-center space-x-1.5 bg-[var(--pale-sage)] px-3 py-1 text-xs font-bold text-[var(--forest-green)] rounded">
+              <Activity className="h-3.5 w-3.5" />
+              <span>Daily Kaizen Activity</span>
             </div>
           <h2 className="mt-2 text-xl font-black text-[var(--text-heading)] sm:text-2xl">
             Consistency & Activity Heatmap
@@ -153,24 +155,24 @@ export const ActivityHeatmap: React.FC = () => {
         <div className="flex flex-wrap items-center gap-3 text-xs font-bold">
           <div className="paper-card bg-[var(--surface-secondary)] px-4 py-2 text-center border border-[var(--border-default)]">
             <div className="text-[var(--text-muted)] text-[10px] uppercase font-bold">Current Streak</div>
-            <div className="text-lg font-black text-[var(--crimson)] flex items-center justify-center space-x-1">
-              <span>🔥</span>
+            <div className="text-lg font-black text-[var(--crimson)] flex items-center justify-center space-x-1.5">
+              <Flame className="h-4 w-4 fill-crimson" />
               <span>{stats.currentStreak} {stats.currentStreak === 1 ? "day" : "days"}</span>
             </div>
           </div>
 
           <div className="paper-card bg-[var(--surface-secondary)] px-4 py-2 text-center border border-[var(--border-default)]">
             <div className="text-[var(--text-muted)] text-[10px] uppercase font-bold">Longest Streak</div>
-            <div className="text-lg font-black text-[var(--text-heading)] flex items-center justify-center space-x-1">
-              <span>⚡</span>
+            <div className="text-lg font-black text-[var(--text-heading)] flex items-center justify-center space-x-1.5">
+              <Zap className="h-4 w-4 text-amber-500 fill-amber-500" />
               <span>{stats.longestStreak} {stats.longestStreak === 1 ? "day" : "days"}</span>
             </div>
           </div>
 
           <div className="paper-card bg-[var(--surface-secondary)] px-4 py-2 text-center border border-[var(--border-default)]">
             <div className="text-[var(--text-muted)] text-[10px] uppercase font-bold">Active Days</div>
-            <div className="text-lg font-black text-[var(--forest-green)] flex items-center justify-center space-x-1">
-              <span>📅</span>
+            <div className="text-lg font-black text-[var(--forest-green)] flex items-center justify-center space-x-1.5">
+              <Calendar className="h-4 w-4" />
               <span>{stats.totalActiveDays}</span>
             </div>
           </div>
@@ -248,8 +250,9 @@ export const ActivityHeatmap: React.FC = () => {
 
         {/* Bottom Bar & Legend */}
         <div className="mt-4 pt-3 border-t border-[var(--border-default)] flex flex-col sm:flex-row items-center justify-between text-xs gap-3">
-          <div className="text-[var(--text-muted)] text-xs font-medium">
-            💡 <strong className="text-[var(--text-heading)]">Daily Kaizen Tip:</strong> Visiting the site every day turns small daily steps into long-term mastery.
+          <div className="text-[var(--text-muted)] text-xs font-medium inline-flex items-center gap-1.5">
+            <Lightbulb className="h-3.5 w-3.5 text-amber-500 shrink-0" />
+            <span><strong className="text-[var(--text-heading)]">Daily Kaizen Tip:</strong> Visiting the site every day turns small daily steps into long-term mastery.</span>
           </div>
 
           {/* Color Legend */}

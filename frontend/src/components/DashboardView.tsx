@@ -3,6 +3,15 @@
 import React from "react";
 import { Subject, Goal } from "../lib/api";
 import { ActivityHeatmap } from "./ActivityHeatmap";
+import {
+  BookOpen,
+  Target,
+  Zap,
+  Compass,
+  Sparkles,
+  Plus,
+  ArrowRight,
+} from "lucide-react";
 
 interface DashboardViewProps {
   subjects: Subject[];
@@ -33,8 +42,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       <div className="paper-card p-6 sm:p-8">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
-            <div className="inline-flex items-center space-x-2 paper-badge px-3 py-1 text-xs font-bold">
-              <span>🌱 Continuous Improvement Loop</span>
+            <div className="inline-flex items-center space-x-1.5 paper-badge px-3 py-1 text-xs font-bold text-[var(--forest-green)]">
+              <Sparkles className="h-3.5 w-3.5" />
+              <span>Continuous Improvement Loop</span>
             </div>
             <h1 className="text-2xl font-black text-[var(--text-heading)] sm:text-3xl">
               Welcome back to Kaizu
@@ -55,17 +65,19 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               </div>
               <button
                 onClick={() => onSelectSubject(recentSubject)}
-                className="mt-3 text-xs font-bold text-[var(--crimson)] hover:underline block"
+                className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-[var(--crimson)] hover:underline cursor-pointer"
               >
-                Resume Learning →
+                <span>Resume Learning</span>
+                <ArrowRight className="h-3.5 w-3.5" />
               </button>
             </div>
           ) : (
             <button
               onClick={onOpenCreateSubject}
-              className="paper-btn-primary px-5 py-3 text-xs font-bold shadow-xs"
+              className="paper-btn-primary inline-flex items-center gap-1.5 px-5 py-3 text-xs font-bold shadow-xs cursor-pointer active:scale-95 transition-all"
             >
-              Start building your first Subject
+              <Plus className="h-4 w-4" />
+              <span>Start building your first Subject</span>
             </button>
           )}
         </div>
@@ -76,7 +88,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         <div className="paper-card p-5 space-y-1">
           <div className="flex items-center justify-between text-xs font-bold text-[var(--text-muted)]">
             <span>Total Subjects</span>
-            <span className="text-xl">📚</span>
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[var(--pale-sage)] text-[var(--forest-green)]">
+              <BookOpen className="h-4 w-4" />
+            </span>
           </div>
           <div className="text-2xl font-black text-[var(--text-heading)]">{subjects.length}</div>
           <div className="text-xs text-[var(--text-secondary)]">
@@ -87,7 +101,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         <div className="paper-card p-5 space-y-1">
           <div className="flex items-center justify-between text-xs font-bold text-[var(--text-muted)]">
             <span>Active Goals</span>
-            <span className="text-xl">🎯</span>
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#FFEAE8] text-[var(--crimson)]">
+              <Target className="h-4 w-4" />
+            </span>
           </div>
           <div className="text-2xl font-black text-[var(--text-heading)]">{activeGoals.length}</div>
           <div className="text-xs text-[var(--forest-green)] font-semibold">
@@ -98,7 +114,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         <div className="paper-card p-5 space-y-1">
           <div className="flex items-center justify-between text-xs font-bold text-[var(--text-muted)]">
             <span>Active Days</span>
-            <span className="text-xl">⚡</span>
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600">
+              <Zap className="h-4 w-4" />
+            </span>
           </div>
           <div className="text-xl font-black text-[var(--forest-green)]">Consistent</div>
           <div className="text-xs text-[var(--text-secondary)]">Evidence-backed progress</div>
@@ -107,7 +125,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         <div className="paper-card p-5 space-y-1">
           <div className="flex items-center justify-between text-xs font-bold text-[var(--text-muted)]">
             <span>Core Philosophy</span>
-            <span className="text-xl">⛩️</span>
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[var(--pale-sage)] text-[var(--forest-green)]">
+              <Compass className="h-4 w-4" />
+            </span>
           </div>
           <div className="text-lg font-black text-[var(--text-heading)]">Kaizen & Hansei</div>
           <div className="text-xs text-[var(--text-secondary)]">Small daily improvements</div>
@@ -125,22 +145,30 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </div>
             <button
               onClick={onOpenCreateSubject}
-              className="text-xs font-bold text-[var(--crimson)] hover:underline"
+              className="inline-flex items-center gap-1 text-xs font-bold text-[var(--crimson)] hover:underline cursor-pointer"
             >
-              + New Subject
+              <Plus className="h-3.5 w-3.5" />
+              <span>New Subject</span>
             </button>
           </div>
 
           {subjects.length === 0 ? (
-            <div className="paper-inset p-8 text-center space-y-2 bg-[var(--surface-secondary)]">
-              <div className="text-3xl">📚</div>
+            <div className="paper-inset p-8 text-center space-y-3 bg-[var(--surface-secondary)]">
+              <div className="flex justify-center">
+                <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--pale-sage)] text-[var(--forest-green)] shadow-xs">
+                  <BookOpen className="h-6 w-6" strokeWidth={1.8} />
+                </span>
+              </div>
               <div className="font-bold text-[var(--text-heading)]">Nothing here yet.</div>
-              <p className="text-xs text-[var(--text-muted)]">Start building your learning journey without needing a fixed syllabus.</p>
+              <p className="text-xs text-[var(--text-muted)] max-w-sm mx-auto">
+                Start building your learning journey without needing a fixed syllabus.
+              </p>
               <button
                 onClick={onOpenCreateSubject}
-                className="paper-btn-secondary px-4 py-2 text-xs font-bold mt-2"
+                className="paper-btn-secondary inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold cursor-pointer"
               >
-                + Create Subject
+                <Plus className="h-3.5 w-3.5" />
+                <span>Create Subject</span>
               </button>
             </div>
           ) : (
@@ -173,9 +201,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               {subjects.length > 4 && (
                 <button
                   onClick={() => onSelectTab("subjects")}
-                  className="w-full text-center text-xs font-bold text-[var(--forest-green)] hover:underline pt-1"
+                  className="inline-flex items-center justify-center gap-1 w-full text-center text-xs font-bold text-[var(--forest-green)] hover:underline pt-1 cursor-pointer"
                 >
-                  View all {subjects.length} subjects →
+                  <span>View all {subjects.length} subjects</span>
+                  <ArrowRight className="h-3.5 w-3.5" />
                 </button>
               )}
             </div>
@@ -191,22 +220,30 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </div>
             <button
               onClick={onOpenCreateGoal}
-              className="text-xs font-bold text-[var(--crimson)] hover:underline"
+              className="inline-flex items-center gap-1 text-xs font-bold text-[var(--crimson)] hover:underline cursor-pointer"
             >
-              + New Goal
+              <Plus className="h-3.5 w-3.5" />
+              <span>New Goal</span>
             </button>
           </div>
 
           {goals.length === 0 ? (
-            <div className="paper-inset p-8 text-center space-y-2 bg-[var(--surface-secondary)]">
-              <div className="text-3xl">🎯</div>
+            <div className="paper-inset p-8 text-center space-y-3 bg-[var(--surface-secondary)]">
+              <div className="flex justify-center">
+                <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#FFEAE8] text-[var(--crimson)] shadow-xs">
+                  <Target className="h-6 w-6" strokeWidth={1.8} />
+                </span>
+              </div>
               <div className="font-bold text-[var(--text-heading)]">No active goals yet.</div>
-              <p className="text-xs text-[var(--text-muted)]">Set clear outcomes like "Master System Design" or "Launch Open Source Project".</p>
+              <p className="text-xs text-[var(--text-muted)] max-w-sm mx-auto">
+                Set clear outcomes like "Master System Design" or "Launch Open Source Project".
+              </p>
               <button
                 onClick={onOpenCreateGoal}
-                className="paper-btn-secondary px-4 py-2 text-xs font-bold mt-2"
+                className="paper-btn-secondary inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold cursor-pointer"
               >
-                + Create Goal
+                <Plus className="h-3.5 w-3.5" />
+                <span>Create Goal</span>
               </button>
             </div>
           ) : (
@@ -240,9 +277,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               {goals.length > 4 && (
                 <button
                   onClick={() => onSelectTab("goals")}
-                  className="w-full text-center text-xs font-bold text-[var(--forest-green)] hover:underline pt-1"
+                  className="inline-flex items-center justify-center gap-1 w-full text-center text-xs font-bold text-[var(--forest-green)] hover:underline pt-1 cursor-pointer"
                 >
-                  View all {goals.length} goals →
+                  <span>View all {goals.length} goals</span>
+                  <ArrowRight className="h-3.5 w-3.5" />
                 </button>
               )}
             </div>

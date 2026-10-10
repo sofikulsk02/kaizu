@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { ProjectListItem, ProjectStatus, Api } from "../lib/api";
+import { FolderKanban, Plus, Flag, ArrowRight, Search, X } from "lucide-react";
 
 interface ProjectsViewProps {
   onSelectProject: (projectId: string) => void;
@@ -175,7 +176,11 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({ onSelectProject }) =
         </div>
       ) : filteredProjects.length === 0 ? (
         <div className="paper-card bg-[var(--surface-secondary)] p-12 text-center space-y-4 border border-[var(--border-default)]">
-          <div className="text-4xl">🚀</div>
+          <div className="flex justify-center">
+            <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--pale-sage)] text-[var(--forest-green)] shadow-xs">
+              <FolderKanban className="h-7 w-7" strokeWidth={1.8} />
+            </span>
+          </div>
           <div className="text-lg font-bold text-[var(--text-heading)]">
             {searchTerm ? "No projects match your filter" : "No projects created yet"}
           </div>
@@ -187,9 +192,10 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({ onSelectProject }) =
           {!searchTerm && (
             <button
               onClick={() => setShowCreateModal(true)}
-              className="paper-btn-primary px-5 py-2.5 text-xs font-bold"
+              className="paper-btn-primary inline-flex items-center gap-1.5 px-5 py-2.5 text-xs font-bold cursor-pointer"
             >
-              + Create First Project
+              <Plus className="h-4 w-4" />
+              <span>Create First Project</span>
             </button>
           )}
         </div>
@@ -201,12 +207,12 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({ onSelectProject }) =
               <div
                 key={project.id}
                 onClick={() => onSelectProject(project.id)}
-                className="paper-card-interactive p-6 space-y-5 cursor-pointer hover:border-[var(--forest-green)] transition-all border border-[var(--border-default)] flex flex-col justify-between"
+                className="group paper-card-interactive p-6 space-y-5 cursor-pointer hover:border-[var(--forest-green)] transition-all border border-[var(--border-default)] flex flex-col justify-between"
               >
                 <div className="space-y-3">
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <h2 className="text-xl font-bold text-[var(--text-heading)] hover:text-[var(--crimson)] transition-colors">
+                      <h2 className="text-xl font-bold text-[var(--text-heading)] group-hover:text-[var(--crimson)] transition-colors">
                         {project.name}
                       </h2>
                       {project.category && (
@@ -231,7 +237,7 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({ onSelectProject }) =
                   {/* Current milestone indicator */}
                   {project.currentMilestoneTitle && (
                     <div className="text-xs text-[var(--forest-green)] font-medium bg-[var(--pale-sage)] px-3 py-1.5 rounded flex items-center space-x-2">
-                      <span className="text-sm">🚩</span>
+                      <Flag className="h-3.5 w-3.5 text-[var(--forest-green)] shrink-0" />
                       <span className="truncate">Current milestone: <strong>{project.currentMilestoneTitle}</strong></span>
                     </div>
                   )}
@@ -249,10 +255,10 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({ onSelectProject }) =
                   </div>
 
                   <div className="flex items-center justify-end pt-1">
-                    <button className="text-xs font-black text-[var(--crimson)] hover:underline flex items-center space-x-1">
+                    <span className="inline-flex items-center gap-1 text-xs font-black text-[var(--crimson)] group-hover:underline">
                       <span>Open project</span>
-                      <span>→</span>
-                    </button>
+                      <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+                    </span>
                   </div>
                 </div>
               </div>
@@ -272,9 +278,9 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({ onSelectProject }) =
               </div>
               <button
                 onClick={() => setShowCreateModal(false)}
-                className="text-lg text-[var(--text-muted)] hover:text-[var(--text-heading)] font-bold"
+                className="flex h-7 w-7 items-center justify-center rounded-lg text-[var(--text-muted)] hover:text-[var(--text-heading)] hover:bg-[var(--surface-secondary)] transition cursor-pointer"
               >
-                ✕
+                <X className="h-4 w-4" />
               </button>
             </div>
 

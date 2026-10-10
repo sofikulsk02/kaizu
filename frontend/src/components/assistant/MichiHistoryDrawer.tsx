@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { AssistantConversationSummary } from "../../lib/api";
+import { Plus, Trash2, ArrowLeft, MessageSquare } from "lucide-react";
 
 interface MichiHistoryDrawerProps {
   conversations: AssistantConversationSummary[];
@@ -40,11 +41,9 @@ export const MichiHistoryDrawer: React.FC<MichiHistoryDrawerProps> = ({
       <div className="p-3 border-b border-[var(--border-default)] flex items-center justify-between">
         <button
           onClick={onNewChat}
-          className="paper-btn-primary flex items-center space-x-1.5 px-3 py-1.5 text-xs font-bold shadow-xs w-full justify-center"
+          className="paper-btn-primary flex items-center space-x-1.5 px-3 py-1.5 text-xs font-bold shadow-xs w-full justify-center cursor-pointer"
         >
-          <svg className="h-3.5 w-3.5 stroke-[2.5]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-          </svg>
+          <Plus className="h-3.5 w-3.5" />
           <span>Start New Conversation</span>
         </button>
       </div>
@@ -57,8 +56,12 @@ export const MichiHistoryDrawer: React.FC<MichiHistoryDrawerProps> = ({
             <span>Loading history...</span>
           </div>
         ) : conversations.length === 0 ? (
-          <div className="p-6 text-center text-xs text-[var(--text-muted)] space-y-1">
-            <div className="text-2xl">⛩️</div>
+          <div className="p-6 text-center text-xs text-[var(--text-muted)] space-y-2">
+            <div className="flex justify-center">
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--pale-sage)] text-[var(--forest-green)] shadow-xs">
+                <MessageSquare className="h-5 w-5" />
+              </span>
+            </div>
             <p className="font-semibold text-[var(--text-heading)]">No past conversations</p>
             <p className="text-[11px]">Your previous chats with Michi will be saved here.</p>
           </div>
@@ -90,7 +93,7 @@ export const MichiHistoryDrawer: React.FC<MichiHistoryDrawerProps> = ({
                 <button
                   onClick={(e) => handleDelete(e, conv.id)}
                   title={isConfirming ? "Click again to confirm deletion" : "Delete conversation"}
-                  className={`p-1 rounded text-xs transition shrink-0 ${
+                  className={`p-1 rounded text-xs transition shrink-0 cursor-pointer ${
                     isConfirming
                       ? "bg-red-500 text-white font-bold px-2 py-0.5 text-[10px]"
                       : "opacity-0 group-hover:opacity-100 text-[var(--text-muted)] hover:text-red-500 hover:bg-red-500/10"
@@ -99,14 +102,7 @@ export const MichiHistoryDrawer: React.FC<MichiHistoryDrawerProps> = ({
                   {isConfirming ? (
                     "Confirm"
                   ) : (
-                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                      />
-                    </svg>
+                    <Trash2 className="h-3.5 w-3.5" />
                   )}
                 </button>
               </div>
@@ -119,9 +115,10 @@ export const MichiHistoryDrawer: React.FC<MichiHistoryDrawerProps> = ({
       <div className="p-2.5 border-t border-[var(--border-default)] bg-[var(--surface-secondary)] text-center">
         <button
           onClick={onCloseHistory}
-          className="text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-heading)] underline"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-heading)] underline cursor-pointer"
         >
-          ← Return to current chat
+          <ArrowLeft className="h-3 w-3" />
+          <span>Return to current chat</span>
         </button>
       </div>
     </div>

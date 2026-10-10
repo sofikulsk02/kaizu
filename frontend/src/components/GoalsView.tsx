@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { Goal, GoalStatus, Api } from "../lib/api";
+import { Goal, Api } from "../lib/api";
+import { Target, Plus, ArrowRight, Trash2 } from "lucide-react";
 
 interface GoalsViewProps {
   goals: Goal[];
@@ -46,9 +47,10 @@ export const GoalsView: React.FC<GoalsViewProps> = ({
 
         <button
           onClick={onOpenCreateGoal}
-          className="paper-btn-primary px-5 py-2.5 text-xs font-bold shadow-xs self-start sm:self-center"
+          className="paper-btn-primary inline-flex items-center gap-1.5 px-4 py-2.5 text-xs font-bold shadow-xs self-start sm:self-center cursor-pointer active:scale-95 transition-all"
         >
-          + Create Goal
+          <Plus className="h-4 w-4" />
+          <span>Create Goal</span>
         </button>
       </div>
 
@@ -58,9 +60,9 @@ export const GoalsView: React.FC<GoalsViewProps> = ({
           <button
             key={status}
             onClick={() => setStatusFilter(status)}
-            className={`px-3.5 py-1.5 text-xs font-bold transition rounded ${
+            className={`px-3.5 py-1.5 text-xs font-bold transition rounded cursor-pointer ${
               statusFilter === status
-                ? "bg-[var(--forest-green)] text-white"
+                ? "bg-[var(--forest-green)] text-white shadow-xs"
                 : "text-[var(--text-muted)] hover:text-[var(--text-heading)] hover:bg-[var(--surface-hover)]"
             }`}
           >
@@ -72,7 +74,11 @@ export const GoalsView: React.FC<GoalsViewProps> = ({
       {/* Goals Grid */}
       {filteredGoals.length === 0 ? (
         <div className="paper-card p-12 text-center space-y-4">
-          <div className="text-4xl">🎯</div>
+          <div className="flex justify-center">
+            <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#FFEAE8] text-[var(--crimson)] shadow-xs">
+              <Target className="h-7 w-7" strokeWidth={1.8} />
+            </span>
+          </div>
           <div className="text-lg font-bold text-[var(--text-heading)]">No goals found.</div>
           <p className="text-xs text-[var(--text-muted)] max-w-md mx-auto">
             {statusFilter !== "ALL"
@@ -81,9 +87,10 @@ export const GoalsView: React.FC<GoalsViewProps> = ({
           </p>
           <button
             onClick={onOpenCreateGoal}
-            className="paper-btn-primary px-5 py-2.5 text-xs font-bold"
+            className="paper-btn-primary inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold cursor-pointer"
           >
-            + Create Goal
+            <Plus className="h-3.5 w-3.5" />
+            <span>Create Goal</span>
           </button>
         </div>
       ) : (
@@ -92,7 +99,7 @@ export const GoalsView: React.FC<GoalsViewProps> = ({
             <div
               key={goal.id}
               onClick={() => onSelectGoal(goal)}
-              className="paper-card-interactive cursor-pointer p-6 flex flex-col justify-between space-y-4 border border-[var(--border-default)]"
+              className="group paper-card-interactive cursor-pointer p-6 flex flex-col justify-between space-y-4 border border-[var(--border-default)] transition-all hover:border-[var(--forest-green)]"
             >
               <div className="space-y-3">
                 <div className="flex items-start justify-between gap-2">
@@ -102,7 +109,7 @@ export const GoalsView: React.FC<GoalsViewProps> = ({
                         {goal.category}
                       </span>
                     )}
-                    <h2 className="text-lg font-bold text-[var(--text-heading)] hover:text-[var(--crimson)] transition-colors">
+                    <h2 className="text-lg font-bold text-[var(--text-heading)] group-hover:text-[var(--crimson)] transition-colors">
                       {goal.title}
                     </h2>
                   </div>
@@ -134,15 +141,17 @@ export const GoalsView: React.FC<GoalsViewProps> = ({
 
               {/* Progress Summary Footer */}
               <div className="pt-3 border-t border-[var(--border-subtle)] flex items-center justify-between text-xs">
-                <div className="text-[var(--crimson)] font-bold flex items-center space-x-1">
-                  <span>Open Goal Workspace →</span>
+                <div className="inline-flex items-center gap-1 text-[var(--crimson)] font-bold">
+                  <span>Open Goal Workspace</span>
+                  <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
                 </div>
 
                 <button
                   onClick={(e) => handleDeleteGoal(e, goal)}
-                  className="text-xs font-semibold text-[var(--text-muted)] hover:text-red-600"
+                  className="p-1 rounded text-[var(--text-muted)] hover:text-red-600 hover:bg-red-500/10 transition-colors cursor-pointer"
+                  title="Delete goal"
                 >
-                  Delete
+                  <Trash2 className="h-3.5 w-3.5" />
                 </button>
               </div>
             </div>

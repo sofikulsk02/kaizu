@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { History, Plus, X, MapPin } from "lucide-react";
 
 interface MichiHeaderProps {
   onClose: () => void;
@@ -48,37 +49,31 @@ export const MichiHeader: React.FC<MichiHeaderProps> = ({
           <button
             onClick={onToggleHistory}
             title={isHistoryOpen ? "Back to chat" : "View conversation history"}
-            className={`flex h-7 w-7 items-center justify-center rounded text-xs transition ${
+            className={`flex h-7 w-7 items-center justify-center rounded text-xs transition cursor-pointer ${
               isHistoryOpen
                 ? "bg-[var(--forest-green)] text-white"
                 : "text-[var(--text-secondary)] hover:bg-[var(--surface-secondary)] hover:text-[var(--text-heading)]"
             }`}
           >
-            <svg className="h-4 w-4 stroke-[2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+            <History className="h-4 w-4" />
           </button>
 
           {/* New Chat Button */}
           <button
             onClick={onNewChat}
             title="Start new conversation"
-            className="flex h-7 w-7 items-center justify-center rounded text-xs text-[var(--text-secondary)] hover:bg-[var(--surface-secondary)] hover:text-[var(--text-heading)] transition"
+            className="flex h-7 w-7 items-center justify-center rounded text-xs text-[var(--text-secondary)] hover:bg-[var(--surface-secondary)] hover:text-[var(--text-heading)] transition cursor-pointer"
           >
-            <svg className="h-4 w-4 stroke-[2.2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-            </svg>
+            <Plus className="h-4 w-4" />
           </button>
 
           {/* Close/Minimize */}
           <button
             onClick={onClose}
             title="Close drawer"
-            className="flex h-7 w-7 items-center justify-center rounded text-xs text-[var(--text-secondary)] hover:bg-[var(--surface-secondary)] hover:text-[var(--text-heading)] transition"
+            className="flex h-7 w-7 items-center justify-center rounded text-xs text-[var(--text-secondary)] hover:bg-[var(--surface-secondary)] hover:text-[var(--text-heading)] transition cursor-pointer"
           >
-            <svg className="h-4 w-4 stroke-[2.2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            <X className="h-4 w-4" />
           </button>
         </div>
       </div>
@@ -88,7 +83,10 @@ export const MichiHeader: React.FC<MichiHeaderProps> = ({
         <div className="mt-2 flex items-center justify-between text-[10px] text-[var(--text-muted)] pt-1.5 border-t border-[var(--border-subtle)]">
           {pageContextTitle ? (
             <div className="flex items-center space-x-1 truncate max-w-[210px]">
-              <span className="text-[var(--forest-green)] font-semibold">📍 Context:</span>
+              <span className="text-[var(--forest-green)] font-semibold inline-flex items-center gap-0.5">
+                <MapPin className="h-2.5 w-2.5" />
+                Context:
+              </span>
               <span className="font-medium truncate text-[var(--text-secondary)]">{pageContextTitle}</span>
             </div>
           ) : (

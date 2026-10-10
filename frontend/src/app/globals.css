@@ -35,6 +35,8 @@ body[data-theme="paper-washi"] {
   --sidebar-text: #59675C;
   --sidebar-active-bg: #E1E9DC;
   --sidebar-active-text: #173524;
+  --sidebar-badge-bg: #E1E9DC;
+  --sidebar-badge-text: #173524;
   
   /* Retain aliases for standard component bindings */
   --fg-main: #26382D;
@@ -81,6 +83,8 @@ body[data-theme="theme-orange-black"] {
   --sidebar-text: #94A3B8;
   --sidebar-active-bg: #252E3A;
   --sidebar-active-text: #FF8A3D;
+  --sidebar-badge-bg: #252E3A;
+  --sidebar-badge-text: #F1F5F9;
   
   --fg-main: #E5E7EB;
   --surface-bg: #1A1F26;
@@ -126,6 +130,8 @@ body[data-theme="theme-olive-burgundy"] {
   --sidebar-text: #D1DEC0;
   --sidebar-active-bg: #4D6031;
   --sidebar-active-text: #FFFFFF;
+  --sidebar-badge-bg: #273418;
+  --sidebar-badge-text: #FFFFFF;
   
   --fg-main: #1F2937;
   --surface-bg: #FFFFFF;
@@ -171,6 +177,8 @@ body[data-theme="paper-sage"] {
   --sidebar-text: #495C50;
   --sidebar-active-bg: #D5E3D2;
   --sidebar-active-text: #122419;
+  --sidebar-badge-bg: #D5E3D2;
+  --sidebar-badge-text: #122419;
   
   --fg-main: #1C2E24;
   --surface-bg: #F7F5F0;
@@ -216,6 +224,8 @@ body[data-theme="paper-charcoal"] {
   --sidebar-text: #78857C;
   --sidebar-active-bg: #27362C;
   --sidebar-active-text: #C94A5C;
+  --sidebar-badge-bg: #27362C;
+  --sidebar-badge-text: #E8EDE9;
   
   --fg-main: #E8EDE9;
   --surface-bg: #242C28;
@@ -228,6 +238,399 @@ body[data-theme="paper-charcoal"] {
   --btn-secondary-text: #E8EDE9;
   --accent-color: #C94A5C;
   --muted-text: #A0ABA3;
+}
+
+/* ==========================================================================
+   THEME 1: Matcha & Rice Paper (Top Pick)
+   Natural · Japanese · Calm
+   Primary: #527653 | Page: #F5F3E9 | Cards: #FFFEF8 | Accent: #C7795A | Text: #26372B | Border: #DDDCCF
+   ========================================================================== */
+html[data-theme="theme-matcha-ricepaper"],
+body[data-theme="theme-matcha-ricepaper"] {
+  --bg-main: #F5F3E9;
+  --surface-primary: #FFFEF8;
+  --surface-hover: #F8F6EC;
+  --surface-secondary: #EFECE0;
+  --surface-inset: #E6E2D4;
+  --surface-dialog: #FFFFFF;
+  
+  --text-primary: #26372B;
+  --text-heading: #1C2B20;
+  --text-secondary: #536558;
+  --text-muted: #77857A;
+  --text-disabled: #A3ACA4;
+  
+  --forest-green: #527653;
+  --deep-forest: #3E5C40;
+  --crimson: #C7795A;
+  --crimson-hover: #B26648;
+  --sage: #84A385;
+  --pale-sage: #E5ECE2;
+  
+  --border-default: #DDDCCF;
+  --border-strong: #CDCAB8;
+  --border-subtle: #EBE9DC;
+  
+  --sidebar-bg: #F5F3E9;
+  --sidebar-text: #536558;
+  --sidebar-active-bg: #E5ECE2;
+  --sidebar-active-text: #527653;
+  --sidebar-badge-bg: #E5ECE2;
+  --sidebar-badge-text: #527653;
+  
+  --fg-main: #26372B;
+  --surface-bg: #FFFEF8;
+  --surface-nested: #EFECE0;
+  --badge-bg: #E5ECE2;
+  --input-bg: #FFFEF8;
+  --btn-primary-bg: #527653;
+  --btn-primary-text: #FFFFFF;
+  --btn-secondary-bg: #EFECE0;
+  --btn-secondary-text: #26372B;
+  --accent-color: #C7795A;
+  --muted-text: #77857A;
+
+  /* Semantic Design Tokens */
+  --color-primary: #527653;
+  --color-page: #F5F3E9;
+  --color-card: #FFFEF8;
+  --color-surface-elevated: #FFFFFF;
+  --color-accent: #C7795A;
+  --color-text: #26372B;
+  --color-text-muted: #77857A;
+  --color-border: #DDDCCF;
+  --color-success: #527653;
+  --color-warning: #C7795A;
+  --color-danger: #B83245;
+}
+
+/* ==========================================================================
+   THEME 2: Midnight Indigo
+   Professional · Focused · Technical
+   Primary: #818CF8 | Page: #101522 | Cards: #191F30 | Accent: #67D5E8 | Text: #E8ECF5 | Border: #30384B
+   ========================================================================== */
+html[data-theme="theme-midnight-indigo"],
+body[data-theme="theme-midnight-indigo"] {
+  --bg-main: #101522;
+  --surface-primary: #191F30;
+  --surface-hover: #222B42;
+  --surface-secondary: #141A29;
+  --surface-inset: #0D111C;
+  --surface-dialog: #20273D;
+  
+  --text-primary: #E8ECF5;
+  --text-heading: #FFFFFF;
+  --text-secondary: #A8B3CF;
+  --text-muted: #7884A0;
+  --text-disabled: #505A70;
+  
+  --forest-green: #818CF8;
+  --deep-forest: #6366F1;
+  --crimson: #67D5E8;
+  --crimson-hover: #4EC1D6;
+  --sage: #818CF8;
+  --pale-sage: #1E2845;
+  
+  --border-default: #30384B;
+  --border-strong: #424C65;
+  --border-subtle: #222A3E;
+  
+  --sidebar-bg: #141A29;
+  --sidebar-text: #7884A0;
+  --sidebar-active-bg: #232B42;
+  --sidebar-active-text: #818CF8;
+  --sidebar-badge-bg: #232B42;
+  --sidebar-badge-text: #E8ECF5;
+  
+  --fg-main: #E8ECF5;
+  --surface-bg: #191F30;
+  --surface-nested: #141A29;
+  --badge-bg: #1E2845;
+  --input-bg: #141A29;
+  --btn-primary-bg: #818CF8;
+  --btn-primary-text: #0F1424;
+  --btn-secondary-bg: #232B42;
+  --btn-secondary-text: #E8ECF5;
+  --accent-color: #67D5E8;
+  --muted-text: #7884A0;
+
+  /* Semantic Design Tokens */
+  --color-primary: #818CF8;
+  --color-page: #101522;
+  --color-card: #191F30;
+  --color-surface-elevated: #20273D;
+  --color-accent: #67D5E8;
+  --color-text: #E8ECF5;
+  --color-text-muted: #7884A0;
+  --color-border: #30384B;
+  --color-success: #34D399;
+  --color-warning: #FBBF24;
+  --color-danger: #F87171;
+}
+
+/* ==========================================================================
+   THEME 3: Forest & Linen
+   Grounded · Mature · Organic
+   Primary: #2F6549 | Page: #F0F1E8 | Cards: #FAFBF5 | Accent: #B58B52 | Text: #202F27 | Border: #D6DED2
+   ========================================================================== */
+html[data-theme="theme-forest-linen"],
+body[data-theme="theme-forest-linen"] {
+  --bg-main: #F0F1E8;
+  --surface-primary: #FAFBF5;
+  --surface-hover: #EDF1E7;
+  --surface-secondary: #E5EADF;
+  --surface-inset: #DBE1D4;
+  --surface-dialog: #FFFFFF;
+  
+  --text-primary: #202F27;
+  --text-heading: #14221A;
+  --text-secondary: #4D5F54;
+  --text-muted: #738379;
+  --text-disabled: #9CA9A1;
+  
+  --forest-green: #2F6549;
+  --deep-forest: #204A34;
+  --crimson: #B58B52;
+  --crimson-hover: #A07740;
+  --sage: #5E8E76;
+  --pale-sage: #DCE8DC;
+  
+  --border-default: #D6DED2;
+  --border-strong: #C1CCBD;
+  --border-subtle: #E2E9DF;
+  
+  --sidebar-bg: #FAFBF5;
+  --sidebar-text: #4D5F54;
+  --sidebar-active-bg: #DCE8DC;
+  --sidebar-active-text: #2F6549;
+  --sidebar-badge-bg: #DCE8DC;
+  --sidebar-badge-text: #2F6549;
+  
+  --fg-main: #202F27;
+  --surface-bg: #FAFBF5;
+  --surface-nested: #E5EADF;
+  --badge-bg: #DCE8DC;
+  --input-bg: #FAFBF5;
+  --btn-primary-bg: #2F6549;
+  --btn-primary-text: #FFFFFF;
+  --btn-secondary-bg: #E5EADF;
+  --btn-secondary-text: #202F27;
+  --accent-color: #B58B52;
+  --muted-text: #738379;
+
+  /* Semantic Design Tokens */
+  --color-primary: #2F6549;
+  --color-page: #F0F1E8;
+  --color-card: #FAFBF5;
+  --color-surface-elevated: #FFFFFF;
+  --color-accent: #B58B52;
+  --color-text: #202F27;
+  --color-text-muted: #738379;
+  --color-border: #D6DED2;
+  --color-success: #2F6549;
+  --color-warning: #B58B52;
+  --color-danger: #B83245;
+}
+
+/* ==========================================================================
+   THEME 4: Wisteria & Ink
+   Creative · Gentle · Modern
+   Primary: #7865B5 | Page: #F5F1F8 | Cards: #FFFCFF | Accent: #C8758D | Text: #30283C | Border: #E1D8E9
+   ========================================================================== */
+html[data-theme="theme-wisteria-ink"],
+body[data-theme="theme-wisteria-ink"] {
+  --bg-main: #F5F1F8;
+  --surface-primary: #FFFCFF;
+  --surface-hover: #F4EEF7;
+  --surface-secondary: #ECE4F2;
+  --surface-inset: #E2D9E9;
+  --surface-dialog: #FFFFFF;
+  
+  --text-primary: #30283C;
+  --text-heading: #221A2E;
+  --text-secondary: #5D536B;
+  --text-muted: #80768F;
+  --text-disabled: #ABA1BA;
+  
+  --forest-green: #7865B5;
+  --deep-forest: #5F4D9C;
+  --crimson: #C8758D;
+  --crimson-hover: #B56179;
+  --sage: #9D8DCF;
+  --pale-sage: #EDE8F6;
+  
+  --border-default: #E1D8E9;
+  --border-strong: #CFC2DA;
+  --border-subtle: #EFE9F5;
+  
+  --sidebar-bg: #F5F1F8;
+  --sidebar-text: #5D536B;
+  --sidebar-active-bg: #EDE8F6;
+  --sidebar-active-text: #7865B5;
+  --sidebar-badge-bg: #EDE8F6;
+  --sidebar-badge-text: #7865B5;
+  
+  --fg-main: #30283C;
+  --surface-bg: #FFFCFF;
+  --surface-nested: #ECE4F2;
+  --badge-bg: #EDE8F6;
+  --input-bg: #FFFCFF;
+  --btn-primary-bg: #7865B5;
+  --btn-primary-text: #FFFFFF;
+  --btn-secondary-bg: #ECE4F2;
+  --btn-secondary-text: #30283C;
+  --accent-color: #C8758D;
+  --muted-text: #80768F;
+
+  /* Semantic Design Tokens */
+  --color-primary: #7865B5;
+  --color-page: #F5F1F8;
+  --color-card: #FFFCFF;
+  --color-surface-elevated: #FFFFFF;
+  --color-accent: #C8758D;
+  --color-text: #30283C;
+  --color-text-muted: #80768F;
+  --color-border: #E1D8E9;
+  --color-success: #438A64;
+  --color-warning: #C8758D;
+  --color-danger: #C0392B;
+}
+
+/* ==========================================================================
+   THEME 5: Charcoal & Copper
+   Warm Dark · Elegant · Low Glare
+   Primary: #D99A6C | Page: #191817 | Cards: #242220 | Accent: #C66B55 | Text: #F0EAE1 | Border: #3A3632
+   ========================================================================== */
+html[data-theme="theme-charcoal-copper"],
+body[data-theme="theme-charcoal-copper"] {
+  --bg-main: #191817;
+  --surface-primary: #242220;
+  --surface-hover: #2E2B28;
+  --surface-secondary: #1E1C1B;
+  --surface-inset: #141312;
+  --surface-dialog: #2D2A27;
+  
+  --text-primary: #F0EAE1;
+  --text-heading: #FAF6F0;
+  --text-secondary: #B8B0A5;
+  --text-muted: #8A8277;
+  --text-disabled: #5E574E;
+  
+  --forest-green: #D99A6C;
+  --deep-forest: #C58556;
+  --crimson: #C66B55;
+  --crimson-hover: #B35842;
+  --sage: #D99A6C;
+  --pale-sage: #322B24;
+  
+  --border-default: #3A3632;
+  --border-strong: #4E4843;
+  --border-subtle: #2A2724;
+  
+  --sidebar-bg: #1E1C1B;
+  --sidebar-text: #8A8277;
+  --sidebar-active-bg: #2E2B28;
+  --sidebar-active-text: #D99A6C;
+  --sidebar-badge-bg: #2E2B28;
+  --sidebar-badge-text: #F0EAE1;
+  
+  --fg-main: #F0EAE1;
+  --surface-bg: #242220;
+  --surface-nested: #1E1C1B;
+  --badge-bg: #322B24;
+  --input-bg: #1E1C1B;
+  --btn-primary-bg: #D99A6C;
+  --btn-primary-text: #191817;
+  --btn-secondary-bg: #2E2B28;
+  --btn-secondary-text: #F0EAE1;
+  --accent-color: #C66B55;
+  --muted-text: #8A8277;
+
+  /* Semantic Design Tokens */
+  --color-primary: #D99A6C;
+  --color-page: #191817;
+  --color-card: #242220;
+  --color-surface-elevated: #2D2A27;
+  --color-accent: #C66B55;
+  --color-text: #F0EAE1;
+  --color-text-muted: #8A8277;
+  --color-border: #3A3632;
+  --color-success: #4EAA79;
+  --color-warning: #E0A96D;
+  --color-danger: #E06B52;
+}
+
+/* ==========================================================================
+   THEME 6: Sumi Monochrome
+   Minimal · Distraction-free · Timeless
+   Primary: #D8D8D8 | Page: #111214 | Cards: #1C1D20 | Accent: #A8C5AE | Text: #F0F0F0 | Border: #35363A
+   ========================================================================== */
+html[data-theme="theme-sumi-monochrome"],
+body[data-theme="theme-sumi-monochrome"] {
+  --bg-main: #111214;
+  --surface-primary: #1C1D20;
+  --surface-hover: #26272C;
+  --surface-secondary: #161719;
+  --surface-inset: #0C0C0E;
+  --surface-dialog: #24252A;
+  
+  --text-primary: #F0F0F0;
+  --text-heading: #FFFFFF;
+  --text-secondary: #B2B4BA;
+  --text-muted: #7E8088;
+  --text-disabled: #52545C;
+  
+  --forest-green: #D8D8D8;
+  --deep-forest: #BDBDBD;
+  --crimson: #A8C5AE;
+  --crimson-hover: #95B59C;
+  --sage: #A8C5AE;
+  --pale-sage: #222A24;
+  
+  --border-default: #35363A;
+  --border-strong: #484A50;
+  --border-subtle: #242528;
+  
+  --sidebar-bg: #161719;
+  --sidebar-text: #7E8088;
+  --sidebar-active-bg: #26272C;
+  --sidebar-active-text: #F0F0F0;
+  --sidebar-badge-bg: #222A24;
+  --sidebar-badge-text: #A8C5AE;
+  
+  --fg-main: #F0F0F0;
+  --surface-bg: #1C1D20;
+  --surface-nested: #161719;
+  --badge-bg: #222A24;
+  --input-bg: #161719;
+  --btn-primary-bg: #D8D8D8;
+  --btn-primary-text: #111214;
+  --btn-secondary-bg: #26272C;
+  --btn-secondary-text: #F0F0F0;
+  --accent-color: #A8C5AE;
+  --muted-text: #7E8088;
+
+  /* Semantic Design Tokens */
+  --color-primary: #D8D8D8;
+  --color-page: #111214;
+  --color-card: #1C1D20;
+  --color-surface-elevated: #24252A;
+  --color-accent: #A8C5AE;
+  --color-text: #F0F0F0;
+  --color-text-muted: #7E8088;
+  --color-border: #35363A;
+  --color-success: #A8C5AE;
+  --color-warning: #D9B173;
+  --color-danger: #E06B52;
+}
+
+/* Texture Dampener for Low-Glare Dark Themes */
+html[data-theme="theme-midnight-indigo"] body::before,
+html[data-theme="theme-charcoal-copper"] body::before,
+html[data-theme="theme-sumi-monochrome"] body::before,
+html[data-theme="theme-orange-black"] body::before,
+html[data-theme="paper-charcoal"] body::before {
+  opacity: 0.04;
 }
 
 /* Body & Washi Texture Setup */
@@ -306,33 +709,164 @@ h1, h2, h3, h4, .font-heading {
   border-radius: 0.5rem;
   font-weight: 700;
   border: 1px solid transparent;
-  box-shadow: 0 1px 2px rgba(184, 50, 69, 0.2);
-  transition: all 0.15s ease;
+  box-shadow: 0 1px 3px rgba(184, 50, 69, 0.25);
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  user-select: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .paper-btn-primary:hover, .clay-btn-primary:hover {
   background-color: var(--crimson-hover);
-  box-shadow: 0 3px 8px rgba(184, 50, 69, 0.3);
+  box-shadow: 0 4px 12px rgba(184, 50, 69, 0.35);
+  transform: translateY(-1px);
 }
 
 .paper-btn-primary:active, .clay-btn-primary:active {
-  transform: translateY(1px);
+  transform: scale(0.97) translateY(0);
 }
 
 /* Secondary Paper Button */
 .paper-btn-secondary, .clay-btn-secondary {
-  background-color: var(--surface-secondary);
+  background-color: var(--surface-primary);
   color: var(--text-heading) !important;
   border: 1px solid var(--border-default);
   border-radius: 0.5rem;
   font-weight: 600;
-  transition: all 0.15s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  user-select: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .paper-btn-secondary:hover, .clay-btn-secondary:hover {
   background-color: var(--surface-hover);
   border-color: var(--border-strong);
   color: var(--deep-forest) !important;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.06);
+  transform: translateY(-1px);
+}
+
+.paper-btn-secondary:active, .clay-btn-secondary:active {
+  transform: scale(0.97) translateY(0);
+}
+
+/* Tactical Study Action Button */
+.btn-study {
+  background-color: var(--pale-sage);
+  color: var(--forest-green) !important;
+  border: 1px solid var(--sage);
+  font-weight: 700;
+  border-radius: 0.5rem;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  user-select: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 2px rgba(36, 70, 51, 0.08);
+}
+
+.btn-study:hover {
+  background-color: var(--forest-green);
+  color: #FFFFFF !important;
+  border-color: var(--forest-green);
+  box-shadow: 0 4px 10px rgba(36, 70, 51, 0.25);
+  transform: translateY(-1px);
+}
+
+.btn-study:active {
+  transform: scale(0.96) translateY(0);
+}
+
+/* Tactical Edit Button */
+.btn-edit {
+  background-color: var(--surface-primary);
+  color: var(--text-heading) !important;
+  border: 1px solid var(--border-default);
+  font-weight: 600;
+  border-radius: 0.5rem;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  user-select: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.btn-edit:hover {
+  background-color: var(--surface-hover);
+  border-color: var(--border-strong);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.06);
+  transform: translateY(-1px);
+}
+
+.btn-edit:active {
+  transform: scale(0.96) translateY(0);
+}
+
+/* Tactical Pill Button (e.g. + Add Topic) */
+.btn-pill-action {
+  background-color: var(--surface-primary);
+  border: 1px solid var(--border-default);
+  color: var(--forest-green) !important;
+  font-weight: 700;
+  border-radius: 9999px;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  user-select: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-pill-action:hover {
+  background-color: var(--pale-sage);
+  border-color: var(--sage);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgba(36, 70, 51, 0.12);
+}
+
+.btn-pill-action:active {
+  transform: scale(0.96) translateY(0);
+}
+
+/* Subtle Icon Button with Hover Glow */
+.btn-icon-subtle {
+  color: var(--text-muted);
+  border-radius: 0.375rem;
+  padding: 0.375rem;
+  transition: all 0.15s ease;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-icon-subtle:hover {
+  color: #C0392B;
+  background-color: rgba(192, 57, 43, 0.1);
+  transform: scale(1.08);
+}
+
+.btn-icon-subtle:active {
+  transform: scale(0.94);
+}
+
+/* Card Hover Lift Micro-animation */
+.card-lift {
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.2s ease;
+}
+
+.card-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(36, 70, 51, 0.08);
 }
 
 /* Danger Button */
@@ -342,10 +876,21 @@ h1, h2, h3, h4, .font-heading {
   border-radius: 0.5rem;
   font-weight: 700;
   transition: all 0.15s ease;
+  cursor: pointer;
+  user-select: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .paper-btn-danger:hover, .clay-btn-danger:hover {
   background-color: #A93226;
+  box-shadow: 0 3px 8px rgba(192, 57, 43, 0.3);
+  transform: translateY(-1px);
+}
+
+.paper-btn-danger:active, .clay-btn-danger:active {
+  transform: scale(0.97) translateY(0);
 }
 
 /* Form Inputs */

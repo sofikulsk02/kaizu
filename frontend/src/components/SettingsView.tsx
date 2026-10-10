@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { getActiveUserId, setActiveUserId, clearAuth, getJwtToken, Api, User } from "../lib/api";
 import { THEMES, getActiveThemeId, applyTheme } from "../lib/theme";
+import { Palette, Globe, ShieldCheck } from "lucide-react";
 
 interface SettingsViewProps {
   onUserChanged: () => void;
@@ -14,7 +15,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onUserChanged }) => 
 
   const [activeUser, setActiveUser] = useState<User | null>(null);
   const [loadingGoogle, setLoadingGoogle] = useState(false);
-  const [selectedThemeId, setSelectedThemeId] = useState<string>("wine");
+  const [selectedThemeId, setSelectedThemeId] = useState<string>("theme-matcha-ricepaper");
+  const [themeFilter, setThemeFilter] = useState<"all" | "light" | "dark">("all");
 
   const [customUserId, setCustomUserId] = useState("");
   const [customUserName, setCustomUserName] = useState("");
@@ -106,18 +108,57 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onUserChanged }) => 
 
       {/* Theme Palette Switcher Plate Section */}
       <div className="paper-card p-6 space-y-5 border border-[var(--border-default)]">
-        <div className="flex items-center space-x-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--pale-sage)] text-xl text-[var(--forest-green)] font-bold">
-            🎨
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center space-x-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--pale-sage)] text-[var(--forest-green)] shadow-xs">
+              <Palette className="h-5 w-5" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-[var(--text-heading)]">Theme Palette Switcher</h2>
+              <p className="text-xs text-[var(--text-muted)]">Select your preferred paper color palette below</p>
+            </div>
           </div>
-          <div>
-            <h2 className="text-lg font-bold text-[var(--text-heading)]">Theme Palette Switcher</h2>
-            <p className="text-xs text-[var(--text-muted)]">Select your preferred paper color palette below</p>
+
+          {/* Category Filter Pills */}
+          <div className="flex items-center p-1 rounded-lg bg-[var(--surface-secondary)] border border-[var(--border-default)] text-xs font-bold self-start sm:self-auto">
+            <button
+              type="button"
+              onClick={() => setThemeFilter("all")}
+              className={`px-3 py-1 rounded transition cursor-pointer ${
+                themeFilter === "all"
+                  ? "bg-[var(--surface-primary)] text-[var(--text-heading)] shadow-2xs font-extrabold"
+                  : "text-[var(--text-muted)] hover:text-[var(--text-heading)]"
+              }`}
+            >
+              All ({THEMES.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => setThemeFilter("light")}
+              className={`px-3 py-1 rounded transition cursor-pointer ${
+                themeFilter === "light"
+                  ? "bg-[var(--surface-primary)] text-[var(--text-heading)] shadow-2xs font-extrabold"
+                  : "text-[var(--text-muted)] hover:text-[var(--text-heading)]"
+              }`}
+            >
+              Light ({THEMES.filter((t) => t.category === "light").length})
+            </button>
+            <button
+              type="button"
+              onClick={() => setThemeFilter("dark")}
+              className={`px-3 py-1 rounded transition cursor-pointer ${
+                themeFilter === "dark"
+                  ? "bg-[var(--surface-primary)] text-[var(--text-heading)] shadow-2xs font-extrabold"
+                  : "text-[var(--text-muted)] hover:text-[var(--text-heading)]"
+              }`}
+            >
+              Dark ({THEMES.filter((t) => t.category === "dark").length})
+            </button>
           </div>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-3 pt-2">
-          {THEMES.map((theme) => {
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 pt-2">
+          {THEMES.filter((t) => (themeFilter === "all" ? true : t.category === themeFilter)).map((theme) => {
             const isSelected = selectedThemeId === theme.id;
             return (
               <div
@@ -125,37 +166,47 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onUserChanged }) => 
                 onClick={() => handleSelectTheme(theme.id)}
                 className={`cursor-pointer rounded-xl p-5 transition flex flex-col justify-between space-y-4 border ${
                   isSelected
-                    ? "paper-card border-[var(--forest-green)] ring-2 ring-[var(--forest-green)]/20 scale-[1.01]"
-                    : "paper-card bg-[var(--surface-secondary)] border-[var(--border-default)] hover:border-[var(--forest-green)]"
+                    ? "paper-card border-[var(--forest-green)] ring-2 ring-[var(--forest-green)]/30 shadow-md scale-[1.01]"
+                    : "paper-card bg-[var(--surface-secondary)] border-[var(--border-default)] hover:border-[var(--forest-green)]/70 hover:shadow-xs"
                 }`}
               >
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between gap-2">
                     <span className="text-sm font-bold text-[var(--text-heading)]">{theme.name}</span>
-                    {isSelected && (
-                      <span className="bg-[var(--pale-sage)] text-[var(--forest-green)] px-2.5 py-0.5 text-[10px] font-extrabold rounded">
+                    {isSelected ? (
+                      <span className="bg-[var(--pale-sage)] text-[var(--forest-green)] px-2 py-0.5 text-[10px] font-black rounded tracking-wider shrink-0">
                         ACTIVE
+                      </span>
+                    ) : (
+                      <span className="text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-wider shrink-0">
+                        {theme.category}
                       </span>
                     )}
                   </div>
+                  {theme.tagline && (
+                    <div className="text-[11px] font-semibold text-[var(--forest-green)]">
+                      {theme.tagline}
+                    </div>
+                  )}
                   <p className="text-xs text-[var(--text-muted)] line-clamp-2 leading-relaxed">
                     {theme.description}
                   </p>
                 </div>
 
                 {/* Color Swatch Circle Plate */}
-                <div className="pt-2 border-t border-[var(--border-default)] space-y-2">
+                <div className="pt-3 border-t border-[var(--border-default)] space-y-2">
                   <div className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
                     Color Swatch Palette
                   </div>
-                  <div className="flex items-center space-x-3">
+                  <div className="flex items-center flex-wrap gap-2.5">
                     {theme.colors.map((color, idx) => (
                       <div key={idx} className="group relative flex flex-col items-center">
                         <div
-                          className="h-8 w-8 rounded-full border border-[var(--border-default)] shadow-xs transition-transform group-hover:scale-110"
+                          className="h-7 w-7 rounded-full border border-[var(--border-default)] shadow-xs transition-transform group-hover:scale-115"
                           style={{ backgroundColor: color }}
+                          title={`${theme.labels[idx]}: ${color}`}
                         />
-                        <span className="mt-1 text-[9px] font-semibold text-[var(--text-muted)] max-w-[60px] truncate text-center">
+                        <span className="mt-1 text-[9px] font-semibold text-[var(--text-muted)] max-w-[55px] truncate text-center">
                           {theme.labels[idx]}
                         </span>
                       </div>
@@ -171,8 +222,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onUserChanged }) => 
       {/* Google Authentication Section */}
       <div className="paper-card p-6 space-y-5 border border-[var(--border-default)]">
         <div className="flex items-center space-x-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--surface-secondary)] text-xl border border-[var(--border-default)]">
-            🌐
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--surface-secondary)] text-[var(--text-heading)] border border-[var(--border-default)]">
+            <Globe className="h-5 w-5" />
           </div>
           <div>
             <h2 className="text-lg font-bold text-[var(--text-heading)]">Google OAuth 2.0 Login</h2>
@@ -244,7 +295,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onUserChanged }) => 
       {/* Cross-User Security Testing & Identity Switcher */}
       <div className="paper-card p-6 space-y-4 border border-[var(--border-default)]">
         <div className="flex items-center space-x-2">
-          <span className="text-xl">🔒</span>
+          <ShieldCheck className="h-5 w-5 text-[var(--forest-green)]" />
           <h2 className="text-lg font-bold text-[var(--text-heading)]">Dev Security & Multi-User Switcher</h2>
         </div>
         <p className="text-xs text-[var(--text-muted)]">

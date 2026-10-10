@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { Api } from "../lib/api";
+import { X } from "lucide-react";
 
 interface CreateSubjectModalProps {
   isOpen: boolean;
@@ -53,8 +54,11 @@ export const CreateSubjectModal: React.FC<CreateSubjectModalProps> = ({
             <h2 className="text-xl font-bold text-[var(--text-heading)]">Create Subject</h2>
             <p className="text-xs text-[var(--text-muted)]">Start building your learning journey</p>
           </div>
-          <button onClick={onClose} className="text-[var(--text-muted)] hover:text-[var(--text-heading)] font-bold text-lg">
-            ✕
+          <button
+            onClick={onClose}
+            className="flex h-7 w-7 items-center justify-center rounded-lg text-[var(--text-muted)] hover:text-[var(--text-heading)] hover:bg-[var(--surface-secondary)] transition cursor-pointer"
+          >
+            <X className="h-4 w-4" />
           </button>
         </div>
 

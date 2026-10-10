@@ -1,6 +1,30 @@
 "use client";
 
 import React, { useState } from "react";
+import {
+  ArrowLeft,
+  Clock,
+  Pencil,
+  Trash2,
+  Play,
+  BookOpen,
+  Zap,
+  Flame,
+  CheckCircle2,
+  CircleDot,
+  Circle,
+  Sparkles,
+  Plus,
+  Star,
+  FileText,
+  Target,
+  ExternalLink,
+  X,
+  Calendar,
+  Layers,
+  History,
+  AlertTriangle,
+} from "lucide-react";
 import { Subject, Chapter, Topic, StudySession, TopicStatus, Api } from "../lib/api";
 
 interface SubjectDetailViewProps {
@@ -9,12 +33,45 @@ interface SubjectDetailViewProps {
   onRefresh: () => void;
 }
 
-const STATUS_CONFIG: Record<TopicStatus, { label: string; badgeClass: string; icon: string }> = {
-  NOT_STARTED: { label: "Not Started", badgeClass: "bg-[var(--surface-secondary)] text-[var(--text-muted)]", icon: "○" },
-  LEARNING: { label: "Learning", badgeClass: "bg-[#E1EBF5] text-[#1E40AF]", icon: "◉" },
-  STUDIED: { label: "Studied", badgeClass: "bg-[#E1F2E6] text-[#166534]", icon: "✓" },
-  NEEDS_REVISION: { label: "Needs Revision", badgeClass: "bg-[#FDF2E9] text-[#C2410C]", icon: "⚡" },
-  UNDERSTOOD: { label: "Understood", badgeClass: "bg-[#D5E3D2] text-[#122419]", icon: "★" },
+const STATUS_CONFIG: Record<
+  TopicStatus,
+  {
+    label: string;
+    badgeClass: string;
+    Icon: React.ComponentType<{ className?: string }>;
+    dotColor: string;
+  }
+> = {
+  NOT_STARTED: {
+    label: "Not Started",
+    badgeClass: "bg-[var(--surface-inset)] text-[var(--text-muted)] border border-[var(--border-subtle)]",
+    Icon: Circle,
+    dotColor: "bg-gray-400",
+  },
+  LEARNING: {
+    label: "Learning",
+    badgeClass: "bg-blue-500/15 text-blue-600 dark:text-blue-300 border border-blue-500/30",
+    Icon: CircleDot,
+    dotColor: "bg-blue-500",
+  },
+  STUDIED: {
+    label: "Studied",
+    badgeClass: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30",
+    Icon: CheckCircle2,
+    dotColor: "bg-emerald-500",
+  },
+  NEEDS_REVISION: {
+    label: "Needs Revision",
+    badgeClass: "bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30",
+    Icon: Flame,
+    dotColor: "bg-amber-500",
+  },
+  UNDERSTOOD: {
+    label: "Mastered",
+    badgeClass: "bg-[var(--pale-sage)] text-[var(--forest-green)] border border-[var(--sage)]/50",
+    Icon: Sparkles,
+    dotColor: "bg-[var(--forest-green)]",
+  },
 };
 
 function formatMinutes(mins: number): string {
@@ -100,6 +157,14 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
     (t) => t.status === "NEEDS_REVISION" || (t.confidence !== null && t.confidence <= 2)
   );
 
+  const completedTopicsCount = allTopics.filter(
+    (t) => t.status === "STUDIED" || t.status === "UNDERSTOOD"
+  ).length;
+
+  const totalTopicsCount = allTopics.length;
+  const overallMasteryPct =
+    totalTopicsCount > 0 ? Math.round((completedTopicsCount / totalTopicsCount) * 100) : 0;
+
   // --- Handlers ---
   const handleCreateChapter = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -158,7 +223,11 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
   };
 
   const handleDeleteSubject = async () => {
-    if (!confirm(`Are you sure you want to delete Subject "${subject.name}"? This will delete all chapters, topics, and study sessions.`)) {
+    if (
+      !confirm(
+        `Are you sure you want to delete Subject "${subject.name}"? This will delete all chapters, topics, and study sessions.`
+      )
+    ) {
       return;
     }
     setLoading(true);
@@ -172,7 +241,7 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
   };
 
   const handleDeleteChapter = async (chapter: Chapter) => {
-    if (!confirm(`Delete chapter "${chapter.title}" and its topics?`)) return;
+    if (!confirm(`Delete chapter "${chapter.title}" and all its topics?`)) return;
     try {
       await Api.deleteChapter(chapter.id);
       onRefresh();
@@ -190,7 +259,6 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
     }
   };
 
-  // Study Session Submission
   const handleLogStudySession = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!sessionSummary.trim()) return;
@@ -229,7 +297,6 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
     }
   };
 
-  // Open Topic Modal
   const openEditTopicModal = (topic: Topic) => {
     setEditingTopic(topic);
     setTopicStatus(topic.status || "NOT_STARTED");
@@ -271,58 +338,77 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Top Header Bar */}
-      <div className="flex items-center justify-between">
+      {/* Top Header Navigation & Action Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        {/* Back Button with Tactile Hover */}
         <button
           onClick={onBack}
-          className="clay-btn-secondary px-4 py-2 text-xs font-bold flex items-center space-x-2"
+          className="paper-btn-secondary px-3.5 py-2 text-xs font-bold self-start flex items-center space-x-2 group shadow-2xs cursor-pointer"
         >
-          <span>← Back to Subjects</span>
+          <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-1" />
+          <span>Back to Subjects</span>
         </button>
 
-        <div className="flex items-center space-x-3">
+        {/* Action Group */}
+        <div className="flex items-center space-x-2 self-end sm:self-center">
           <button
             onClick={() => setShowSessionModal(true)}
-            className="clay-btn-primary px-4 py-2 text-xs font-bold flex items-center space-x-1.5"
+            className="paper-btn-primary px-4 py-2 text-xs font-bold shadow-xs flex items-center space-x-1.5"
           >
-            <span>⏱ Log Study Session</span>
+            <Clock className="h-3.5 w-3.5" />
+            <span>Log Study Session</span>
           </button>
+
           <button
             onClick={() => setEditingSubject(!editingSubject)}
-            className="clay-btn-secondary px-4 py-2 text-xs font-bold"
+            className="paper-btn-secondary px-3 py-2 text-xs font-bold flex items-center space-x-1.5"
           >
-            {editingSubject ? "Cancel Edit" : "Edit Subject"}
+            <Pencil className="h-3 w-3" />
+            <span>{editingSubject ? "Cancel" : "Edit"}</span>
           </button>
+
           <button
             onClick={handleDeleteSubject}
-            className="clay-btn-danger px-4 py-2 text-xs font-bold"
+            className="paper-btn-danger px-3 py-2 text-xs font-bold flex items-center space-x-1"
           >
-            Delete
+            <Trash2 className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Delete</span>
           </button>
         </div>
       </div>
 
       {error && (
-        <div className="clay-surface bg-red-500/10 p-4 text-xs font-semibold text-red-300">
-          {error}
+        <div className="p-4 rounded-xl border border-red-500/30 bg-red-500/10 text-xs font-semibold text-red-400 flex items-center justify-between">
+          <span className="inline-flex items-center gap-1.5">
+            <AlertTriangle className="h-4 w-4 shrink-0 text-red-500" />
+            <span>{error}</span>
+          </span>
+          <button onClick={() => setError(null)} className="font-bold hover:underline cursor-pointer">
+            Dismiss
+          </button>
         </div>
       )}
 
-      {/* Subject Header Information */}
-      <div className="paper-card p-6 space-y-4 border border-[var(--border-default)]">
+      {/* Subject Hero Header & Analytics */}
+      <div className="paper-card p-6 sm:p-7 space-y-6 border border-[var(--border-default)]">
         {editingSubject ? (
           <form onSubmit={handleUpdateSubject} className="space-y-4">
             <div>
-              <label className="block text-xs font-bold text-[var(--text-muted)]">Subject Name *</label>
+              <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">
+                Subject Name *
+              </label>
               <input
                 type="text"
                 value={editSubjectName}
                 onChange={(e) => setEditSubjectName(e.target.value)}
                 className="paper-input mt-1.5 w-full px-4 py-2.5 text-sm"
+                autoFocus
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-[var(--text-muted)]">Description</label>
+              <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">
+                Description
+              </label>
               <textarea
                 value={editSubjectDesc}
                 onChange={(e) => setEditSubjectDesc(e.target.value)}
@@ -330,7 +416,14 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
                 className="paper-input mt-1.5 w-full px-4 py-2.5 text-sm"
               />
             </div>
-            <div className="flex justify-end space-x-2">
+            <div className="flex justify-end space-x-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setEditingSubject(false)}
+                className="paper-btn-secondary px-4 py-2 text-xs font-bold"
+              >
+                Cancel
+              </button>
               <button
                 type="submit"
                 disabled={loading}
@@ -342,66 +435,128 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
           </form>
         ) : (
           <div>
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
-                <h1 className="text-3xl font-black text-[var(--text-heading)]">{subject.name}</h1>
-                {subject.description && (
-                  <p className="mt-1 text-sm text-[var(--text-secondary)]">{subject.description}</p>
+                <div className="inline-flex items-center space-x-1.5 paper-badge px-3 py-1 text-xs font-bold mb-2">
+                  <BookOpen className="h-3 w-3 text-[var(--forest-green)]" />
+                  <span>Learning Area</span>
+                </div>
+                <h1 className="text-2xl sm:text-3xl font-black text-[var(--text-heading)]">
+                  {subject.name}
+                </h1>
+                {subject.description ? (
+                  <p className="mt-1 text-sm text-[var(--text-secondary)] max-w-2xl leading-relaxed">
+                    {subject.description}
+                  </p>
+                ) : (
+                  <p className="mt-1 text-xs text-[var(--text-muted)] italic">
+                    Add chapters and study topics below to map out your mastery path.
+                  </p>
                 )}
+              </div>
+
+              {/* Progress Summary Pill */}
+              <div className="self-start sm:self-center flex items-center space-x-3 bg-[var(--surface-secondary)] border border-[var(--border-default)] p-3 rounded-xl shadow-2xs">
+                <div className="text-right">
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
+                    Mastery
+                  </div>
+                  <div className="text-lg font-black text-[var(--forest-green)]">
+                    {overallMasteryPct}%
+                  </div>
+                </div>
+                <div className="w-16 h-2 bg-[var(--border-default)] rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-[var(--forest-green)] transition-all duration-500 rounded-full"
+                    style={{ width: `${overallMasteryPct}%` }}
+                  />
+                </div>
               </div>
             </div>
           </div>
         )}
 
-        {/* Learning Analytics Bar */}
+        {/* 4 Analytics Metrics Cards with Micro-hover */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
-          <div className="paper-card bg-[var(--surface-secondary)] p-3.5 border border-[var(--border-default)]">
-            <div className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Time Studied</div>
-            <div className="text-xl font-black text-[var(--text-heading)] mt-1">{formatMinutes(metrics.totalTimeStudiedMinutes)}</div>
+          <div className="paper-card bg-[var(--surface-secondary)] p-4 border border-[var(--border-default)] card-lift">
+            <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
+              <span>Time Studied</span>
+              <Clock className="h-3.5 w-3.5 text-[var(--forest-green)]" />
+            </div>
+            <div className="text-xl sm:text-2xl font-black text-[var(--text-heading)] mt-1.5">
+              {formatMinutes(metrics.totalTimeStudiedMinutes)}
+            </div>
           </div>
 
-          <div className="paper-card bg-[var(--surface-secondary)] p-3.5 border border-[var(--border-default)]">
-            <div className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Topics Tracked</div>
-            <div className="text-xl font-black text-[var(--forest-green)] mt-1">{metrics.topicsTrackedCount}</div>
+          <div className="paper-card bg-[var(--surface-secondary)] p-4 border border-[var(--border-default)] card-lift">
+            <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
+              <span>Topics Tracked</span>
+              <BookOpen className="h-3.5 w-3.5 text-[var(--forest-green)]" />
+            </div>
+            <div className="text-xl sm:text-2xl font-black text-[var(--forest-green)] mt-1.5">
+              {metrics.topicsTrackedCount}
+            </div>
           </div>
 
-          <div className="paper-card bg-[var(--surface-secondary)] p-3.5 border border-[var(--border-default)]">
-            <div className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Active Days</div>
-            <div className="text-xl font-black text-[var(--forest-green)] mt-1">{metrics.activeDaysCount}</div>
+          <div className="paper-card bg-[var(--surface-secondary)] p-4 border border-[var(--border-default)] card-lift">
+            <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
+              <span>Active Days</span>
+              <Zap className="h-3.5 w-3.5 text-[var(--forest-green)]" />
+            </div>
+            <div className="text-xl sm:text-2xl font-black text-[var(--forest-green)] mt-1.5">
+              {metrics.activeDaysCount}
+            </div>
           </div>
 
-          <div className="paper-card bg-[var(--surface-secondary)] p-3.5 border border-[var(--border-default)]">
-            <div className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Needs Revision</div>
-            <div className="text-xl font-black text-[#C2410C] mt-1">{metrics.topicsNeedingRevisionCount}</div>
+          <div className="paper-card bg-[var(--surface-secondary)] p-4 border border-[var(--border-default)] card-lift">
+            <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
+              <span>Needs Revision</span>
+              <Flame className="h-3.5 w-3.5 text-[#C2410C]" />
+            </div>
+            <div className="text-xl sm:text-2xl font-black text-[#C2410C] mt-1.5">
+              {metrics.topicsNeedingRevisionCount}
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Continue Learning Hero Card */}
-      <div className="paper-card bg-[var(--surface-secondary)] p-6 border border-[var(--border-default)]">
+      {/* Continue Learning Spotlight Hero Card */}
+      <div className="paper-card bg-[var(--surface-secondary)] p-5 sm:p-6 border border-[var(--border-default)] card-lift">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <div className="text-xs font-bold uppercase tracking-wider text-[var(--forest-green)] flex items-center space-x-2">
-              <span className="text-sm">▶</span>
-              <span>Continue Learning</span>
+          <div className="space-y-1.5">
+            <div className="text-xs font-extrabold uppercase tracking-wider text-[var(--forest-green)] flex items-center space-x-2">
+              <span className="flex h-2 w-2 rounded-full bg-[var(--forest-green)] animate-pulse" />
+              <span>Next Recommended Action</span>
             </div>
             {continueLearning && continueLearning.lastTopicTitle ? (
               <div>
-                <h3 className="text-lg font-bold text-[var(--text-heading)] mt-1">{continueLearning.lastTopicTitle}</h3>
+                <h3 className="text-lg font-bold text-[var(--text-heading)]">
+                  {continueLearning.lastTopicTitle}
+                </h3>
                 <div className="text-xs text-[var(--text-muted)] mt-0.5">
-                  Last studied: <span className="text-[var(--text-heading)] font-semibold">{formatDate(continueLearning.lastStudiedAt)}</span>
-                  {continueLearning.lastDurationMinutes ? ` · ${continueLearning.lastDurationMinutes} min session` : ""}
+                  Last session:{" "}
+                  <span className="text-[var(--text-heading)] font-semibold">
+                    {formatDate(continueLearning.lastStudiedAt)}
+                  </span>
+                  {continueLearning.lastDurationMinutes
+                    ? ` · ${continueLearning.lastDurationMinutes} mins`
+                    : ""}
                 </div>
                 {continueLearning.nextStep && (
-                  <div className="mt-2 text-xs text-[var(--forest-green)] bg-[var(--pale-sage)] px-3 py-1.5 rounded inline-block font-semibold">
-                    Next Action: {continueLearning.nextStep}
+                  <div className="mt-2 text-xs text-[var(--forest-green)] bg-[var(--pale-sage)] border border-[var(--sage)]/40 px-3 py-1.5 rounded-md inline-flex items-center space-x-1.5 font-bold">
+                    <Target className="h-3.5 w-3.5 text-[var(--crimson)]" />
+                    <span>Next Step: {continueLearning.nextStep}</span>
                   </div>
                 )}
               </div>
             ) : (
               <div>
-                <h3 className="text-base font-bold text-[var(--text-heading)] mt-1">Ready to start studying {subject.name}?</h3>
-                <p className="text-xs text-[var(--text-muted)]">Log your first study session to track your time and progress.</p>
+                <h3 className="text-base font-bold text-[var(--text-heading)]">
+                  Ready to study {subject.name}?
+                </h3>
+                <p className="text-xs text-[var(--text-muted)]">
+                  Pick a topic below or log your first study session to start your momentum loop.
+                </p>
               </div>
             )}
           </div>
@@ -414,83 +569,144 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
               }
               setShowSessionModal(true);
             }}
-            className="paper-btn-primary px-6 py-2.5 text-xs font-bold shadow-xs flex items-center justify-center space-x-2 self-start md:self-center shrink-0"
+            className="paper-btn-primary px-5 py-3 text-xs font-bold shadow-xs flex items-center justify-center space-x-2 self-start md:self-center shrink-0"
           >
-            <span>Resume Learning →</span>
+            <Play className="h-3.5 w-3.5 fill-current" />
+            <span>Resume Learning</span>
           </button>
         </div>
       </div>
 
-      {/* Workspace Tabs */}
-      <div className="flex border-b border-[var(--border-default)] space-x-6 text-sm font-bold text-[var(--text-muted)]">
+      {/* Workspace Tabs with Badge Counters */}
+      <div className="flex border-b border-[var(--border-default)] space-x-2 sm:space-x-6 text-xs sm:text-sm font-bold text-[var(--text-muted)] overflow-x-auto custom-scrollbar">
         <button
           onClick={() => setActiveTab("structure")}
-          className={`pb-3 transition-colors border-b-2 ${
+          className={`pb-3 pt-1 px-2 transition-all flex items-center space-x-2 border-b-2 whitespace-nowrap cursor-pointer ${
             activeTab === "structure"
-              ? "border-[var(--forest-green)] text-[var(--text-heading)] font-extrabold"
+              ? "border-[var(--forest-green)] text-[var(--text-heading)] font-black"
               : "border-transparent hover:text-[var(--text-heading)]"
           }`}
         >
-          Structure & Topics ({allTopics.length})
+          <Layers className="h-4 w-4" />
+          <span>Learning Structure</span>
+          <span
+            className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${
+              activeTab === "structure"
+                ? "bg-[var(--forest-green)] text-white"
+                : "bg-[var(--surface-secondary)] text-[var(--text-muted)]"
+            }`}
+          >
+            {allTopics.length}
+          </span>
         </button>
+
         <button
           onClick={() => setActiveTab("sessions")}
-          className={`pb-3 transition-colors border-b-2 ${
+          className={`pb-3 pt-1 px-2 transition-all flex items-center space-x-2 border-b-2 whitespace-nowrap cursor-pointer ${
             activeTab === "sessions"
-              ? "border-[var(--forest-green)] text-[var(--text-heading)] font-extrabold"
+              ? "border-[var(--forest-green)] text-[var(--text-heading)] font-black"
               : "border-transparent hover:text-[var(--text-heading)]"
           }`}
         >
-          Study Sessions ({studySessions.length})
+          <History className="h-4 w-4" />
+          <span>Study Sessions</span>
+          <span
+            className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${
+              activeTab === "sessions"
+                ? "bg-[var(--forest-green)] text-white"
+                : "bg-[var(--surface-secondary)] text-[var(--text-muted)]"
+            }`}
+          >
+            {studySessions.length}
+          </span>
         </button>
+
         <button
           onClick={() => setActiveTab("revision")}
-          className={`pb-3 transition-colors border-b-2 ${
+          className={`pb-3 pt-1 px-2 transition-all flex items-center space-x-2 border-b-2 whitespace-nowrap cursor-pointer ${
             activeTab === "revision"
-              ? "border-[var(--forest-green)] text-[var(--text-heading)] font-extrabold"
+              ? "border-[var(--forest-green)] text-[var(--text-heading)] font-black"
               : "border-transparent hover:text-[var(--text-heading)]"
           }`}
         >
-          Understanding & Revision ({topicsNeedingRevision.length})
+          <Flame className="h-4 w-4 text-[#C2410C]" />
+          <span>Understanding & Revision</span>
+          <span
+            className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${
+              topicsNeedingRevision.length > 0
+                ? "bg-amber-600 text-white"
+                : "bg-[var(--surface-secondary)] text-[var(--text-muted)]"
+            }`}
+          >
+            {topicsNeedingRevision.length}
+          </span>
         </button>
       </div>
 
-      {/* TAB 1: STRUCTURE & TOPICS */}
+      {/* ==========================================
+          TAB 1: STRUCTURE & TOPICS (REDESIGNED)
+          ========================================== */}
       {activeTab === "structure" && (
-        <div className="paper-card p-6 space-y-6 border border-[var(--border-default)]">
-          <div className="flex items-center justify-between">
+        <div className="paper-card p-5 sm:p-7 space-y-6 border border-[var(--border-default)]">
+          {/* Section Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-[var(--border-subtle)]">
             <div>
-              <h2 className="text-xl font-bold text-[var(--text-heading)]">Learning Structure</h2>
-              <p className="text-xs text-[var(--text-muted)]">Chapters, topics, mastery levels, notes, and resources</p>
+              <h2 className="text-lg sm:text-xl font-black text-[var(--text-heading)]">
+                Learning Structure
+              </h2>
+              <p className="text-xs text-[var(--text-muted)]">
+                Organize your study into chapters, topics, mastery ratings, and next actions.
+              </p>
             </div>
             <button
               onClick={() => setShowAddChapter(true)}
-              className="paper-btn-primary px-4 py-2 text-xs font-bold"
+              className="paper-btn-primary px-4 py-2 text-xs font-bold flex items-center space-x-1.5 self-start sm:self-center shadow-xs"
             >
-              + Add Chapter
+              <Plus className="h-3.5 w-3.5" />
+              <span>Add Chapter</span>
             </button>
           </div>
 
-          {/* Add Chapter Inline Form */}
+          {/* Add Chapter Form Modal/Accordion */}
           {showAddChapter && (
-            <form onSubmit={handleCreateChapter} className="paper-card bg-[var(--surface-secondary)] p-5 space-y-3 border border-[var(--border-default)]">
-              <h3 className="text-xs font-extrabold uppercase tracking-wider text-[var(--forest-green)]">New Chapter</h3>
+            <form
+              onSubmit={handleCreateChapter}
+              className="paper-card bg-[var(--surface-secondary)] p-5 sm:p-6 space-y-3.5 border-2 border-[var(--forest-green)]/40 rounded-xl shadow-sm"
+            >
+              <div className="flex items-center justify-between">
+                <h3 className="text-xs font-extrabold uppercase tracking-wider text-[var(--forest-green)] flex items-center space-x-2">
+                  <BookOpen className="h-3.5 w-3.5" />
+                  <span>Create New Chapter</span>
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => setShowAddChapter(false)}
+                  className="text-xs text-[var(--text-muted)] hover:text-[var(--text-heading)] cursor-pointer flex items-center space-x-1"
+                >
+                  <X className="h-3.5 w-3.5" />
+                  <span>Close</span>
+                </button>
+              </div>
+
               <input
                 type="text"
-                placeholder="Chapter Title (e.g. Transport Layer, Memory Allocation)"
+                placeholder="Chapter Title (e.g. Chapter 1: Transport Layer Protocols)"
                 value={newChapterTitle}
                 onChange={(e) => setNewChapterTitle(e.target.value)}
-                className="paper-input w-full px-4 py-2.5 text-sm"
+                className="paper-input w-full px-4 py-2.5 text-sm font-semibold"
                 autoFocus
+                required
               />
+
               <input
                 type="text"
-                placeholder="Description (Optional)"
+                placeholder="Brief Overview / Description (Optional)"
                 value={newChapterDesc}
                 onChange={(e) => setNewChapterDesc(e.target.value)}
                 className="paper-input w-full px-4 py-2.5 text-sm"
               />
-              <div className="flex justify-end space-x-2 pt-1">
+
+              <div className="flex justify-end space-x-2.5 pt-2">
                 <button
                   type="button"
                   onClick={() => setShowAddChapter(false)}
@@ -500,10 +716,10 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
                 </button>
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={loading || !newChapterTitle.trim()}
                   className="paper-btn-primary px-5 py-2 text-xs font-bold"
                 >
-                  Create Chapter
+                  Save Chapter
                 </button>
               </div>
             </form>
@@ -511,238 +727,370 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
 
           {/* Empty State */}
           {chapters.length === 0 && !showAddChapter ? (
-            <div className="paper-card bg-[var(--surface-secondary)] p-8 text-center space-y-3 border border-[var(--border-default)]">
-              <div className="text-3xl">🌱</div>
-              <div className="font-bold text-[var(--text-heading)] text-lg">Start building your syllabus naturally.</div>
-              <p className="text-xs text-[var(--text-muted)]">
-                You don't need to define every chapter upfront. Create chapters as your learning expands!
+            <div className="paper-card bg-[var(--surface-secondary)] p-10 text-center space-y-3 border border-[var(--border-default)] rounded-xl">
+              <div className="flex justify-center">
+                <div className="h-12 w-12 rounded-full bg-[var(--pale-sage)] flex items-center justify-center text-[var(--forest-green)]">
+                  <BookOpen className="h-6 w-6" />
+                </div>
+              </div>
+              <div className="font-bold text-[var(--text-heading)] text-lg">
+                Start building your syllabus naturally.
+              </div>
+              <p className="text-xs text-[var(--text-muted)] max-w-md mx-auto">
+                Kaizu allows your syllabus to evolve as you learn. Create your first chapter to add
+                topics, notes, and confidence levels.
               </p>
               <button
                 onClick={() => setShowAddChapter(true)}
-                className="paper-btn-primary px-5 py-2.5 text-xs font-bold"
+                className="paper-btn-primary px-6 py-2.5 text-xs font-bold mt-2 flex items-center space-x-1.5 mx-auto"
               >
-                + Add Chapter
+                <Plus className="h-3.5 w-3.5" />
+                <span>Create First Chapter</span>
               </button>
             </div>
           ) : (
-            <div className="space-y-4">
-              {chapters.map((chapter) => (
-                <div key={chapter.id} className="paper-card p-5 space-y-4 border border-[var(--border-default)]">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-bold text-[var(--text-heading)] text-base">{chapter.title}</h3>
-                      {chapter.description && (
-                        <p className="text-xs text-[var(--text-muted)] mt-0.5">{chapter.description}</p>
-                      )}
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <button
-                        onClick={() => setActiveChapterForTopic(chapter.id)}
-                        className="text-xs font-bold text-[var(--forest-green)] hover:underline"
-                      >
-                        + Add Topic
-                      </button>
-                      <button
-                        onClick={() => handleDeleteChapter(chapter)}
-                        className="text-xs font-semibold text-[var(--text-muted)] hover:text-red-600"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </div>
+            <div className="space-y-6">
+              {chapters.map((chapter, cIndex) => {
+                const chapterTopics = chapter.topics || [];
 
-                  {/* Topics List */}
-                  <div className="pl-3 border-l-2 border-[var(--border-default)] space-y-3">
-                    {chapter.topics && chapter.topics.length > 0 ? (
-                      chapter.topics.map((topic) => {
-                        const statusInfo = STATUS_CONFIG[topic.status || "NOT_STARTED"];
-                        return (
-                          <div
-                            key={topic.id}
-                            className="paper-card bg-[var(--surface-secondary)] p-4 text-xs space-y-2 border border-[var(--border-default)] hover:border-[var(--forest-green)] transition-colors"
-                          >
-                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                              <div className="flex items-center space-x-3">
-                                <span className={`px-2.5 py-1 rounded text-[11px] font-bold ${statusInfo.badgeClass}`}>
-                                  {statusInfo.icon} {statusInfo.label}
-                                </span>
-                                <span className="font-bold text-[var(--text-heading)] text-sm">{topic.title}</span>
-                              </div>
-
-                              <div className="flex items-center space-x-2 self-end sm:self-center">
-                                {/* Confidence stars */}
-                                {topic.confidence && (
-                                  <span className="text-amber-600 font-bold text-xs mr-1" title={`Confidence: ${topic.confidence}/5`}>
-                                    {"★".repeat(topic.confidence)}{"☆".repeat(5 - topic.confidence)}
-                                  </span>
-                                )}
-
-                                <button
-                                  onClick={() => startQuickSessionForTopic(topic)}
-                                  className="paper-btn-secondary px-3 py-1 text-[11px] font-bold text-[var(--forest-green)]"
-                                  title="Study this topic now"
-                                >
-                                  Study →
-                                </button>
-                                <button
-                                  onClick={() => openEditTopicModal(topic)}
-                                  className="paper-btn-secondary px-3 py-1 text-[11px] font-bold"
-                                >
-                                  Details / Edit
-                                </button>
-                                <button
-                                  onClick={() => handleDeleteTopic(topic.id)}
-                                  className="text-[var(--text-muted)] hover:text-red-600 font-bold px-2"
-                                >
-                                  ✕
-                                </button>
-                              </div>
-                            </div>
-
-                            {/* Additional Details Snippet */}
-                            {(topic.notes || topic.resources || topic.nextStep) && (
-                              <div className="bg-[var(--surface-primary)] p-3 rounded text-[11px] space-y-1 text-[var(--text-muted)] border border-[var(--border-default)]">
-                                {topic.notes && (
-                                  <div>
-                                    <strong className="text-[var(--text-heading)]">Notes:</strong> {topic.notes}
-                                  </div>
-                                )}
-                                {topic.resources && (
-                                  <div>
-                                    <strong className="text-[var(--forest-green)]">Resources:</strong> {topic.resources}
-                                  </div>
-                                )}
-                                {topic.nextStep && (
-                                  <div>
-                                    <strong className="text-[var(--crimson)]">Next Step:</strong> {topic.nextStep}
-                                  </div>
-                                )}
-                              </div>
-                            )}
+                return (
+                  <div
+                    key={chapter.id}
+                    className="paper-card p-5 sm:p-6 space-y-4 border border-[var(--border-default)] rounded-xl shadow-2xs hover:border-[var(--border-strong)] transition-all"
+                  >
+                    {/* Chapter Header Card */}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[var(--border-subtle)]">
+                      <div className="flex items-start space-x-3">
+                        {/* Chapter Number Badge */}
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--forest-green)] text-white font-black text-xs shrink-0 shadow-2xs">
+                          {String(cIndex + 1).padStart(2, "0")}
+                        </div>
+                        <div>
+                          <div className="flex items-center space-x-2">
+                            <h3 className="font-extrabold text-[var(--text-heading)] text-base">
+                              {chapter.title}
+                            </h3>
+                            <span className="text-[11px] font-bold text-[var(--text-muted)] bg-[var(--surface-secondary)] px-2 py-0.5 rounded">
+                              {chapterTopics.length} {chapterTopics.length === 1 ? "topic" : "topics"}
+                            </span>
                           </div>
-                        );
-                      })
-                    ) : (
-                      <div className="text-xs text-[var(--text-muted)] italic py-1">No topics added to this chapter yet.</div>
-                    )}
+                          {chapter.description && (
+                            <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                              {chapter.description}
+                            </p>
+                          )}
+                        </div>
+                      </div>
 
-                    {/* Add Topic Inline Form */}
-                    {activeChapterForTopic === chapter.id && (
-                      <div className="flex items-center space-x-2 pt-2">
-                        <input
-                          type="text"
-                          placeholder="Topic title (e.g. TCP Connection Establishment)"
-                          value={newTopicTitle}
-                          onChange={(e) => setNewTopicTitle(e.target.value)}
-                          className="paper-input flex-1 px-3.5 py-2 text-xs"
-                          autoFocus
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") {
-                              e.preventDefault();
-                              handleCreateTopic(chapter.id);
-                            }
-                          }}
-                        />
+                      {/* Chapter Action Buttons */}
+                      <div className="flex items-center space-x-2 self-end sm:self-center">
                         <button
-                          onClick={() => handleCreateTopic(chapter.id)}
-                          className="paper-btn-primary px-4 py-2 text-xs font-bold"
+                          onClick={() => setActiveChapterForTopic(chapter.id)}
+                          className="btn-pill-action px-3 py-1.5 text-xs font-bold space-x-1"
                         >
-                          Add Topic
+                          <Plus className="h-3 w-3" />
+                          <span>Add Topic</span>
                         </button>
+
                         <button
-                          onClick={() => setActiveChapterForTopic(null)}
-                          className="text-xs font-semibold text-[var(--text-muted)] hover:text-[var(--text-heading)]"
+                          onClick={() => handleDeleteChapter(chapter)}
+                          title="Delete Chapter"
+                          className="btn-icon-subtle text-xs"
                         >
-                          Cancel
+                          <Trash2 className="h-3.5 w-3.5" />
                         </button>
                       </div>
-                    )}
+                    </div>
+
+                    {/* Topics List Container */}
+                    <div className="space-y-3">
+                      {chapterTopics.length > 0 ? (
+                        chapterTopics.map((topic) => {
+                          const statusInfo = STATUS_CONFIG[topic.status || "NOT_STARTED"];
+                          const StatusIcon = statusInfo.Icon;
+
+                          return (
+                            <div
+                              key={topic.id}
+                              className="paper-card bg-[var(--surface-primary)] p-4 sm:p-4.5 rounded-xl border border-[var(--border-default)] hover:border-[var(--forest-green)] transition-all card-lift space-y-3 shadow-2xs"
+                            >
+                              {/* Topic Main Row (Responsive: stacks on mobile, clean row on desktop) */}
+                              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                {/* Left: Status Badge & Title */}
+                                <div className="flex items-start sm:items-center space-x-2.5 min-w-0">
+                                  {/* Status Pill Badge */}
+                                  <span
+                                    className={`px-2.5 py-1 rounded-md text-[11px] font-bold inline-flex items-center space-x-1.5 shrink-0 ${statusInfo.badgeClass}`}
+                                  >
+                                    <StatusIcon className="h-3 w-3" />
+                                    <span>{statusInfo.label}</span>
+                                  </span>
+
+                                  {/* Topic Title */}
+                                  <span className="font-bold text-[var(--text-heading)] text-sm leading-snug break-words">
+                                    {topic.title}
+                                  </span>
+                                </div>
+
+                                {/* Right: Confidence Stars & Action Buttons */}
+                                <div className="flex items-center justify-between sm:justify-end space-x-2.5 pt-2 sm:pt-0 border-t sm:border-t-0 border-[var(--border-subtle)]">
+                                  {/* 5-Star Confidence Rating using Lucide Star */}
+                                  <div
+                                    className="flex items-center space-x-0.5"
+                                    title={`Confidence Rating: ${topic.confidence || 0} of 5`}
+                                  >
+                                    {[1, 2, 3, 4, 5].map((starIdx) => (
+                                      <Star
+                                        key={starIdx}
+                                        className={`h-3 w-3 ${
+                                          starIdx <= (topic.confidence || 0)
+                                            ? "fill-amber-400 text-amber-500"
+                                            : "text-[var(--border-strong)] opacity-35"
+                                        }`}
+                                      />
+                                    ))}
+                                  </div>
+
+                                  {/* Action Buttons Group */}
+                                  <div className="flex items-center space-x-2">
+                                    {/* Tactile Study Button */}
+                                    <button
+                                      onClick={() => startQuickSessionForTopic(topic)}
+                                      className="btn-study px-3 py-1.5 text-xs font-bold space-x-1"
+                                      title="Log a study session for this topic"
+                                    >
+                                      <Play className="h-3 w-3 fill-current" />
+                                      <span>Study</span>
+                                    </button>
+
+                                    {/* Tactile Edit Button */}
+                                    <button
+                                      onClick={() => openEditTopicModal(topic)}
+                                      className="btn-edit px-3 py-1.5 text-xs font-bold space-x-1"
+                                      title="Edit details, notes, and mastery"
+                                    >
+                                      <Pencil className="h-3 w-3" />
+                                      <span>Details</span>
+                                    </button>
+
+                                    {/* Delete Button */}
+                                    <button
+                                      onClick={() => handleDeleteTopic(topic.id)}
+                                      title="Delete Topic"
+                                      className="btn-icon-subtle text-xs"
+                                    >
+                                      <Trash2 className="h-3.5 w-3.5" />
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Structured Notes & Next Steps Inset */}
+                              {(topic.notes || topic.resources || topic.nextStep) && (
+                                <div className="paper-inset bg-[var(--surface-secondary)] p-3 rounded-lg text-xs space-y-1.5 border border-[var(--border-subtle)] text-[var(--text-secondary)]">
+                                  {topic.notes && (
+                                    <div className="flex items-start space-x-2">
+                                      <span className="font-bold text-[var(--text-heading)] shrink-0 flex items-center space-x-1">
+                                        <FileText className="h-3 w-3 text-[var(--text-muted)]" />
+                                        <span>Notes:</span>
+                                      </span>
+                                      <span className="leading-relaxed">{topic.notes}</span>
+                                    </div>
+                                  )}
+
+                                  {topic.nextStep && (
+                                    <div className="flex items-start space-x-2">
+                                      <span className="font-bold text-[var(--crimson)] shrink-0 flex items-center space-x-1">
+                                        <Target className="h-3 w-3 text-[var(--crimson)]" />
+                                        <span>Next Step:</span>
+                                      </span>
+                                      <span className="font-medium text-[var(--text-heading)]">
+                                        {topic.nextStep}
+                                      </span>
+                                    </div>
+                                  )}
+
+                                  {topic.resources && (
+                                    <div className="flex items-start space-x-2">
+                                      <span className="font-bold text-[var(--forest-green)] shrink-0 flex items-center space-x-1">
+                                        <ExternalLink className="h-3 w-3 text-[var(--forest-green)]" />
+                                        <span>Resources:</span>
+                                      </span>
+                                      <span className="truncate">{topic.resources}</span>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })
+                      ) : (
+                        <div className="text-xs text-[var(--text-muted)] italic py-2 px-3 bg-[var(--surface-secondary)]/50 rounded-lg border border-dashed border-[var(--border-default)]">
+                          No topics added to this chapter yet. Click "+ Add Topic" above to begin.
+                        </div>
+                      )}
+
+                      {/* Add Topic Inline Accordion Form */}
+                      {activeChapterForTopic === chapter.id && (
+                        <div className="p-3.5 rounded-xl bg-[var(--surface-secondary)] border border-[var(--forest-green)]/40 space-y-2.5">
+                          <div className="text-xs font-bold text-[var(--forest-green)] flex items-center space-x-1.5">
+                            <Plus className="h-3.5 w-3.5" />
+                            <span>Add New Topic to {chapter.title}</span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <input
+                              type="text"
+                              placeholder="e.g. TCP Handshake & Congestion Control"
+                              value={newTopicTitle}
+                              onChange={(e) => setNewTopicTitle(e.target.value)}
+                              className="paper-input flex-1 px-3.5 py-2 text-xs"
+                              autoFocus
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                  e.preventDefault();
+                                  handleCreateTopic(chapter.id);
+                                }
+                              }}
+                            />
+                            <button
+                              onClick={() => handleCreateTopic(chapter.id)}
+                              disabled={loading || !newTopicTitle.trim()}
+                              className="paper-btn-primary px-4 py-2 text-xs font-bold shadow-xs"
+                            >
+                              Add
+                            </button>
+                            <button
+                              onClick={() => setActiveChapterForTopic(null)}
+                              className="paper-btn-secondary px-3 py-2 text-xs font-bold"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
       )}
 
-      {/* TAB 2: STUDY SESSIONS LOG */}
+      {/* ==========================================
+          TAB 2: STUDY SESSIONS LOG
+          ========================================== */}
       {activeTab === "sessions" && (
-        <div className="paper-card p-6 space-y-6 border border-[var(--border-default)]">
-          <div className="flex items-center justify-between">
+        <div className="paper-card p-5 sm:p-7 space-y-6 border border-[var(--border-default)]">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-[var(--border-subtle)]">
             <div>
-              <h2 className="text-xl font-bold text-[var(--text-heading)]">Study Sessions</h2>
-              <p className="text-xs text-[var(--text-muted)]">Proof of actual work done in {subject.name}</p>
+              <h2 className="text-lg sm:text-xl font-black text-[var(--text-heading)]">
+                Study Sessions
+              </h2>
+              <p className="text-xs text-[var(--text-muted)]">
+                Tangible proof of learning time and focused sessions in {subject.name}.
+              </p>
             </div>
             <button
               onClick={() => setShowSessionModal(true)}
-              className="paper-btn-primary px-4 py-2 text-xs font-bold"
+              className="paper-btn-primary px-4 py-2 text-xs font-bold flex items-center space-x-1.5 self-start sm:self-center shadow-xs"
             >
-              + Log Study Session
+              <Plus className="h-3.5 w-3.5" />
+              <span>Log Study Session</span>
             </button>
           </div>
 
           {studySessions.length === 0 ? (
-            <div className="paper-card bg-[var(--surface-secondary)] p-8 text-center space-y-3 border border-[var(--border-default)]">
-              <div className="text-3xl">⏱</div>
-              <div className="font-bold text-[var(--text-heading)] text-lg">No study sessions recorded yet.</div>
-              <p className="text-xs text-[var(--text-muted)]">
-                Log what you studied and how long you spent to build your learning history.
+            <div className="paper-card bg-[var(--surface-secondary)] p-10 text-center space-y-3 border border-[var(--border-default)] rounded-xl">
+              <div className="flex justify-center">
+                <div className="h-12 w-12 rounded-full bg-[var(--pale-sage)] flex items-center justify-center text-[var(--forest-green)]">
+                  <Clock className="h-6 w-6" />
+                </div>
+              </div>
+              <div className="font-bold text-[var(--text-heading)] text-lg">
+                No study sessions recorded yet.
+              </div>
+              <p className="text-xs text-[var(--text-muted)] max-w-md mx-auto">
+                Track how much time you spend on each concept. Log your first session to build your
+                habit streak!
               </p>
               <button
                 onClick={() => setShowSessionModal(true)}
-                className="paper-btn-primary px-5 py-2.5 text-xs font-bold"
+                className="paper-btn-primary px-5 py-2.5 text-xs font-bold mt-2 flex items-center space-x-1.5 mx-auto"
               >
-                + Log First Session
+                <Plus className="h-3.5 w-3.5" />
+                <span>Log First Session</span>
               </button>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-3.5">
               {studySessions.map((session) => (
                 <div
                   key={session.id}
-                  className="paper-card p-5 space-y-3 border border-[var(--border-default)]"
+                  className="paper-card p-5 space-y-3 border border-[var(--border-default)] rounded-xl card-lift"
                 >
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
                     <div>
                       <div className="flex items-center space-x-2">
-                        <span className="text-xs font-black text-[var(--forest-green)]">
-                          {formatMinutes(session.durationMinutes)}
+                        <span className="text-xs font-black text-[var(--forest-green)] bg-[var(--pale-sage)] px-2.5 py-0.5 rounded flex items-center space-x-1">
+                          <Clock className="h-3 w-3" />
+                          <span>{formatMinutes(session.durationMinutes)}</span>
                         </span>
-                        <span className="text-xs text-[var(--text-muted)]">· {formatDate(session.occurredAt)}</span>
+                        <span className="text-xs text-[var(--text-muted)] flex items-center space-x-1">
+                          <Calendar className="h-3 w-3" />
+                          <span>{formatDate(session.occurredAt)}</span>
+                        </span>
                         {session.topic && (
-                          <span className="bg-[var(--pale-sage)] text-[var(--forest-green)] px-2 py-0.5 rounded text-[11px] font-bold">
+                          <span className="bg-[var(--surface-secondary)] text-[var(--text-heading)] border border-[var(--border-default)] px-2 py-0.5 rounded text-[11px] font-bold">
                             {session.topic.title}
                           </span>
                         )}
                       </div>
-                      <h4 className="text-sm font-bold text-[var(--text-heading)] mt-1">{session.summary}</h4>
+                      <h4 className="text-sm font-bold text-[var(--text-heading)] mt-1.5">
+                        {session.summary}
+                      </h4>
                     </div>
 
                     <div className="flex items-center space-x-3 self-end sm:self-center">
                       {session.confidence && (
-                        <div className="text-amber-600 font-bold text-xs" title={`Confidence: ${session.confidence}/5`}>
-                          {"★".repeat(session.confidence)}
+                        <div
+                          className="flex items-center space-x-0.5"
+                          title={`Confidence: ${session.confidence}/5`}
+                        >
+                          {[1, 2, 3, 4, 5].map((s) => (
+                            <Star
+                              key={s}
+                              className={`h-3 w-3 ${
+                                s <= session.confidence!
+                                  ? "fill-amber-400 text-amber-500"
+                                  : "text-[var(--border-strong)] opacity-35"
+                              }`}
+                            />
+                          ))}
                         </div>
                       )}
                       <button
                         onClick={() => handleDeleteSession(session.id)}
-                        className="text-[var(--text-muted)] hover:text-red-600 text-xs font-bold"
+                        className="btn-icon-subtle text-xs"
+                        title="Delete Session"
                       >
-                        Delete
+                        <Trash2 className="h-3.5 w-3.5" />
                       </button>
                     </div>
                   </div>
 
                   {(session.outcome || session.nextStep) && (
-                    <div className="bg-[var(--surface-secondary)] p-3 rounded text-xs space-y-1 text-[var(--text-muted)] border border-[var(--border-default)]">
+                    <div className="paper-inset bg-[var(--surface-secondary)] p-3 rounded-lg text-xs space-y-1 text-[var(--text-secondary)] border border-[var(--border-subtle)]">
                       {session.outcome && (
                         <div>
-                          <strong className="text-[var(--text-heading)]">Outcome:</strong> {session.outcome}
+                          <strong className="text-[var(--text-heading)]">Outcome:</strong>{" "}
+                          {session.outcome}
                         </div>
                       )}
                       {session.nextStep && (
                         <div>
-                          <strong className="text-[var(--forest-green)]">Next Action:</strong> {session.nextStep}
+                          <strong className="text-[var(--forest-green)]">Next Action:</strong>{" "}
+                          {session.nextStep}
                         </div>
                       )}
                     </div>
@@ -754,58 +1102,78 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
         </div>
       )}
 
-      {/* TAB 3: UNDERSTANDING & REVISION */}
+      {/* ==========================================
+          TAB 3: UNDERSTANDING & REVISION FOCUS
+          ========================================== */}
       {activeTab === "revision" && (
-        <div className="paper-card p-6 space-y-6 border border-[var(--border-default)]">
-          <div>
-            <h2 className="text-xl font-bold text-[var(--text-heading)]">Understanding & Revision Focus</h2>
+        <div className="paper-card p-5 sm:p-7 space-y-6 border border-[var(--border-default)]">
+          <div className="pb-2 border-b border-[var(--border-subtle)]">
+            <h2 className="text-lg sm:text-xl font-black text-[var(--text-heading)]">
+              Understanding & Revision Focus
+            </h2>
             <p className="text-xs text-[var(--text-muted)]">
-              Topics flagged for review or rated with lower confidence. Revisit these to build true mastery.
+              Topics flagged for review or rated with lower confidence. Revisit these to build true
+              mastery.
             </p>
           </div>
 
           {topicsNeedingRevision.length === 0 ? (
-            <div className="paper-card bg-[var(--surface-secondary)] p-8 text-center space-y-3 border border-[var(--border-default)]">
-              <div className="text-3xl">🎉</div>
-              <div className="font-bold text-[var(--text-heading)] text-lg">No topics marked for revision right now!</div>
-              <p className="text-xs text-[var(--text-muted)]">
-                You can flag any topic as "Needs Revision" when studying if you feel unsure about key concepts.
+            <div className="paper-card bg-[var(--surface-secondary)] p-10 text-center space-y-3 border border-[var(--border-default)] rounded-xl">
+              <div className="flex justify-center">
+                <div className="h-12 w-12 rounded-full bg-emerald-500/15 flex items-center justify-center text-emerald-600">
+                  <CheckCircle2 className="h-6 w-6" />
+                </div>
+              </div>
+              <div className="font-bold text-[var(--text-heading)] text-lg">
+                No topics marked for revision right now!
+              </div>
+              <p className="text-xs text-[var(--text-muted)] max-w-md mx-auto">
+                When studying, flag tricky topics as "Needs Revision" to review them here.
               </p>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-3.5">
               {topicsNeedingRevision.map((topic) => (
                 <div
                   key={topic.id}
-                  className="paper-card p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border border-[var(--border-default)]"
+                  className="paper-card p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border border-[var(--border-default)] rounded-xl card-lift"
                 >
-                  <div className="space-y-1">
+                  <div className="space-y-1.5">
                     <div className="flex items-center space-x-2">
-                      <span className="bg-[#FDF2E9] text-[#C2410C] px-2.5 py-0.5 rounded text-[11px] font-bold">
-                        Needs Revision
+                      <span className="bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 px-2.5 py-0.5 rounded text-[11px] font-bold flex items-center space-x-1">
+                        <Flame className="h-3 w-3" />
+                        <span>Needs Revision</span>
                       </span>
                       {topic.chapterTitle && (
-                        <span className="text-xs text-[var(--text-muted)]">in {topic.chapterTitle}</span>
+                        <span className="text-xs text-[var(--text-muted)]">
+                          in {topic.chapterTitle}
+                        </span>
                       )}
                     </div>
-                    <h4 className="text-base font-bold text-[var(--text-heading)]">{topic.title}</h4>
+                    <h4 className="text-base font-bold text-[var(--text-heading)]">
+                      {topic.title}
+                    </h4>
                     {topic.notes && (
-                      <p className="text-xs text-[var(--text-muted)] line-clamp-2">{topic.notes}</p>
+                      <p className="text-xs text-[var(--text-muted)] line-clamp-2">
+                        {topic.notes}
+                      </p>
                     )}
                   </div>
 
-                  <div className="flex items-center space-x-2 shrink-0">
+                  <div className="flex items-center space-x-2.5 shrink-0 self-end sm:self-center">
                     <button
                       onClick={() => startQuickSessionForTopic(topic)}
-                      className="paper-btn-primary px-4 py-2 text-xs font-bold"
+                      className="btn-study px-4 py-2 text-xs font-bold space-x-1"
                     >
-                      Study Topic Now →
+                      <Play className="h-3 w-3 fill-current" />
+                      <span>Study Now</span>
                     </button>
                     <button
                       onClick={() => openEditTopicModal(topic)}
-                      className="paper-btn-secondary px-3 py-2 text-xs font-bold"
+                      className="btn-edit px-3 py-2 text-xs font-bold space-x-1"
                     >
-                      Update Details
+                      <Pencil className="h-3 w-3" />
+                      <span>Update</span>
                     </button>
                   </div>
                 </div>
@@ -815,26 +1183,34 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
         </div>
       )}
 
-      {/* MODAL: LOG STUDY SESSION */}
+      {/* ==========================================
+          MODAL: LOG STUDY SESSION
+          ========================================== */}
       {showSessionModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
-          <div className="paper-modal bg-[var(--surface-primary)] w-full max-w-xl p-6 space-y-5 rounded-xl border border-[var(--border-default)] shadow-2xl max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
+          <div className="paper-modal bg-[var(--surface-primary)] w-full max-w-xl p-6 sm:p-7 space-y-5 rounded-2xl border border-[var(--border-strong)] shadow-2xl max-h-[92vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-[var(--border-default)] pb-4">
               <div>
-                <h3 className="text-lg font-black text-[var(--text-heading)]">Log a Study Session</h3>
-                <p className="text-xs text-[var(--text-muted)]">Record time and progress for {subject.name}</p>
+                <h3 className="text-lg font-black text-[var(--text-heading)]">
+                  Log a Study Session
+                </h3>
+                <p className="text-xs text-[var(--text-muted)]">
+                  Record focused time and accomplishments for {subject.name}
+                </p>
               </div>
               <button
                 onClick={() => setShowSessionModal(false)}
-                className="text-lg text-[var(--text-muted)] hover:text-[var(--text-heading)] font-bold"
+                className="btn-icon-subtle text-sm font-bold"
               >
-                ✕
+                <X className="h-4 w-4" />
               </button>
             </div>
 
             <form onSubmit={handleLogStudySession} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-[var(--text-muted)]">What did you study? *</label>
+                <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">
+                  What did you study? *
+                </label>
                 <input
                   type="text"
                   placeholder="e.g. TCP 3-way handshake and SYN flood attacks"
@@ -848,16 +1224,19 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
 
               {/* Topic Selector */}
               <div>
-                <label className="block text-xs font-bold text-[var(--text-muted)]">Link to Topic (Optional)</label>
+                <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">
+                  Link to Topic (Optional)
+                </label>
                 <select
                   value={sessionTopicId}
                   onChange={(e) => setSessionTopicId(e.target.value)}
-                  className="paper-input mt-1.5 w-full px-4 py-2.5 text-sm bg-[var(--surface-primary)]"
+                  className="paper-input mt-1.5 w-full px-4 py-2.5 text-sm bg-[var(--surface-primary)] font-medium"
                 >
                   <option value="">-- General Subject Study (No specific topic) --</option>
                   {allTopics.map((t) => (
                     <option key={t.id} value={t.id}>
-                      {t.chapterTitle ? `${t.chapterTitle} > ` : ""}{t.title}
+                      {t.chapterTitle ? `${t.chapterTitle} > ` : ""}
+                      {t.title}
                     </option>
                   ))}
                 </select>
@@ -865,16 +1244,18 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
 
               {/* Time spent preset buttons */}
               <div>
-                <label className="block text-xs font-bold text-[var(--text-muted)]">Time spent</label>
+                <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">
+                  Time Spent: {formatMinutes(sessionDuration)}
+                </label>
                 <div className="flex items-center space-x-2 mt-1.5 flex-wrap gap-y-2">
                   {[15, 30, 45, 60, 90, 120].map((mins) => (
                     <button
                       key={mins}
                       type="button"
                       onClick={() => setSessionDuration(mins)}
-                      className={`px-3 py-1.5 text-xs font-bold rounded transition-colors ${
+                      className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
                         sessionDuration === mins
-                          ? "bg-[var(--forest-green)] text-white font-extrabold"
+                          ? "bg-[var(--forest-green)] text-white shadow-xs font-black scale-105"
                           : "bg-[var(--surface-secondary)] text-[var(--text-muted)] hover:text-[var(--text-heading)] border border-[var(--border-default)]"
                       }`}
                     >
@@ -886,7 +1267,9 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
 
               {/* Confidence Rating */}
               <div>
-                <label className="block text-xs font-bold text-[var(--text-muted)]">How did it go? (Understanding level)</label>
+                <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">
+                  Understanding Level
+                </label>
                 <div className="grid grid-cols-5 gap-2 mt-1.5">
                   {[
                     { val: 1, label: "Revisit" },
@@ -899,23 +1282,29 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
                       key={item.val}
                       type="button"
                       onClick={() => setSessionConfidence(item.val)}
-                      className={`p-2 text-center rounded text-xs font-bold transition-colors ${
+                      className={`p-2 text-center rounded-lg text-xs font-bold transition-all cursor-pointer ${
                         sessionConfidence === item.val
-                          ? "bg-[var(--pale-sage)] text-[var(--forest-green)] border border-[var(--sage)]"
+                          ? "bg-[var(--pale-sage)] text-[var(--forest-green)] border-2 border-[var(--forest-green)] shadow-2xs scale-102"
                           : "bg-[var(--surface-secondary)] text-[var(--text-muted)] hover:text-[var(--text-heading)] border border-[var(--border-default)]"
                       }`}
                     >
-                      <div>{"★".repeat(item.val)}</div>
-                      <div className="text-[10px] mt-0.5">{item.label}</div>
+                      <div className="flex justify-center space-x-0.5">
+                        {[...Array(item.val)].map((_, i) => (
+                          <Star key={i} className="h-2.5 w-2.5 fill-amber-400 text-amber-500" />
+                        ))}
+                      </div>
+                      <div className="text-[10px] mt-1">{item.label}</div>
                     </button>
                   ))}
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-[var(--text-muted)]">What did you actually accomplish? (Optional)</label>
+                <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">
+                  What did you actually accomplish? (Optional)
+                </label>
                 <textarea
-                  placeholder="e.g. Read RFC 793, drew connection diagram, implemented socket listener."
+                  placeholder="e.g. Read RFC 793, drew connection diagrams, implemented socket listener."
                   value={sessionOutcome}
                   onChange={(e) => setSessionOutcome(e.target.value)}
                   rows={2}
@@ -924,10 +1313,12 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-[var(--text-muted)]">What's your intended next step? (Optional)</label>
+                <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">
+                  Next Intended Step (Optional)
+                </label>
                 <input
                   type="text"
-                  placeholder="e.g. Solve 3 congestion control practice problems"
+                  placeholder="e.g. Practice 3 congestion control problems tomorrow"
                   value={sessionNextStep}
                   onChange={(e) => setSessionNextStep(e.target.value)}
                   className="paper-input mt-1.5 w-full px-4 py-2.5 text-sm"
@@ -945,7 +1336,7 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
                 <button
                   type="submit"
                   disabled={loading}
-                  className="paper-btn-primary px-6 py-2 text-xs font-bold"
+                  className="paper-btn-primary px-6 py-2 text-xs font-bold shadow-xs"
                 >
                   Save Study Session
                 </button>
@@ -955,63 +1346,79 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
         </div>
       )}
 
-      {/* MODAL: EDIT TOPIC DETAILS & MASTERY */}
+      {/* ==========================================
+          MODAL: EDIT TOPIC DETAILS & MASTERY
+          ========================================== */}
       {editingTopic && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
-          <div className="paper-modal bg-[var(--surface-primary)] w-full max-w-lg p-6 space-y-5 rounded-xl border border-[var(--border-default)] shadow-2xl max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
+          <div className="paper-modal bg-[var(--surface-primary)] w-full max-w-lg p-6 sm:p-7 space-y-5 rounded-2xl border border-[var(--border-strong)] shadow-2xl max-h-[92vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-[var(--border-default)] pb-4">
               <div>
-                <h3 className="text-lg font-black text-[var(--text-heading)]">{editingTopic.title}</h3>
-                <p className="text-xs text-[var(--text-muted)]">Topic Mastery & Learning Resources</p>
+                <h3 className="text-lg font-black text-[var(--text-heading)]">
+                  {editingTopic.title}
+                </h3>
+                <p className="text-xs text-[var(--text-muted)]">
+                  Topic Mastery, Notes & Learning Resources
+                </p>
               </div>
               <button
                 onClick={() => setEditingTopic(null)}
-                className="text-lg text-[var(--text-muted)] hover:text-[var(--text-heading)] font-bold"
+                className="btn-icon-subtle text-sm font-bold"
               >
-                ✕
+                <X className="h-4 w-4" />
               </button>
             </div>
 
             <form onSubmit={handleSaveTopicDetails} className="space-y-4">
               {/* Status Picker */}
               <div>
-                <label className="block text-xs font-bold text-[var(--text-muted)]">Learning Status</label>
+                <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">
+                  Learning Status
+                </label>
                 <select
                   value={topicStatus}
                   onChange={(e) => setTopicStatus(e.target.value as TopicStatus)}
-                  className="paper-input mt-1.5 w-full px-4 py-2.5 text-sm bg-[var(--surface-primary)]"
+                  className="paper-input mt-1.5 w-full px-4 py-2.5 text-sm bg-[var(--surface-primary)] font-bold"
                 >
                   <option value="NOT_STARTED">○ Not Started</option>
                   <option value="LEARNING">◉ Learning</option>
                   <option value="STUDIED">✓ Studied (Read / Covered)</option>
-                  <option value="NEEDS_REVISION">⚡ Needs Revision</option>
-                  <option value="UNDERSTOOD">★ Understood & Mastered</option>
+                  <option value="NEEDS_REVISION">▲ Needs Revision</option>
+                  <option value="UNDERSTOOD">★ Mastered & Understood</option>
                 </select>
               </div>
 
               {/* Confidence Rating */}
               <div>
-                <label className="block text-xs font-bold text-[var(--text-muted)]">Confidence Level (1-5)</label>
+                <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">
+                  Confidence Level: {topicConfidence} of 5
+                </label>
                 <div className="flex items-center space-x-2 mt-1.5">
                   {[1, 2, 3, 4, 5].map((val) => (
                     <button
                       key={val}
                       type="button"
                       onClick={() => setTopicConfidence(val)}
-                      className={`flex-1 py-2 text-center rounded text-xs font-bold transition-colors ${
+                      className={`flex-1 py-2 text-center rounded-lg text-xs font-bold transition-all cursor-pointer flex justify-center items-center ${
                         topicConfidence === val
-                          ? "bg-[var(--pale-sage)] text-[var(--forest-green)] border border-[var(--sage)]"
+                          ? "bg-[var(--pale-sage)] text-[var(--forest-green)] border-2 border-[var(--forest-green)] shadow-2xs scale-102"
                           : "bg-[var(--surface-secondary)] text-[var(--text-muted)] hover:text-[var(--text-heading)] border border-[var(--border-default)]"
                       }`}
                     >
-                      {"★".repeat(val)}
+                      <div className="flex space-x-0.5">
+                        {[...Array(val)].map((_, i) => (
+                          <Star key={i} className="h-3 w-3 fill-amber-400 text-amber-500" />
+                        ))}
+                      </div>
                     </button>
                   ))}
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-[var(--text-muted)]">Personal Notes</label>
+                <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">
+                  Personal Notes
+                </label>
                 <textarea
                   placeholder="Explain concepts in your own words..."
                   value={topicNotes}
@@ -1022,10 +1429,12 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-[var(--text-muted)]">Resources & Links</label>
+                <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">
+                  Resources & Links
+                </label>
                 <input
                   type="text"
-                  placeholder="Books, URLs, documentation links..."
+                  placeholder="Documentation links, books, videos..."
                   value={topicResources}
                   onChange={(e) => setTopicResources(e.target.value)}
                   className="paper-input mt-1.5 w-full px-4 py-2.5 text-sm"
@@ -1033,7 +1442,9 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-[var(--text-muted)]">Next Intended Action</label>
+                <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">
+                  Next Intended Action
+                </label>
                 <input
                   type="text"
                   placeholder="e.g. Revisit SYN cookies section"
@@ -1044,7 +1455,9 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-[var(--text-muted)]">Planned Revision Date</label>
+                <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">
+                  Planned Revision Date
+                </label>
                 <input
                   type="date"
                   value={topicRevisionDate}
@@ -1064,7 +1477,7 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
                 <button
                   type="submit"
                   disabled={loading}
-                  className="paper-btn-primary px-6 py-2 text-xs font-bold"
+                  className="paper-btn-primary px-6 py-2 text-xs font-bold shadow-xs"
                 >
                   Save Mastery Details
                 </button>
@@ -1076,4 +1489,3 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
     </div>
   );
 };
-

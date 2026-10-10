@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef } from "react";
 import { AssistantMessageItem } from "../../lib/api";
+import { Copy, AlertTriangle, RotateCcw } from "lucide-react";
 
 interface MichiMessageListProps {
   messages: AssistantMessageItem[];
@@ -152,16 +153,9 @@ export const MichiMessageList: React.FC<MichiMessageListProps> = ({
                   <button
                     onClick={() => copyToClipboard(msg.content)}
                     title="Copy response"
-                    className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition p-1 text-[var(--text-muted)] hover:text-[var(--text-heading)] bg-[var(--surface-primary)] rounded"
+                    className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition p-1 text-[var(--text-muted)] hover:text-[var(--text-heading)] bg-[var(--surface-primary)] rounded cursor-pointer"
                   >
-                    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-                      />
-                    </svg>
+                    <Copy className="h-3 w-3" />
                   </button>
                 </>
               )}
@@ -197,15 +191,16 @@ export const MichiMessageList: React.FC<MichiMessageListProps> = ({
       {error && (
         <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-xs text-red-600 dark:text-red-300 space-y-2">
           <div className="flex items-start space-x-2">
-            <span>⚠️</span>
+            <AlertTriangle className="h-4 w-4 shrink-0 text-red-500 mt-0.5" />
             <span className="leading-snug">{error}</span>
           </div>
           {onRetryLast && (
             <button
               onClick={onRetryLast}
-              className="text-[11px] font-bold text-[var(--crimson)] hover:underline inline-block"
+              className="text-[11px] font-bold text-[var(--crimson)] hover:underline inline-flex items-center gap-1 cursor-pointer"
             >
-              🔄 Retry request
+              <RotateCcw className="h-3 w-3" />
+              <span>Retry request</span>
             </button>
           )}
         </div>

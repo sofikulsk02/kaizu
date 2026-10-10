@@ -1,6 +1,7 @@
 import { prisma } from "../../database/prisma";
 import { NotFoundError } from "../../core/ApiError";
 import { CreateChapterDto, UpdateChapterDto } from "./chapter.schema";
+import { CacheService } from "../../core/cache.service";
 
 export class ChapterService {
   public static async createChapter(userId: string, subjectId: string, dto: CreateChapterDto) {
@@ -13,7 +14,7 @@ export class ChapterService {
       throw new NotFoundError("Subject not found");
     }
 
-    return prisma.chapter.create({
+    const chapter = await prisma.chapter.create({
       data: {
         subjectId,
         title: dto.title,
@@ -23,6 +24,9 @@ export class ChapterService {
         topics: true,
       },
     });
+
+    await CacheService.invalidateUserSubjects(userId);
+    return chapter;
   }
 
   public static async getChaptersBySubject(userId: string, subjectId: string) {
@@ -78,7 +82,7 @@ export class ChapterService {
       throw new NotFoundError("Chapter not found");
     }
 
-    return prisma.chapter.update({
+    const updated = await prisma.chapter.update({
       where: { id },
       data: {
         ...(dto.title !== undefined && { title: dto.title }),
@@ -88,6 +92,9 @@ export class ChapterService {
         topics: true,
       },
     });
+
+    await CacheService.invalidateUserSubjects(userId);
+    return updated;
   }
 
   public static async deleteChapter(userId: string, id: string) {
@@ -106,6 +113,7 @@ export class ChapterService {
       where: { id },
     });
 
+    await CacheService.invalidateUserSubjects(userId);
     return { success: true, message: "Chapter deleted successfully" };
   }
 }

@@ -1,6 +1,19 @@
 "use client";
 
 import React from "react";
+import {
+  Target,
+  BarChart2,
+  Zap,
+  BookOpen,
+  Brain,
+  Calendar,
+  Wrench,
+  AlertTriangle,
+  Sprout,
+  Compass,
+  RotateCcw,
+} from "lucide-react";
 
 interface MichiStarterPromptsProps {
   pageType?: "dashboard" | "subject" | "goal" | "project" | "activity" | "settings";
@@ -8,76 +21,81 @@ interface MichiStarterPromptsProps {
   onSelectPrompt: (promptText: string) => void;
 }
 
+interface PromptItem {
+  icon: React.ReactNode;
+  text: string;
+}
+
 export const MichiStarterPrompts: React.FC<MichiStarterPromptsProps> = ({
   pageType,
   recordName,
   onSelectPrompt,
 }) => {
-  const getPrompts = () => {
+  const getPrompts = (): PromptItem[] => {
     switch (pageType) {
       case "goal":
         return [
           {
-            icon: "🎯",
+            icon: <Target className="h-4 w-4 text-[var(--crimson)]" />,
             text: recordName
               ? `Help me break down "${recordName}" into practical next steps.`
               : "Help me break down my goal into practical next steps.",
           },
           {
-            icon: "📊",
+            icon: <BarChart2 className="h-4 w-4 text-[var(--forest-green)]" />,
             text: "Analyze my progress and recent actions on this goal.",
           },
           {
-            icon: "⚡",
+            icon: <Zap className="h-4 w-4 text-amber-500" />,
             text: "What is the single highest-leverage task I should do today?",
           },
         ];
       case "subject":
         return [
           {
-            icon: "📚",
+            icon: <BookOpen className="h-4 w-4 text-[var(--forest-green)]" />,
             text: recordName
               ? `What should I study next in "${recordName}"?`
               : "What should I study next based on my tracked topics?",
           },
           {
-            icon: "🧠",
+            icon: <Brain className="h-4 w-4 text-purple-600" />,
             text: "Suggest an effective Hansei reflection for my recent study sessions.",
           },
           {
-            icon: "📅",
+            icon: <Calendar className="h-4 w-4 text-[var(--forest-green)]" />,
             text: "Help me organize a realistic study schedule for this subject.",
           },
         ];
       case "project":
         return [
           {
-            icon: "🛠️",
+            icon: <Wrench className="h-4 w-4 text-[var(--forest-green)]" />,
             text: recordName
               ? `Review the next immediate actions for "${recordName}".`
               : "What is the immediate next action for this project?",
           },
           {
-            icon: "🚧",
+            icon: <AlertTriangle className="h-4 w-4 text-amber-500" />,
             text: "Help me identify potential blockers in my current milestones.",
           },
         ];
       default:
         return [
           {
-            icon: "🎯",
+            icon: <Target className="h-4 w-4 text-[var(--crimson)]" />,
             text: "What should I focus on today based on my goals and habits?",
           },
           {
-            icon: "🌱",
+            icon: <Sprout className="h-4 w-4 text-[var(--forest-green)]" />,
             text: "Review my accomplishments and activity from the past week.",
           },
           {
-            icon: "⛩️",
+            icon: <RotateCcw className="h-4 w-4 text-amber-600" />,
             text: "Where is my momentum stalling, and what small Kaizen step can restart it?",
           },
           {
-            icon: "🧭",
+            icon: <Compass className="h-4 w-4 text-[var(--forest-green)]" />,
             text: "Help me plan a high-focus day around my most important goal.",
           },
         ];
@@ -109,9 +127,9 @@ export const MichiStarterPrompts: React.FC<MichiStarterPromptsProps> = ({
             <button
               key={idx}
               onClick={() => onSelectPrompt(p.text)}
-              className="w-full text-left p-2.5 rounded-lg border border-[var(--border-default)] bg-[var(--surface-primary)] hover:bg-[var(--surface-secondary)] hover:border-[var(--forest-green)] transition text-xs font-medium text-[var(--text-primary)] flex items-start space-x-2.5 shadow-2xs group"
+              className="w-full text-left p-2.5 rounded-lg border border-[var(--border-default)] bg-[var(--surface-primary)] hover:bg-[var(--surface-secondary)] hover:border-[var(--forest-green)] transition text-xs font-medium text-[var(--text-primary)] flex items-start space-x-2.5 shadow-2xs group cursor-pointer"
             >
-              <span className="text-sm shrink-0 group-hover:scale-110 transition-transform">
+              <span className="shrink-0 mt-0.5 group-hover:scale-110 transition-transform">
                 {p.icon}
               </span>
               <span className="leading-snug">{p.text}</span>

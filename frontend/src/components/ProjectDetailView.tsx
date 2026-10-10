@@ -13,6 +13,7 @@ import {
   TaskPriority,
   Api,
 } from "../lib/api";
+import { Target, Flag, FileText, Plus, Trash2, X } from "lucide-react";
 
 interface ProjectDetailViewProps {
   projectId: string;
@@ -464,8 +465,8 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({ projectId,
       <div className="clay-surface bg-gradient-to-r from-[#172431] to-[#121c27] p-6 border border-[#26374a]">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1">
-            <div className="text-xs font-extrabold uppercase tracking-wider text-[#10b981] flex items-center space-x-2">
-              <span className="animate-pulse text-sm">🎯</span>
+            <div className="text-xs font-extrabold uppercase tracking-wider text-[#10b981] flex items-center space-x-1.5">
+              <Target className="h-4 w-4" />
               <span>Next Action</span>
             </div>
             {project.nextAction ? (
@@ -500,43 +501,43 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({ projectId,
       </div>
 
       {/* Workspace Navigation Tabs */}
-      <div className="flex border-b border-[#232d39] space-x-6 text-sm font-bold text-[#8b98a5]">
+      <div className="flex border-b border-[var(--border-default)] space-x-6 text-sm font-bold text-[var(--text-secondary)]">
         <button
           onClick={() => setActiveTab("milestones")}
-          className={`pb-3 transition-colors border-b-2 ${
+          className={`pb-3 transition-colors border-b-2 cursor-pointer ${
             activeTab === "milestones"
-              ? "border-[#10b981] text-white font-extrabold"
-              : "border-transparent hover:text-white"
+              ? "border-[var(--forest-green)] text-[var(--text-heading)] font-extrabold"
+              : "border-transparent hover:text-[var(--text-heading)]"
           }`}
         >
           Milestones & Tasks ({allTasks.length})
         </button>
         <button
           onClick={() => setActiveTab("sessions")}
-          className={`pb-3 transition-colors border-b-2 ${
+          className={`pb-3 transition-colors border-b-2 cursor-pointer ${
             activeTab === "sessions"
-              ? "border-[#10b981] text-white font-extrabold"
-              : "border-transparent hover:text-white"
+              ? "border-[var(--forest-green)] text-[var(--text-heading)] font-extrabold"
+              : "border-transparent hover:text-[var(--text-heading)]"
           }`}
         >
           Recent Work ({workSessions.length})
         </button>
         <button
           onClick={() => setActiveTab("notes")}
-          className={`pb-3 transition-colors border-b-2 ${
+          className={`pb-3 transition-colors border-b-2 cursor-pointer ${
             activeTab === "notes"
-              ? "border-[#10b981] text-white font-extrabold"
-              : "border-transparent hover:text-white"
+              ? "border-[var(--forest-green)] text-[var(--text-heading)] font-extrabold"
+              : "border-transparent hover:text-[var(--text-heading)]"
           }`}
         >
           Notes & Context ({notes.length})
         </button>
         <button
           onClick={() => setActiveTab("reports")}
-          className={`pb-3 transition-colors border-b-2 ${
+          className={`pb-3 transition-colors border-b-2 cursor-pointer ${
             activeTab === "reports"
-              ? "border-[#10b981] text-white font-extrabold"
-              : "border-transparent hover:text-white"
+              ? "border-[var(--forest-green)] text-[var(--text-heading)] font-extrabold"
+              : "border-transparent hover:text-[var(--text-heading)]"
           }`}
         >
           Reports & Progress
@@ -572,7 +573,11 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({ projectId,
 
           {milestones.length === 0 && directTasks.length === 0 ? (
             <div className="clay-surface bg-[#10171e] p-8 text-center space-y-3">
-              <div className="text-3xl">🚩</div>
+              <div className="flex justify-center">
+                <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#1e2a38] text-[#60a5fa] shadow-xs">
+                  <Flag className="h-6 w-6" strokeWidth={1.8} />
+                </span>
+              </div>
               <div className="font-bold text-white text-lg">No milestones or tasks added yet.</div>
               <p className="text-xs text-[#8b98a5]">
                 Add a milestone stage (e.g. WAL Recovery) or add tasks directly as you build.
@@ -661,9 +666,10 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({ projectId,
                                 </span>
                                 <button
                                   onClick={() => handleDeleteTask(task.id)}
-                                  className="text-[#8b98a5] hover:text-red-400 font-bold px-1"
+                                  className="text-[#8b98a5] hover:text-red-400 p-1 rounded transition cursor-pointer"
+                                  title="Delete task"
                                 >
-                                  ✕
+                                  <Trash2 className="h-3 w-3" />
                                 </button>
                               </div>
                             </div>
@@ -711,9 +717,10 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({ projectId,
                             </span>
                             <button
                               onClick={() => handleDeleteTask(task.id)}
-                              className="text-[#8b98a5] hover:text-red-400 font-bold px-1"
+                              className="text-[#8b98a5] hover:text-red-400 p-1 rounded transition cursor-pointer"
+                              title="Delete task"
                             >
-                              ✕
+                              <Trash2 className="h-3 w-3" />
                             </button>
                           </div>
                         </div>
@@ -829,7 +836,11 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({ projectId,
 
           {notes.length === 0 ? (
             <div className="clay-surface bg-[#10171e] p-8 text-center space-y-3">
-              <div className="text-3xl">📝</div>
+              <div className="flex justify-center">
+                <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#1e2a38] text-[#60a5fa] shadow-xs">
+                  <FileText className="h-6 w-6" strokeWidth={1.8} />
+                </span>
+              </div>
               <div className="font-bold text-white text-lg">No notes or decisions captured yet.</div>
               <p className="text-xs text-[#8b98a5]">
                 Preserve technical context, design tradeoffs, and useful docs right alongside your project code.
@@ -917,11 +928,14 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({ projectId,
           <div className="clay-surface bg-[#161e27] w-full max-w-xl p-7 space-y-5 rounded-xl border border-[#232d39] max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-[#232d39] pb-4">
               <div>
-                <h3 className="text-lg font-black text-white">Log Work Session</h3>
-                <p className="text-xs text-[#8b98a5]">Record work done on {project.name}</p>
+                <h3 className="text-lg font-black text-[var(--text-heading)]">Log Work Session</h3>
+                <p className="text-xs text-[var(--text-muted)]">Record work done on {project.name}</p>
               </div>
-              <button onClick={() => setShowWorkModal(false)} className="text-lg text-[#8b98a5] hover:text-white font-bold">
-                ✕
+              <button
+                onClick={() => setShowWorkModal(false)}
+                className="flex h-7 w-7 items-center justify-center rounded-lg text-[var(--text-muted)] hover:text-[var(--text-heading)] hover:bg-[#232d39] transition cursor-pointer"
+              >
+                <X className="h-4 w-4" />
               </button>
             </div>
 
@@ -965,10 +979,10 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({ projectId,
                       key={mins}
                       type="button"
                       onClick={() => setWorkDuration(mins)}
-                      className={`px-3 py-1.5 text-xs font-bold rounded transition-colors ${
+                      className={`px-3 py-1.5 text-xs font-bold rounded transition-colors cursor-pointer ${
                         workDuration === mins
-                          ? "bg-[#10b981] text-black font-extrabold"
-                          : "bg-[#10171e] text-[#8b98a5] hover:text-white"
+                          ? "bg-[var(--forest-green)] text-white font-extrabold"
+                          : "bg-[var(--surface-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-heading)] border border-[var(--border-default)]"
                       }`}
                     >
                       {formatMinutes(mins)}
@@ -1033,17 +1047,20 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({ projectId,
           <div className="clay-surface bg-[#161e27] w-full max-w-lg p-7 space-y-5 rounded-xl border border-[#232d39]">
             <div className="flex items-center justify-between border-b border-[#232d39] pb-4">
               <div>
-                <h3 className="text-lg font-black text-white">Add Milestone</h3>
-                <p className="text-xs text-[#8b98a5]">Define a major stage or focus area</p>
+                <h3 className="text-lg font-black text-[var(--text-heading)]">Add Milestone</h3>
+                <p className="text-xs text-[var(--text-muted)]">Define a major stage or focus area</p>
               </div>
-              <button onClick={() => setShowMilestoneModal(false)} className="text-lg text-[#8b98a5] hover:text-white font-bold">
-                ✕
+              <button
+                onClick={() => setShowMilestoneModal(false)}
+                className="flex h-7 w-7 items-center justify-center rounded-lg text-[var(--text-muted)] hover:text-[var(--text-heading)] hover:bg-[#232d39] transition cursor-pointer"
+              >
+                <X className="h-4 w-4" />
               </button>
             </div>
 
             <form onSubmit={handleCreateMilestone} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-[#8b98a5]">Milestone Title *</label>
+                <label className="block text-xs font-bold text-[var(--text-muted)]">Milestone Title *</label>
                 <input
                   type="text"
                   placeholder="e.g. B-Tree Indexing, WAL Recovery"
@@ -1055,7 +1072,7 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({ projectId,
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-[#8b98a5]">Description (Optional)</label>
+                <label className="block text-xs font-bold text-[var(--text-muted)]">Description (Optional)</label>
                 <textarea
                   placeholder="Scope or objectives of this stage..."
                   value={milestoneDesc}
@@ -1064,15 +1081,15 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({ projectId,
                   className="clay-input mt-1.5 w-full px-4 py-2.5 text-sm"
                 />
               </div>
-              <div className="flex justify-end space-x-3 pt-3 border-t border-[#232d39]">
+              <div className="flex justify-end space-x-3 pt-3 border-t border-[var(--border-default)]">
                 <button
                   type="button"
                   onClick={() => setShowMilestoneModal(false)}
-                  className="clay-btn-secondary px-4 py-2 text-xs font-bold"
+                  className="clay-btn-secondary px-4 py-2 text-xs font-bold cursor-pointer"
                 >
                   Cancel
                 </button>
-                <button type="submit" disabled={loading} className="clay-btn-primary px-6 py-2 text-xs font-bold">
+                <button type="submit" disabled={loading} className="clay-btn-primary px-6 py-2 text-xs font-bold cursor-pointer">
                   Create Milestone
                 </button>
               </div>
@@ -1087,17 +1104,20 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({ projectId,
           <div className="clay-surface bg-[#161e27] w-full max-w-lg p-7 space-y-5 rounded-xl border border-[#232d39]">
             <div className="flex items-center justify-between border-b border-[#232d39] pb-4">
               <div>
-                <h3 className="text-lg font-black text-white">Add Task</h3>
-                <p className="text-xs text-[#8b98a5]">Create an actionable task for {project.name}</p>
+                <h3 className="text-lg font-black text-[var(--text-heading)]">Add Task</h3>
+                <p className="text-xs text-[var(--text-muted)]">Create an actionable task for {project.name}</p>
               </div>
-              <button onClick={() => setShowTaskModal(false)} className="text-lg text-[#8b98a5] hover:text-white font-bold">
-                ✕
+              <button
+                onClick={() => setShowTaskModal(false)}
+                className="flex h-7 w-7 items-center justify-center rounded-lg text-[var(--text-muted)] hover:text-[var(--text-heading)] hover:bg-[#232d39] transition cursor-pointer"
+              >
+                <X className="h-4 w-4" />
               </button>
             </div>
 
             <form onSubmit={handleCreateTask} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-[#8b98a5]">Task Title *</label>
+                <label className="block text-xs font-bold text-[var(--text-muted)]">Task Title *</label>
                 <input
                   type="text"
                   placeholder="e.g. Implement leaf node split logic"
@@ -1110,11 +1130,11 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({ projectId,
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-[#8b98a5]">Milestone</label>
+                <label className="block text-xs font-bold text-[var(--text-muted)]">Milestone</label>
                 <select
                   value={taskTargetMilestoneId}
                   onChange={(e) => setTaskTargetMilestoneId(e.target.value)}
-                  className="clay-input mt-1.5 w-full px-4 py-2.5 text-sm bg-[#10171e]"
+                  className="clay-input mt-1.5 w-full px-4 py-2.5 text-sm bg-[var(--surface-dialog)]"
                 >
                   <option value="">-- Direct Project Task (Un-grouped) --</option>
                   {milestones.map((m) => (
@@ -1126,11 +1146,11 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({ projectId,
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-[#8b98a5]">Priority</label>
+                <label className="block text-xs font-bold text-[var(--text-muted)]">Priority</label>
                 <select
                   value={taskPriority}
                   onChange={(e) => setTaskPriority(e.target.value as TaskPriority)}
-                  className="clay-input mt-1.5 w-full px-4 py-2.5 text-sm bg-[#10171e]"
+                  className="clay-input mt-1.5 w-full px-4 py-2.5 text-sm bg-[var(--surface-dialog)]"
                 >
                   <option value="LOW">Low</option>
                   <option value="MEDIUM">Medium</option>
@@ -1138,15 +1158,15 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({ projectId,
                 </select>
               </div>
 
-              <div className="flex justify-end space-x-3 pt-3 border-t border-[#232d39]">
+              <div className="flex justify-end space-x-3 pt-3 border-t border-[var(--border-default)]">
                 <button
                   type="button"
                   onClick={() => setShowTaskModal(false)}
-                  className="clay-btn-secondary px-4 py-2 text-xs font-bold"
+                  className="clay-btn-secondary px-4 py-2 text-xs font-bold cursor-pointer"
                 >
                   Cancel
                 </button>
-                <button type="submit" disabled={loading} className="clay-btn-primary px-6 py-2 text-xs font-bold">
+                <button type="submit" disabled={loading} className="clay-btn-primary px-6 py-2 text-xs font-bold cursor-pointer">
                   Create Task
                 </button>
               </div>
@@ -1161,11 +1181,14 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({ projectId,
           <div className="clay-surface bg-[#161e27] w-full max-w-lg p-7 space-y-5 rounded-xl border border-[#232d39]">
             <div className="flex items-center justify-between border-b border-[#232d39] pb-4">
               <div>
-                <h3 className="text-lg font-black text-white">Add Technical Note / Decision</h3>
-                <p className="text-xs text-[#8b98a5]">Capture context, architectural choices, and lessons learned</p>
+                <h3 className="text-lg font-black text-[var(--text-heading)]">Add Technical Note / Decision</h3>
+                <p className="text-xs text-[var(--text-muted)]">Capture context, architectural choices, and lessons learned</p>
               </div>
-              <button onClick={() => setShowNoteModal(false)} className="text-lg text-[#8b98a5] hover:text-white font-bold">
-                ✕
+              <button
+                onClick={() => setShowNoteModal(false)}
+                className="flex h-7 w-7 items-center justify-center rounded-lg text-[var(--text-muted)] hover:text-[var(--text-heading)] hover:bg-[#232d39] transition cursor-pointer"
+              >
+                <X className="h-4 w-4" />
               </button>
             </div>
 

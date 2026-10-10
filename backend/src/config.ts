@@ -21,3 +21,7 @@ export const michiMaxInputChars = parseInt(process.env.MICHI_MAX_INPUT_CHARS || 
 export const michiMaxHistoryMessages = parseInt(process.env.MICHI_MAX_HISTORY_MESSAGES || "10", 10);
 export const michiMaxOutputTokens = parseInt(process.env.MICHI_MAX_OUTPUT_TOKENS || "1024", 10);
 export const michiDailyRequestLimit = parseInt(process.env.MICHI_DAILY_REQUEST_LIMIT || "100", 10);
+
+// Upstash Redis Cache Config
+export const upstashRedisRestUrl = process.env.UPSTASH_REDIS_REST_URL || "";
+export const upstashRedisRestToken = process.env.UPSTASH_REDIS_REST_TOKEN || "";

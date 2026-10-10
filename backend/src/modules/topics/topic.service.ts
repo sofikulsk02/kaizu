@@ -1,6 +1,7 @@
 import { prisma } from "../../database/prisma";
 import { NotFoundError } from "../../core/ApiError";
 import { CreateTopicDto, UpdateTopicDto } from "./topic.schema";
+import { CacheService } from "../../core/cache.service";
 
 export class TopicService {
   public static async createTopic(userId: string, chapterId: string, dto: CreateTopicDto) {
@@ -15,7 +16,7 @@ export class TopicService {
       throw new NotFoundError("Chapter not found");
     }
 
-    return prisma.topic.create({
+    const topic = await prisma.topic.create({
       data: {
         chapterId,
         title: dto.title,
@@ -27,6 +28,9 @@ export class TopicService {
         revisionDate: dto.revisionDate || null,
       },
     });
+
+    await CacheService.invalidateUserSubjects(userId);
+    return topic;
   }
 
   public static async updateTopic(userId: string, id: string, dto: UpdateTopicDto) {
@@ -43,7 +47,7 @@ export class TopicService {
       throw new NotFoundError("Topic not found");
     }
 
-    return prisma.topic.update({
+    const updated = await prisma.topic.update({
       where: { id },
       data: {
         ...(dto.title !== undefined && { title: dto.title }),
@@ -55,6 +59,9 @@ export class TopicService {
         ...(dto.revisionDate !== undefined && { revisionDate: dto.revisionDate }),
       },
     });
+
+    await CacheService.invalidateUserSubjects(userId);
+    return updated;
   }
 
   public static async deleteTopic(userId: string, id: string) {
@@ -75,6 +82,7 @@ export class TopicService {
       where: { id },
     });
 
+    await CacheService.invalidateUserSubjects(userId);
     return { success: true, message: "Topic deleted successfully" };
   }
 }

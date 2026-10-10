@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { Api, GoalStatus } from "../lib/api";
+import { X } from "lucide-react";
 
 interface CreateGoalModalProps {
   isOpen: boolean;
@@ -65,8 +66,11 @@ export const CreateGoalModal: React.FC<CreateGoalModalProps> = ({
             <h2 className="text-xl font-bold text-[var(--text-heading)]">Create Goal</h2>
             <p className="text-xs text-[var(--text-muted)]">What outcome do you want to achieve?</p>
           </div>
-          <button onClick={onClose} className="text-[var(--text-muted)] hover:text-[var(--text-heading)] font-bold text-lg">
-            ✕
+          <button
+            onClick={onClose}
+            className="flex h-7 w-7 items-center justify-center rounded-lg text-[var(--text-muted)] hover:text-[var(--text-heading)] hover:bg-[var(--surface-secondary)] transition cursor-pointer"
+          >
+            <X className="h-4 w-4" />
           </button>
         </div>
 

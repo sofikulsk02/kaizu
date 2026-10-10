@@ -1,5 +1,6 @@
 import { prisma } from "../../database/prisma";
 import { NotFoundError, ForbiddenError } from "../../core/ApiError";
+import { CacheService } from "../../core/cache.service";
 import {
   CreateProjectDto,
   UpdateProjectDto,
@@ -16,140 +17,156 @@ import { ProjectStatus } from "../../generated/prisma/enums";
 export class ProjectService {
   // Get all projects for user with summary metrics
   public static async getProjects(userId: string, status?: ProjectStatus) {
-    const where: any = { userId };
-    if (status) {
-      where.status = status;
-    }
+    const cacheKey = `kaizu:user:${userId}:projects:${status || "all"}`;
 
-    const projects = await prisma.project.findMany({
-      where,
-      include: {
-        milestones: {
-          orderBy: { sortOrder: "asc" },
-          select: { id: true, title: true, status: true },
-        },
-        tasks: {
-          select: { id: true, status: true },
-        },
-        workSessions: {
-          select: { durationMinutes: true, occurredAt: true },
-        },
+    return CacheService.fetchOrSet(
+      cacheKey,
+      async () => {
+        const where: any = { userId };
+        if (status) {
+          where.status = status;
+        }
+
+        const projects = await prisma.project.findMany({
+          where,
+          include: {
+            milestones: {
+              orderBy: { sortOrder: "asc" },
+              select: { id: true, title: true, status: true },
+            },
+            tasks: {
+              select: { id: true, status: true },
+            },
+            workSessions: {
+              select: { durationMinutes: true, occurredAt: true },
+            },
+          },
+          orderBy: { updatedAt: "desc" },
+        });
+
+        return projects.map((project: any) => {
+          const totalTasks = project.tasks.length;
+          const completedTasks = project.tasks.filter((t: any) => t.status === "COMPLETED").length;
+          const totalEffortMinutes = project.workSessions.reduce((acc: number, s: any) => acc + s.durationMinutes, 0);
+          const currentMilestone = project.milestones.find((m: any) => m.status === "IN_PROGRESS") || project.milestones[0];
+
+          return {
+            id: project.id,
+            userId: project.userId,
+            goalId: project.goalId,
+            subjectId: project.subjectId,
+            name: project.name,
+            description: project.description,
+            category: project.category,
+            status: project.status,
+            targetDate: project.targetDate,
+            nextAction: project.nextAction,
+            completedAt: project.completedAt,
+            milestoneCount: project.milestones.length,
+            currentMilestoneTitle: currentMilestone ? currentMilestone.title : null,
+            totalTasksCount: totalTasks,
+            completedTasksCount: completedTasks,
+            totalEffortMinutes,
+            createdAt: project.createdAt,
+            updatedAt: project.updatedAt,
+          };
+        });
       },
-      orderBy: { updatedAt: "desc" },
-    });
-
-    return projects.map((project: any) => {
-      const totalTasks = project.tasks.length;
-      const completedTasks = project.tasks.filter((t: any) => t.status === "COMPLETED").length;
-      const totalEffortMinutes = project.workSessions.reduce((acc: number, s: any) => acc + s.durationMinutes, 0);
-      const currentMilestone = project.milestones.find((m: any) => m.status === "IN_PROGRESS") || project.milestones[0];
-
-      return {
-        id: project.id,
-        userId: project.userId,
-        goalId: project.goalId,
-        subjectId: project.subjectId,
-        name: project.name,
-        description: project.description,
-        category: project.category,
-        status: project.status,
-        targetDate: project.targetDate,
-        nextAction: project.nextAction,
-        completedAt: project.completedAt,
-        milestoneCount: project.milestones.length,
-        currentMilestoneTitle: currentMilestone ? currentMilestone.title : null,
-        totalTasksCount: totalTasks,
-        completedTasksCount: completedTasks,
-        totalEffortMinutes,
-        createdAt: project.createdAt,
-        updatedAt: project.updatedAt,
-      };
-    });
+      300
+    );
   }
 
   // Get project by ID with full detail and computed metrics
   public static async getProjectById(userId: string, projectId: string) {
-    const project = await prisma.project.findUnique({
-      where: { id: projectId },
-      include: {
-        milestones: {
-          orderBy: { sortOrder: "asc" },
+    const cacheKey = `kaizu:user:${userId}:projects:${projectId}`;
+
+    return CacheService.fetchOrSet(
+      cacheKey,
+      async () => {
+        const project = await prisma.project.findUnique({
+          where: { id: projectId },
           include: {
+            milestones: {
+              orderBy: { sortOrder: "asc" },
+              include: {
+                tasks: {
+                  orderBy: { sortOrder: "asc" },
+                },
+              },
+            },
             tasks: {
+              where: { milestoneId: null },
               orderBy: { sortOrder: "asc" },
             },
+            workSessions: {
+              orderBy: { occurredAt: "desc" },
+              include: {
+                milestone: { select: { id: true, title: true } },
+                task: { select: { id: true, title: true } },
+              },
+            },
+            notes: {
+              orderBy: { updatedAt: "desc" },
+            },
+            goal: { select: { id: true, title: true } },
+            subject: { select: { id: true, name: true } },
           },
-        },
-        tasks: {
-          where: { milestoneId: null },
-          orderBy: { sortOrder: "asc" },
-        },
-        workSessions: {
-          orderBy: { occurredAt: "desc" },
-          include: {
-            milestone: { select: { id: true, title: true } },
-            task: { select: { id: true, title: true } },
+        });
+
+        if (!project) {
+          throw new NotFoundError("Project not found");
+        }
+
+        if (project.userId !== userId) {
+          throw new ForbiddenError("You do not have permission to access this project");
+        }
+
+        // Compute metrics
+        const allTasks = [
+          ...project.tasks,
+          ...project.milestones.flatMap((m: any) => m.tasks),
+        ];
+        const completedTasksCount = allTasks.filter((t: any) => t.status === "COMPLETED").length;
+        const totalTasksCount = allTasks.length;
+        const taskProgressPercentage =
+          totalTasksCount > 0 ? Math.round((completedTasksCount / totalTasksCount) * 100) : null;
+
+        const completedMilestonesCount = project.milestones.filter((m: any) => m.status === "COMPLETED").length;
+        const totalMilestonesCount = project.milestones.length;
+
+        const totalEffortMinutes = project.workSessions.reduce((acc: number, s: any) => acc + s.durationMinutes, 0);
+
+        const activeDaysSet = new Set(
+          project.workSessions.map((s: any) => new Date(s.occurredAt).toISOString().split("T")[0])
+        );
+        const activeDaysCount = activeDaysSet.size;
+
+        const currentMilestone = project.milestones.find((m: any) => m.status === "IN_PROGRESS") || project.milestones[0] || null;
+
+        return {
+          ...project,
+          directTasks: project.tasks,
+          metrics: {
+            completedTasksCount,
+            totalTasksCount,
+            taskProgressPercentage,
+            completedMilestonesCount,
+            totalMilestonesCount,
+            totalEffortMinutes,
+            activeDaysCount,
           },
-        },
-        notes: {
-          orderBy: { updatedAt: "desc" },
-        },
-        goal: { select: { id: true, title: true } },
-        subject: { select: { id: true, name: true } },
+          currentMilestone: currentMilestone
+            ? { id: currentMilestone.id, title: currentMilestone.title, status: currentMilestone.status }
+            : null,
+        };
       },
-    });
-
-    if (!project) {
-      throw new NotFoundError("Project not found");
-    }
-
-    if (project.userId !== userId) {
-      throw new ForbiddenError("You do not have permission to access this project");
-    }
-
-    // Compute metrics
-    const allTasks = [
-      ...project.tasks,
-      ...project.milestones.flatMap((m: any) => m.tasks),
-    ];
-    const completedTasksCount = allTasks.filter((t: any) => t.status === "COMPLETED").length;
-    const totalTasksCount = allTasks.length;
-    const taskProgressPercentage =
-      totalTasksCount > 0 ? Math.round((completedTasksCount / totalTasksCount) * 100) : null;
-
-    const completedMilestonesCount = project.milestones.filter((m: any) => m.status === "COMPLETED").length;
-    const totalMilestonesCount = project.milestones.length;
-
-    const totalEffortMinutes = project.workSessions.reduce((acc: number, s: any) => acc + s.durationMinutes, 0);
-
-    const activeDaysSet = new Set(
-      project.workSessions.map((s: any) => new Date(s.occurredAt).toISOString().split("T")[0])
+      300
     );
-    const activeDaysCount = activeDaysSet.size;
-
-    const currentMilestone = project.milestones.find((m: any) => m.status === "IN_PROGRESS") || project.milestones[0] || null;
-
-    return {
-      ...project,
-      directTasks: project.tasks,
-      metrics: {
-        completedTasksCount,
-        totalTasksCount,
-        taskProgressPercentage,
-        completedMilestonesCount,
-        totalMilestonesCount,
-        totalEffortMinutes,
-        activeDaysCount,
-      },
-      currentMilestone: currentMilestone
-        ? { id: currentMilestone.id, title: currentMilestone.title, status: currentMilestone.status }
-        : null,
-    };
   }
 
   // Create Project
   public static async createProject(userId: string, dto: CreateProjectDto) {
-    return prisma.project.create({
+    const created = await prisma.project.create({
       data: {
         userId,
         name: dto.name,
@@ -162,6 +179,9 @@ export class ProjectService {
         subjectId: dto.subjectId || undefined,
       },
     });
+
+    await CacheService.invalidateUserProjects(userId);
+    return created;
   }
 
   // Update Project
@@ -187,10 +207,13 @@ export class ProjectService {
     if (dto.goalId !== undefined) data.goalId = dto.goalId;
     if (dto.subjectId !== undefined) data.subjectId = dto.subjectId;
 
-    return prisma.project.update({
+    const updated = await prisma.project.update({
       where: { id: projectId },
       data,
     });
+
+    await CacheService.invalidateUserProjects(userId);
+    return updated;
   }
 
   // Delete Project
@@ -199,7 +222,9 @@ export class ProjectService {
     if (!existing) throw new NotFoundError("Project not found");
     if (existing.userId !== userId) throw new ForbiddenError("Forbidden");
 
-    return prisma.project.delete({ where: { id: projectId } });
+    const deleted = await prisma.project.delete({ where: { id: projectId } });
+    await CacheService.invalidateUserProjects(userId);
+    return deleted;
   }
 
   // --- Milestones ---
@@ -208,7 +233,7 @@ export class ProjectService {
     if (!project) throw new NotFoundError("Project not found");
     if (project.userId !== userId) throw new ForbiddenError("Forbidden");
 
-    return prisma.projectMilestone.create({
+    const created = await prisma.projectMilestone.create({
       data: {
         projectId,
         title: dto.title,
@@ -218,6 +243,9 @@ export class ProjectService {
         sortOrder: dto.sortOrder ?? 0,
       },
     });
+
+    await CacheService.invalidateUserProjects(userId);
+    return created;
   }
 
   public static async updateMilestone(
@@ -245,10 +273,13 @@ export class ProjectService {
     if (dto.status !== undefined) data.status = dto.status;
     if (dto.sortOrder !== undefined) data.sortOrder = dto.sortOrder;
 
-    return prisma.projectMilestone.update({
+    const updated = await prisma.projectMilestone.update({
       where: { id: milestoneId },
       data,
     });
+
+    await CacheService.invalidateUserProjects(userId);
+    return updated;
   }
 
   public static async deleteMilestone(userId: string, projectId: string, milestoneId: string) {
@@ -264,7 +295,9 @@ export class ProjectService {
       throw new ForbiddenError("Forbidden");
     }
 
-    return prisma.projectMilestone.delete({ where: { id: milestoneId } });
+    const deleted = await prisma.projectMilestone.delete({ where: { id: milestoneId } });
+    await CacheService.invalidateUserProjects(userId);
+    return deleted;
   }
 
   // --- Tasks ---
@@ -273,7 +306,7 @@ export class ProjectService {
     if (!project) throw new NotFoundError("Project not found");
     if (project.userId !== userId) throw new ForbiddenError("Forbidden");
 
-    return prisma.projectTask.create({
+    const created = await prisma.projectTask.create({
       data: {
         projectId,
         milestoneId: dto.milestoneId || undefined,
@@ -285,6 +318,9 @@ export class ProjectService {
         estimateMinutes: dto.estimateMinutes || undefined,
       },
     });
+
+    await CacheService.invalidateUserProjects(userId);
+    return created;
   }
 
   public static async updateTask(
@@ -322,10 +358,13 @@ export class ProjectService {
       }
     }
 
-    return prisma.projectTask.update({
+    const updated = await prisma.projectTask.update({
       where: { id: taskId },
       data,
     });
+
+    await CacheService.invalidateUserProjects(userId);
+    return updated;
   }
 
   public static async deleteTask(userId: string, projectId: string, taskId: string) {
@@ -341,7 +380,9 @@ export class ProjectService {
       throw new ForbiddenError("Forbidden");
     }
 
-    return prisma.projectTask.delete({ where: { id: taskId } });
+    const deleted = await prisma.projectTask.delete({ where: { id: taskId } });
+    await CacheService.invalidateUserProjects(userId);
+    return deleted;
   }
 
   // --- Work Sessions ---
@@ -358,7 +399,7 @@ export class ProjectService {
       });
     }
 
-    return prisma.projectWorkSession.create({
+    const created = await prisma.projectWorkSession.create({
       data: {
         userId,
         projectId,
@@ -376,6 +417,9 @@ export class ProjectService {
         task: { select: { id: true, title: true } },
       },
     });
+
+    await CacheService.invalidateUserProjects(userId);
+    return created;
   }
 
   public static async deleteWorkSession(userId: string, projectId: string, sessionId: string) {
@@ -390,7 +434,9 @@ export class ProjectService {
       throw new ForbiddenError("Forbidden");
     }
 
-    return prisma.projectWorkSession.delete({ where: { id: sessionId } });
+    const deleted = await prisma.projectWorkSession.delete({ where: { id: sessionId } });
+    await CacheService.invalidateUserProjects(userId);
+    return deleted;
   }
 
   // --- Notes & Decisions ---
@@ -399,7 +445,7 @@ export class ProjectService {
     if (!project) throw new NotFoundError("Project not found");
     if (project.userId !== userId) throw new ForbiddenError("Forbidden");
 
-    return prisma.projectNote.create({
+    const created = await prisma.projectNote.create({
       data: {
         projectId,
         title: dto.title,
@@ -407,6 +453,9 @@ export class ProjectService {
         content: dto.content,
       },
     });
+
+    await CacheService.invalidateUserProjects(userId);
+    return created;
   }
 
   public static async updateNote(userId: string, projectId: string, noteId: string, dto: UpdateProjectNoteDto) {
@@ -427,10 +476,13 @@ export class ProjectService {
     if (dto.category !== undefined) data.category = dto.category;
     if (dto.content !== undefined) data.content = dto.content;
 
-    return prisma.projectNote.update({
+    const updated = await prisma.projectNote.update({
       where: { id: noteId },
       data,
     });
+
+    await CacheService.invalidateUserProjects(userId);
+    return updated;
   }
 
   public static async deleteNote(userId: string, projectId: string, noteId: string) {
@@ -446,6 +498,8 @@ export class ProjectService {
       throw new ForbiddenError("Forbidden");
     }
 
-    return prisma.projectNote.delete({ where: { id: noteId } });
+    const deleted = await prisma.projectNote.delete({ where: { id: noteId } });
+    await CacheService.invalidateUserProjects(userId);
+    return deleted;
   }
 }

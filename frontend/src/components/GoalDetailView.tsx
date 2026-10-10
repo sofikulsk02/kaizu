@@ -12,6 +12,7 @@ import {
   TaskPriority,
   CoachAnalysis,
 } from "../lib/api";
+import { ArrowLeft, Pencil, Clock, Target, AlertTriangle, Sparkles, Lightbulb, Zap, Sprout, Map, Check, Plus, Bot } from "lucide-react";
 
 interface GoalDetailViewProps {
   goalDetail: GoalDetail;
@@ -267,27 +268,30 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
       <div className="flex flex-wrap items-center justify-between gap-4">
         <button
           onClick={onBack}
-          className="inline-flex items-center space-x-2 text-xs font-bold text-[var(--muted-text)] hover:text-white transition"
+          className="inline-flex items-center space-x-1.5 text-xs font-bold text-[var(--text-secondary)] hover:text-[var(--crimson)] transition-colors cursor-pointer group"
         >
-          <span>← Back to Goals</span>
-          <span>/</span>
-          <span className="text-[var(--fg-main)] font-black">
+          <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-1 text-[var(--crimson)]" />
+          <span className="group-hover:underline">Back to Goals</span>
+          <span className="text-[var(--border-strong)] mx-1">/</span>
+          <span className="text-[var(--text-heading)] font-black">
             {goalDetail.category || "General"}
           </span>
         </button>
 
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-2 sm:space-x-3">
           <button
             onClick={() => setShowEditGoal(true)}
-            className="clay-btn-secondary px-3.5 py-1.5 text-xs font-bold"
+            className="paper-btn-secondary inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold cursor-pointer"
           >
-            ⚙️ Edit Goal
+            <Pencil className="h-3.5 w-3.5" />
+            <span>Edit Goal</span>
           </button>
           <button
             onClick={() => setShowLogAction(true)}
-            className="clay-btn-primary px-4 py-1.5 text-xs font-extrabold shadow-md"
+            className="paper-btn-primary inline-flex items-center gap-1.5 px-4 py-1.5 text-xs font-bold shadow-xs cursor-pointer active:scale-95 transition-all"
           >
-            📝 Log Work / Action
+            <Clock className="h-3.5 w-3.5" />
+            <span>Log Work / Action</span>
           </button>
         </div>
       </div>
@@ -320,7 +324,7 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
               )}
             </div>
 
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight text-white">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight text-[var(--text-heading)]">
               {goalDetail.title}
             </h1>
 
@@ -332,10 +336,11 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
 
             {goalDetail.successDefinition && (
               <div className="clay-surface bg-[var(--surface-nested)] p-4 text-xs space-y-1">
-                <div className="font-black uppercase tracking-wider text-[var(--accent-color)]">
-                  🎯 Success Criteria / Desired Outcome
+                <div className="font-black uppercase tracking-wider text-[var(--accent-color)] inline-flex items-center gap-1.5">
+                  <Target className="h-3.5 w-3.5" />
+                  <span>Success Criteria / Desired Outcome</span>
                 </div>
-                <div className="text-white font-medium">{goalDetail.successDefinition}</div>
+                <div className="text-[var(--text-primary)] font-medium">{goalDetail.successDefinition}</div>
               </div>
             )}
           </div>
@@ -362,7 +367,7 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
             <div className="text-[10px] font-black uppercase text-[var(--muted-text)]">
               Milestones Completed
             </div>
-            <div className="text-xl font-black text-white">
+            <div className="text-xl font-black text-[var(--text-heading)]">
               {metrics.completedMilestonesCount} / {metrics.totalMilestonesCount}
             </div>
             <div className="text-[11px] text-[var(--muted-text)]">
@@ -374,7 +379,7 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
             <div className="text-[10px] font-black uppercase text-[var(--muted-text)]">
               Task Execution
             </div>
-            <div className="text-xl font-black text-white">
+            <div className="text-xl font-black text-[var(--text-heading)]">
               {metrics.completedTasksCount} / {metrics.totalTasksCount}
             </div>
             <div className="text-[11px] text-[var(--muted-text)]">Actionable work items</div>
@@ -396,7 +401,7 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
             <div className="text-[10px] font-black uppercase text-[var(--muted-text)]">
               Consistency
             </div>
-            <div className="text-xl font-black text-white">
+            <div className="text-xl font-black text-[var(--text-heading)]">
               {metrics.activeDaysCount} {metrics.activeDaysCount === 1 ? "active day" : "active days"}
             </div>
             <div className="text-[11px] text-[var(--muted-text)]">Days with logged action</div>
@@ -409,12 +414,14 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
         <div className="clay-surface p-6 space-y-4 bg-gradient-to-r from-[var(--surface-bg)] to-[var(--surface-nested)] border border-[var(--accent-color)]/40">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center space-x-2">
-              <span className="clay-badge bg-[var(--badge-bg)] px-3 py-1 text-xs font-black text-[var(--accent-color)]">
-                🤖 INTELLIGENT GOAL COACH
+              <span className="clay-badge bg-[var(--badge-bg)] px-3 py-1 text-xs font-black text-[var(--accent-color)] inline-flex items-center gap-1.5">
+                <Bot className="h-3.5 w-3.5" />
+                <span>INTELLIGENT GOAL COACH</span>
               </span>
               {coachAnalysis.isStalled && (
-                <span className="clay-badge bg-red-500/20 text-red-300 px-2.5 py-0.5 text-xs font-extrabold">
-                  ⚠️ STALLED GOAL DETECTED
+                <span className="clay-badge bg-red-500/20 text-red-300 px-2.5 py-0.5 text-xs font-extrabold inline-flex items-center gap-1">
+                  <AlertTriangle className="h-3 w-3" />
+                  <span>STALLED GOAL DETECTED</span>
                 </span>
               )}
             </div>
@@ -422,18 +429,26 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
             <button
               onClick={handleGenerateBreakdown}
               disabled={generatingBreakdown}
-              className="clay-btn-primary px-3.5 py-1.5 text-xs font-extrabold text-[var(--btn-primary-text)] shadow"
+              className="clay-btn-primary px-3.5 py-1.5 text-xs font-extrabold text-[var(--btn-primary-text)] shadow cursor-pointer inline-flex items-center gap-1.5"
             >
-              {generatingBreakdown ? "Generating..." : "✨ Auto-Breakdown into Milestones & Tasks"}
+              {generatingBreakdown ? (
+                "Generating..."
+              ) : (
+                <>
+                  <Sparkles className="h-3.5 w-3.5" />
+                  <span>Auto-Breakdown into Milestones & Tasks</span>
+                </>
+              )}
             </button>
           </div>
 
-          <div className="text-xs text-white leading-relaxed space-y-2">
-            <p className="font-semibold text-sm text-[var(--fg-main)]">
-              💡 {coachAnalysis.advice}
-            </p>
+          <div className="text-xs text-[var(--text-secondary)] leading-relaxed space-y-2">
+            <div className="font-semibold text-sm text-[var(--fg-main)] inline-flex items-start gap-1.5">
+              <Lightbulb className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
+              <span>{coachAnalysis.advice}</span>
+            </div>
             {coachAnalysis.stalledReason && (
-              <p className="text-amber-200 font-medium">
+              <p className="text-amber-600 dark:text-amber-300 font-medium">
                 {coachAnalysis.stalledReason}
               </p>
             )}
@@ -444,7 +459,7 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
               <span className="font-bold text-[var(--muted-text)]">Recurring Blockers Detected: </span>
               <div className="flex flex-wrap gap-1.5 mt-1">
                 {coachAnalysis.recurringBlockers.map((b, i) => (
-                  <span key={i} className="clay-badge bg-amber-500/15 text-amber-200 px-2 py-0.5 text-[10px]">
+                  <span key={i} className="clay-badge bg-amber-500/15 text-amber-700 dark:text-amber-300 px-2 py-0.5 text-[10px]">
                     {b}
                   </span>
                 ))}
@@ -459,9 +474,10 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <div className="inline-flex items-center space-x-2 clay-badge bg-[var(--badge-bg)] px-3.5 py-1 text-xs font-bold text-[var(--accent-color)]">
-              <span>⚡ TODAY'S FOCUS WORKFLOW</span>
+              <Zap className="h-3.5 w-3.5" />
+              <span>TODAY'S FOCUS WORKFLOW</span>
             </div>
-            <h2 className="mt-2 text-xl font-black text-white sm:text-2xl">
+            <h2 className="mt-2 text-xl font-black text-[var(--text-heading)] sm:text-2xl">
               What is one meaningful action you can do next?
             </h2>
             <p className="text-xs text-[var(--muted-text)] mt-0.5">
@@ -471,9 +487,10 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
 
           <button
             onClick={() => setShowLogAction(true)}
-            className="clay-btn-primary px-5 py-3 text-xs font-black shadow-lg self-start sm:self-auto"
+            className="paper-btn-primary px-5 py-3 text-xs font-black shadow-xs self-start sm:self-auto cursor-pointer inline-flex items-center gap-1.5"
           >
-            + Log What I Did Today
+            <Plus className="h-3.5 w-3.5" />
+            <span>Log What I Did Today</span>
           </button>
         </div>
 
@@ -485,12 +502,13 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
                   {todaysFocusTask.priority} PRIORITY
                 </span>
                 {todaysFocusTask.estimateMinutes && (
-                  <span className="text-xs text-[var(--muted-text)] font-semibold">
-                    ⏱️ ~{todaysFocusTask.estimateMinutes} min estimate
+                  <span className="text-xs text-[var(--muted-text)] font-semibold inline-flex items-center gap-1">
+                    <Clock className="h-3 w-3" />
+                    ~{todaysFocusTask.estimateMinutes} min estimate
                   </span>
                 )}
               </div>
-              <h3 className="text-lg font-black text-white">{todaysFocusTask.title}</h3>
+              <h3 className="text-lg font-black text-[var(--text-heading)]">{todaysFocusTask.title}</h3>
               {todaysFocusTask.description && (
                 <p className="text-xs text-[var(--muted-text)]">{todaysFocusTask.description}</p>
               )}
@@ -499,9 +517,10 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
             <div className="flex flex-wrap items-center gap-3">
               <button
                 onClick={() => handleToggleTaskStatus(todaysFocusTask)}
-                className="clay-btn-primary px-4 py-2.5 text-xs font-extrabold"
+                className="paper-btn-primary px-4 py-2.5 text-xs font-extrabold cursor-pointer inline-flex items-center gap-1.5"
               >
-                ✓ Complete Task
+                <Check className="h-3.5 w-3.5" />
+                <span>Complete Task</span>
               </button>
               <button
                 onClick={() => {
@@ -509,16 +528,21 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
                   setActSummary(`Worked on: ${todaysFocusTask.title}`);
                   setShowLogAction(true);
                 }}
-                className="clay-btn-secondary px-4 py-2.5 text-xs font-extrabold"
+                className="paper-btn-secondary px-4 py-2.5 text-xs font-extrabold cursor-pointer inline-flex items-center gap-1.5"
               >
-                ⏱️ Log Work Against Task
+                <Clock className="h-3.5 w-3.5" />
+                <span>Log Work Against Task</span>
               </button>
             </div>
           </div>
         ) : (
           <div className="clay-surface bg-[var(--surface-nested)] p-6 text-center space-y-3">
-            <div className="text-3xl">🌱</div>
-            <div className="font-bold text-white text-sm">
+            <div className="flex justify-center">
+              <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--badge-bg)] text-[var(--accent-color)] shadow-xs">
+                <Sprout className="h-6 w-6" strokeWidth={1.8} />
+              </span>
+            </div>
+            <div className="font-bold text-[var(--text-heading)] text-sm">
               No tasks planned yet. Choose your next step.
             </div>
             <p className="text-xs text-[var(--muted-text)] max-w-md mx-auto">
@@ -530,13 +554,13 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
                   setTargetMilestoneId(undefined);
                   setShowAddTask(true);
                 }}
-                className="clay-btn-secondary px-4 py-2 text-xs font-bold"
+                className="paper-btn-secondary px-4 py-2 text-xs font-bold cursor-pointer"
               >
                 + Add Task
               </button>
               <button
                 onClick={() => setShowAddMilestone(true)}
-                className="clay-btn-secondary px-4 py-2 text-xs font-bold"
+                className="paper-btn-secondary px-4 py-2 text-xs font-bold cursor-pointer"
               >
                 + Add Milestone
               </button>
@@ -546,43 +570,43 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
       </div>
 
       {/* Navigation Sub-Tabs for Goal Sections */}
-      <div className="flex space-x-2 border-b border-[var(--inset-highlight)] pb-3 overflow-x-auto">
+      <div className="flex space-x-2 border-b border-[var(--border-subtle)] pb-3 overflow-x-auto">
         <button
           onClick={() => setActiveTabSection("focus")}
-          className={`px-4 py-2 text-xs font-black rounded-xl transition ${
+          className={`px-4 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer ${
             activeTabSection === "focus"
-              ? "clay-btn-primary"
-              : "text-[var(--muted-text)] hover:text-white"
+              ? "bg-[var(--forest-green)] text-white shadow-xs"
+              : "text-[var(--text-secondary)] hover:text-[var(--text-heading)] hover:bg-[var(--surface-hover)]"
           }`}
         >
           Plan & Milestones ({goalDetail.milestones.length})
         </button>
         <button
           onClick={() => setActiveTabSection("tasks")}
-          className={`px-4 py-2 text-xs font-black rounded-xl transition ${
+          className={`px-4 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer ${
             activeTabSection === "tasks"
-              ? "clay-btn-primary"
-              : "text-[var(--muted-text)] hover:text-white"
+              ? "bg-[var(--forest-green)] text-white shadow-xs"
+              : "text-[var(--text-secondary)] hover:text-[var(--text-heading)] hover:bg-[var(--surface-hover)]"
           }`}
         >
           Tasks ({goalDetail.tasks.length})
         </button>
         <button
           onClick={() => setActiveTabSection("actions")}
-          className={`px-4 py-2 text-xs font-black rounded-xl transition ${
+          className={`px-4 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer ${
             activeTabSection === "actions"
-              ? "clay-btn-primary"
-              : "text-[var(--muted-text)] hover:text-white"
+              ? "bg-[var(--forest-green)] text-white shadow-xs"
+              : "text-[var(--text-secondary)] hover:text-[var(--text-heading)] hover:bg-[var(--surface-hover)]"
           }`}
         >
           Daily Actions ({goalDetail.dailyActions.length})
         </button>
         <button
           onClick={() => setActiveTabSection("reflection")}
-          className={`px-4 py-2 text-xs font-black rounded-xl transition ${
+          className={`px-4 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer ${
             activeTabSection === "reflection"
-              ? "clay-btn-primary"
-              : "text-[var(--muted-text)] hover:text-white"
+              ? "bg-[var(--forest-green)] text-white shadow-xs"
+              : "text-[var(--text-secondary)] hover:text-[var(--text-heading)] hover:bg-[var(--surface-hover)]"
           }`}
         >
           Hansei & Reflections ({goalDetail.reflections.length})
@@ -594,14 +618,14 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-xl font-bold text-white">Plan & Milestones</h2>
+              <h2 className="text-xl font-bold text-[var(--text-heading)]">Plan & Milestones</h2>
               <p className="text-xs text-[var(--muted-text)]">
                 Break the outcome into meaningful stages
               </p>
             </div>
             <button
               onClick={() => setShowAddMilestone(true)}
-              className="clay-btn-primary px-4 py-2 text-xs font-extrabold"
+              className="paper-btn-primary px-4 py-2 text-xs font-bold cursor-pointer"
             >
               + Add Milestone
             </button>
@@ -609,24 +633,30 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
 
           {goalDetail.milestones.length === 0 ? (
             <div className="clay-surface p-8 text-center space-y-3 bg-[var(--surface-nested)]">
-              <div className="text-3xl">🗺️</div>
-              <div className="font-bold text-white text-sm">No milestones added yet</div>
+              <div className="flex justify-center">
+                <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--badge-bg)] text-[var(--accent-color)] shadow-xs">
+                  <Map className="h-6 w-6" strokeWidth={1.8} />
+                </span>
+              </div>
+              <div className="font-bold text-[var(--text-heading)] text-sm">No milestones added yet</div>
               <p className="text-xs text-[var(--muted-text)]">
                 Add milestones when you know the major stages required to achieve this goal.
               </p>
               <div className="flex justify-center gap-3 pt-2">
                 <button
                   onClick={() => setShowAddMilestone(true)}
-                  className="clay-btn-secondary px-4 py-2 text-xs font-bold"
+                  className="paper-btn-secondary px-4 py-2 text-xs font-bold cursor-pointer inline-flex items-center gap-1.5"
                 >
-                  + Add First Milestone
+                  <Plus className="h-3.5 w-3.5" />
+                  <span>Add First Milestone</span>
                 </button>
                 <button
                   onClick={handleGenerateBreakdown}
                   disabled={generatingBreakdown}
-                  className="clay-btn-primary px-4 py-2 text-xs font-extrabold"
+                  className="paper-btn-primary px-4 py-2 text-xs font-bold cursor-pointer inline-flex items-center gap-1.5"
                 >
-                  ✨ Auto-Suggest Milestones
+                  <Sparkles className="h-3.5 w-3.5" />
+                  <span>Auto-Suggest Milestones</span>
                 </button>
               </div>
             </div>
@@ -652,7 +682,7 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
                             {ms.status}
                           </span>
                         </div>
-                        <h3 className="text-lg font-black text-white">{ms.title}</h3>
+                        <h3 className="text-lg font-black text-[var(--text-heading)]">{ms.title}</h3>
                         {ms.description && (
                           <p className="text-xs text-[var(--muted-text)]">{ms.description}</p>
                         )}
@@ -660,7 +690,7 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
 
                       <div className="flex items-center space-x-3">
                         <div className="text-right text-xs text-[var(--muted-text)]">
-                          <div className="font-bold text-white">
+                          <div className="font-bold text-[var(--text-heading)]">
                             {msCompletedTasks} / {ms.tasks.length} tasks
                           </div>
                           {ms.targetDate && (
@@ -672,7 +702,7 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
                             setTargetMilestoneId(ms.id);
                             setShowAddTask(true);
                           }}
-                          className="clay-btn-secondary px-3 py-1.5 text-xs font-bold"
+                          className="paper-btn-secondary px-3 py-1.5 text-xs font-bold cursor-pointer"
                         >
                           + Task
                         </button>
@@ -698,7 +728,7 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
                                 className={`font-bold ${
                                   task.status === "COMPLETED"
                                     ? "line-through text-[var(--muted-text)]"
-                                    : "text-white"
+                                    : "text-[var(--text-heading)]"
                                 }`}
                               >
                                 {task.title}
@@ -732,7 +762,7 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
         <div className="clay-surface p-6 space-y-5">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-xl font-bold text-white">Tasks & Actionable Work</h2>
+              <h2 className="text-xl font-bold text-[var(--text-heading)]">Tasks & Actionable Work</h2>
               <p className="text-xs text-[var(--muted-text)]">
                 Manage specific steps required for this goal
               </p>
@@ -742,7 +772,7 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
                 setTargetMilestoneId(undefined);
                 setShowAddTask(true);
               }}
-              className="clay-btn-primary px-4 py-2 text-xs font-extrabold"
+              className="paper-btn-primary px-4 py-2 text-xs font-bold cursor-pointer"
             >
               + Add Task
             </button>
@@ -771,7 +801,7 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
                         className={`font-bold ${
                           task.status === "COMPLETED"
                             ? "line-through text-[var(--muted-text)]"
-                            : "text-white"
+                            : "text-[var(--text-heading)]"
                         }`}
                       >
                         {task.title}
@@ -790,7 +820,7 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
                     </span>
                     <button
                       onClick={() => Api.deleteGoalTask(goalDetail.id, task.id).then(onRefresh)}
-                      className="text-[10px] font-bold text-red-400 hover:underline"
+                      className="text-[10px] font-bold text-red-400 hover:underline cursor-pointer"
                     >
                       Delete
                     </button>
@@ -807,14 +837,14 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
         <div className="clay-surface p-6 space-y-5">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-xl font-bold text-white">Daily Actions Log</h2>
+              <h2 className="text-xl font-bold text-[var(--text-heading)]">Daily Actions Log</h2>
               <p className="text-xs text-[var(--muted-text)]">
                 Record of work actually performed toward this goal
               </p>
             </div>
             <button
               onClick={() => setShowLogAction(true)}
-              className="clay-btn-primary px-4 py-2 text-xs font-extrabold"
+              className="paper-btn-primary px-4 py-2 text-xs font-bold cursor-pointer"
             >
               + Log Work
             </button>
@@ -837,39 +867,43 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
                           day: "numeric",
                           year: "numeric",
                         })}
-                        {action.durationMinutes && ` · ⏱️ ${action.durationMinutes} mins`}
+                        {action.durationMinutes && (
+                          <span className="inline-flex items-center gap-1 ml-1.5">
+                            · <Clock className="h-3 w-3 inline" /> {action.durationMinutes} mins
+                          </span>
+                        )}
                       </div>
-                      <h4 className="text-sm font-black text-white mt-1">{action.summary}</h4>
+                      <h4 className="text-sm font-black text-[var(--text-heading)] mt-1">{action.summary}</h4>
                     </div>
                     <button
                       onClick={() => Api.deleteDailyAction(goalDetail.id, action.id).then(onRefresh)}
-                      className="text-[10px] text-red-400 font-bold hover:underline"
+                      className="text-[10px] text-red-400 font-bold hover:underline cursor-pointer"
                     >
                       Delete
                     </button>
                   </div>
 
                   {action.outcome && (
-                    <div className="text-xs text-[var(--fg-main)] bg-black/20 p-2.5 rounded-lg">
-                      <strong className="text-emerald-400">Accomplishment / Result:</strong>{" "}
+                    <div className="text-xs text-[var(--fg-main)] bg-black/10 dark:bg-black/30 p-2.5 rounded-lg border border-[var(--border-subtle)]">
+                      <strong className="text-[var(--forest-green)] dark:text-emerald-400">Accomplishment / Result:</strong>{" "}
                       {action.outcome}
                     </div>
                   )}
 
                   {action.blocker && (
-                    <div className="text-xs text-amber-200 bg-amber-500/10 p-2.5 rounded-lg border border-amber-500/20">
+                    <div className="text-xs text-amber-800 dark:text-amber-200 bg-amber-500/10 p-2.5 rounded-lg border border-amber-500/20">
                       <strong>Blocker / Difficulty:</strong> {action.blocker}
                     </div>
                   )}
 
                   {action.nextStep && (
-                    <div className="flex items-center justify-between text-xs text-sky-200 bg-sky-500/10 p-2.5 rounded-lg border border-sky-500/20">
+                    <div className="flex items-center justify-between text-xs text-sky-800 dark:text-sky-200 bg-sky-500/10 p-2.5 rounded-lg border border-sky-500/20">
                       <div>
                         <strong>Next Step:</strong> {action.nextStep}
                       </div>
                       <button
                         onClick={() => handleCreateTaskFromNextStep(action.nextStep!)}
-                        className="clay-btn-secondary px-2.5 py-1 text-[10px] font-bold text-sky-200"
+                        className="paper-btn-secondary px-2.5 py-1 text-[10px] font-bold cursor-pointer"
                       >
                         + Convert to Task
                       </button>
@@ -886,7 +920,7 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
       {activeTabSection === "reflection" && (
         <div className="clay-surface p-6 space-y-5">
           <div>
-            <h2 className="text-xl font-bold text-white">Hansei & Reflections</h2>
+            <h2 className="text-xl font-bold text-[var(--text-heading)]">Hansei & Reflections</h2>
             <p className="text-xs text-[var(--muted-text)]">
               Interpret what happened, capture learnings, and adjust your execution loop.
             </p>
@@ -934,7 +968,7 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
       {showAddMilestone && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <div className="clay-modal w-full max-w-md p-6 space-y-5">
-            <h3 className="text-lg font-black text-white">Add Milestone / Stage</h3>
+            <h3 className="text-lg font-black text-[var(--text-heading)]">Add Milestone / Stage</h3>
             <form onSubmit={handleCreateMilestone} className="space-y-4 text-xs font-bold">
               <div>
                 <label className="block text-[var(--muted-text)] mb-1">Milestone Title *</label>
@@ -993,7 +1027,7 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
       {showAddTask && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <div className="clay-modal w-full max-w-md p-6 space-y-5">
-            <h3 className="text-lg font-black text-white">Add Actionable Task</h3>
+            <h3 className="text-lg font-black text-[var(--text-heading)]">Add Actionable Task</h3>
             <form onSubmit={handleCreateTask} className="space-y-4 text-xs font-bold">
               <div>
                 <label className="block text-[var(--muted-text)] mb-1">Task Title *</label>
@@ -1085,7 +1119,7 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
       {showLogAction && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
           <div className="clay-modal w-full max-w-lg p-6 space-y-5 my-8">
-            <h3 className="text-lg font-black text-white">Log Work & Action</h3>
+            <h3 className="text-lg font-black text-[var(--text-heading)]">Log Work & Action</h3>
             <form onSubmit={handleLogDailyAction} className="space-y-4 text-xs font-bold">
               <div>
                 <label className="block text-[var(--muted-text)] mb-1">What did you work on today? *</label>
@@ -1230,7 +1264,7 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
       {showEditGoal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
           <div className="clay-modal w-full max-w-lg p-6 space-y-5 my-8">
-            <h3 className="text-lg font-black text-white">Edit Goal Details</h3>
+            <h3 className="text-lg font-black text-[var(--text-heading)]">Edit Goal Details</h3>
             <form onSubmit={handleSaveGoalEdit} className="space-y-4 text-xs font-bold">
               <div>
                 <label className="block text-[var(--muted-text)] mb-1">Goal Title *</label>

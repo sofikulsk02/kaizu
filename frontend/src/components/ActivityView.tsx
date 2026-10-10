@@ -3,6 +3,7 @@
 import React from "react";
 import { Subject, Goal } from "../lib/api";
 import { ActivityHeatmap } from "./ActivityHeatmap";
+import { BookOpen, Target, Calendar } from "lucide-react";
 
 interface ActivityViewProps {
   subjects: Subject[];
@@ -40,7 +41,9 @@ export const ActivityView: React.FC<ActivityViewProps> = ({ subjects, goals }) =
                 className="paper-card bg-[var(--surface-secondary)] p-4 flex items-center justify-between border border-[var(--border-default)]"
               >
                 <div className="flex items-center space-x-3">
-                  <div className="text-xl">📚</div>
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--pale-sage)] text-[var(--forest-green)]">
+                    <BookOpen className="h-4 w-4" />
+                  </div>
                   <div>
                     <div className="text-sm font-bold text-[var(--text-heading)]">Subject Tracked: {sub.name}</div>
                     <div className="text-xs text-[var(--text-muted)]">
@@ -60,7 +63,9 @@ export const ActivityView: React.FC<ActivityViewProps> = ({ subjects, goals }) =
                 className="paper-card bg-[var(--surface-secondary)] p-4 flex items-center justify-between border border-[var(--border-default)]"
               >
                 <div className="flex items-center space-x-3">
-                  <div className="text-xl">🎯</div>
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#FFEAE8] text-[var(--crimson)]">
+                    <Target className="h-4 w-4" />
+                  </div>
                   <div>
                     <div className="text-sm font-bold text-[var(--text-heading)]">Goal Created: {g.title}</div>
                     <div className="text-xs text-[var(--text-muted)]">Status: {g.status}</div>

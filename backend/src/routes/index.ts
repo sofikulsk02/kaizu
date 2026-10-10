@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { CacheService } from "../core/cache.service";
 import userRoutes from "../modules/users/user.routes";
 import subjectRoutes from "../modules/subjects";
 import chapterRoutes from "../modules/chapters";
@@ -11,7 +12,12 @@ const router = Router();
 
 // Health check endpoint
 router.get("/health", (_req, res) => {
-  res.json({ status: "ok", service: "Kaizu API", timestamp: new Date().toISOString() });
+  res.json({
+    status: "ok",
+    service: "Kaizu API",
+    cache: CacheService.isConnected() ? "redis_connected" : "bypass",
+    timestamp: new Date().toISOString(),
+  });
 });
 
 // Domain API routes

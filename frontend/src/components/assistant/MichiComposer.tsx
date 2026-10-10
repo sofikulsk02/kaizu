@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
+import { Send } from "lucide-react";
 
 interface MichiComposerProps {
   onSendMessage: (message: string) => void;
@@ -70,15 +71,13 @@ export const MichiComposer: React.FC<MichiComposerProps> = ({
           onClick={handleSubmit}
           disabled={disabled || !text.trim()}
           title="Send message (Enter)"
-          className={`flex h-7 w-7 items-center justify-center rounded-lg text-white transition shrink-0 ${
+          className={`flex h-7 w-7 items-center justify-center rounded-lg text-white transition shrink-0 cursor-pointer ${
             text.trim() && !disabled
               ? "bg-[var(--forest-green)] hover:bg-[var(--deep-forest)] shadow-xs scale-100"
               : "bg-[var(--border-strong)] text-[var(--text-disabled)] cursor-not-allowed opacity-50"
           }`}
         >
-          <svg className="h-3.5 w-3.5 stroke-[2.5]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14M12 5l7 7-7 7" />
-          </svg>
+          <Send className="h-3.5 w-3.5" />
         </button>
       </div>
 

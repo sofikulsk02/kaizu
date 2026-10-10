@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { Api, Goal } from "../lib/api";
+import { Zap, X, Check } from "lucide-react";
 
 interface QuickCaptureModalProps {
   isOpen: boolean;
@@ -33,7 +34,7 @@ export const QuickCaptureModal: React.FC<QuickCaptureModalProps> = ({
     try {
       const res = await Api.quickCapture(input.trim(), selectedGoalId || undefined);
       setParsedFeedback(
-        `Logged: "${res.summary}" ${res.durationMinutes ? `(⏱️ ${res.durationMinutes} mins)` : ""}`
+        `Logged: "${res.summary}" ${res.durationMinutes ? `(${res.durationMinutes} mins)` : ""}`
       );
       setInput("");
       setTimeout(() => {
@@ -53,19 +54,26 @@ export const QuickCaptureModal: React.FC<QuickCaptureModalProps> = ({
       <div className="paper-modal bg-[var(--surface-primary)] w-full max-w-lg p-6 space-y-5 rounded-xl border border-[var(--border-default)] shadow-2xl">
         <div className="flex items-center justify-between border-b border-[var(--border-default)] pb-3">
           <div>
-            <h2 className="text-xl font-bold text-[var(--text-heading)]">⚡ Frictionless Quick Capture</h2>
-            <p className="text-xs text-[var(--text-muted)]">
+            <h2 className="text-xl font-bold text-[var(--text-heading)] inline-flex items-center gap-2">
+              <Zap className="h-5 w-5 text-amber-500" />
+              <span>Frictionless Quick Capture</span>
+            </h2>
+            <p className="text-xs text-[var(--text-muted)] mt-0.5">
               Type naturally e.g. "Studied Computer Networks for 45 mins" or "Read GSoC guide"
             </p>
           </div>
-          <button onClick={onClose} className="text-[var(--text-muted)] hover:text-[var(--text-heading)] font-bold text-lg">
-            ✕
+          <button
+            onClick={onClose}
+            className="flex h-7 w-7 items-center justify-center rounded-lg text-[var(--text-muted)] hover:text-[var(--text-heading)] hover:bg-[var(--surface-secondary)] transition cursor-pointer"
+          >
+            <X className="h-4 w-4" />
           </button>
         </div>
 
         {parsedFeedback && (
-          <div className="paper-card bg-[var(--pale-sage)] p-3 text-xs font-bold text-[var(--forest-green)] border border-[var(--sage)]">
-            ✓ {parsedFeedback}
+          <div className="paper-card bg-[var(--pale-sage)] p-3 text-xs font-bold text-[var(--forest-green)] border border-[var(--border-default)] inline-flex items-center gap-1.5 w-full">
+            <Check className="h-4 w-4 shrink-0" />
+            <span>{parsedFeedback}</span>
           </div>
         )}
 
@@ -103,14 +111,14 @@ export const QuickCaptureModal: React.FC<QuickCaptureModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="paper-btn-secondary px-4 py-2 text-xs font-bold"
+              className="paper-btn-secondary px-4 py-2 text-xs font-bold cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="paper-btn-primary px-6 py-2 text-xs font-bold"
+              className="paper-btn-primary px-6 py-2 text-xs font-bold cursor-pointer"
             >
               {loading ? "Capturing..." : "Log Effort"}
             </button>
