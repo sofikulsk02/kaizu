@@ -15,7 +15,6 @@ interface SidebarProps {
   onToggleSidebar: () => void;
   activeTab: string;
   onSelectTab: (tab: string) => void;
-  counts: { subjects: number; goals: number };
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -23,12 +22,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onToggleSidebar,
   activeTab,
   onSelectTab,
-  counts,
 }) => {
   const navItems = [
     { id: "dashboard", label: "Dashboard", Icon: LayoutDashboard },
-    { id: "subjects", label: "Subjects", Icon: BookOpen, count: counts.subjects },
-    { id: "goals", label: "Goals", Icon: Target, count: counts.goals },
+    { id: "subjects", label: "Subjects", Icon: BookOpen },
+    { id: "goals", label: "Goals", Icon: Target },
     { id: "projects", label: "Projects", Icon: FolderKanban },
     { id: "activity", label: "Activity", Icon: Activity },
     { id: "settings", label: "Settings", Icon: Settings },
@@ -97,17 +95,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   </span>
                   <span className="truncate">{item.label}</span>
                 </div>
-                {item.count !== undefined && (
-                  <span
-                    className={`px-2 py-0.5 text-[11px] font-bold rounded-full transition-colors shrink-0 ${
-                      isActive
-                        ? "bg-[var(--crimson)] text-white shadow-xs"
-                        : "bg-[var(--sidebar-badge-bg)] text-[var(--sidebar-badge-text)] shadow-2xs border border-white/10"
-                    }`}
-                  >
-                    {item.count}
-                  </span>
-                )}
               </button>
             );
           })}

@@ -136,42 +136,42 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({ onSelectProject, loa
       )}
 
       {/* Summary Stat Counter Bar */}
-      <div className="grid grid-cols-3 gap-2 sm:gap-2.5">
-        <div className="paper-card bg-[var(--surface-secondary)] p-2.5 sm:p-3 text-center border border-[var(--border-default)]">
+      <div className="grid grid-cols-3 gap-2">
+        <div className="paper-card bg-[var(--surface-secondary)] p-2 sm:p-2.5 text-center border border-[var(--border-subtle)] rounded-lg">
           <div className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Active / In Progress</div>
-          <div className="text-xl font-black text-[var(--forest-green)] mt-0.5">{activeCount}</div>
+          <div className="text-base sm:text-lg font-black text-[var(--forest-green)] mt-0.5">{activeCount}</div>
         </div>
-        <div className="paper-card bg-[var(--surface-secondary)] p-3 text-center border border-[var(--border-default)]">
+        <div className="paper-card bg-[var(--surface-secondary)] p-2 sm:p-2.5 text-center border border-[var(--border-subtle)] rounded-lg">
           <div className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Completed</div>
-          <div className="text-xl font-black text-[#122419] mt-0.5">{completedCount}</div>
+          <div className="text-base sm:text-lg font-black text-[var(--text-heading)] mt-0.5">{completedCount}</div>
         </div>
-        <div className="paper-card bg-[var(--surface-secondary)] p-3 text-center border border-[var(--border-default)]">
+        <div className="paper-card bg-[var(--surface-secondary)] p-2 sm:p-2.5 text-center border border-[var(--border-subtle)] rounded-lg">
           <div className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Paused / Stopped</div>
-          <div className="text-xl font-black text-[var(--crimson)] mt-0.5">{pausedCount}</div>
+          <div className="text-base sm:text-lg font-black text-[var(--crimson)] mt-0.5">{pausedCount}</div>
         </div>
       </div>
 
       {/* Search & Filter Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
         <div className="flex-1">
           <input
             type="text"
             placeholder="Search projects by name, category, or description..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="paper-input w-full px-4 py-2.5 text-sm"
+            className="paper-input w-full px-3.5 py-2 text-xs sm:text-sm"
           />
         </div>
 
-        <div className="flex items-center space-x-1.5 text-xs font-bold text-[var(--text-muted)]">
+        <div className="flex items-center flex-wrap gap-1 text-[11px] font-bold text-[var(--text-muted)]">
           {["ALL", "IN_PROGRESS", "ACTIVE", "COMPLETED", "PAUSED"].map((st) => (
             <button
               key={st}
               onClick={() => setSelectedStatusFilter(st)}
-              className={`px-3 py-1.5 rounded transition-colors ${
+              className={`px-2.5 py-1 rounded-md transition-colors cursor-pointer ${
                 selectedStatusFilter === st
-                  ? "bg-[var(--forest-green)] text-white font-extrabold"
-                  : "bg-[var(--surface-secondary)] text-[var(--text-muted)] hover:text-[var(--text-heading)] border border-[var(--border-default)]"
+                  ? "bg-[var(--forest-green)] text-white font-extrabold shadow-2xs"
+                  : "bg-[var(--surface-secondary)] text-[var(--text-muted)] hover:text-[var(--text-heading)] border border-[var(--border-subtle)]"
               }`}
             >
               {st === "ALL" ? "All" : STATUS_CONFIG[st as ProjectStatus]?.label || st}
@@ -182,17 +182,17 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({ onSelectProject, loa
 
       {/* Project Cards Grid */}
       {loading ? (
-        <div className="paper-card p-12 text-center text-sm text-[var(--text-muted)] animate-pulse">
+        <div className="paper-card p-8 text-center text-xs text-[var(--text-muted)] animate-pulse border border-[var(--border-default)] rounded-xl">
           Loading projects...
         </div>
       ) : filteredProjects.length === 0 ? (
-        <div className="paper-card bg-[var(--surface-secondary)] p-12 text-center space-y-4 border border-[var(--border-default)]">
+        <div className="paper-card bg-[var(--surface-secondary)] p-8 text-center space-y-3 border border-[var(--border-default)] rounded-xl">
           <div className="flex justify-center">
-            <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--pale-sage)] text-[var(--forest-green)] shadow-xs">
-              <FolderKanban className="h-7 w-7" strokeWidth={1.8} />
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--pale-sage)] text-[var(--forest-green)] shadow-xs">
+              <FolderKanban className="h-5 w-5" strokeWidth={1.8} />
             </span>
           </div>
-          <div className="text-lg font-bold text-[var(--text-heading)]">
+          <div className="text-base font-bold text-[var(--text-heading)]">
             {searchTerm ? "No projects match your filter" : "No projects created yet"}
           </div>
           <p className="text-xs text-[var(--text-muted)] max-w-md mx-auto">
@@ -203,9 +203,9 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({ onSelectProject, loa
           {!searchTerm && (
             <button
               onClick={() => setShowCreateModal(true)}
-              className="paper-btn-primary inline-flex items-center gap-1.5 px-5 py-2.5 text-xs font-bold cursor-pointer"
+              className="paper-btn-primary inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold cursor-pointer"
             >
-              <Plus className="h-4 w-4" />
+              <Plus className="h-3.5 w-3.5" />
               <span>Create First Project</span>
             </button>
           )}
@@ -221,7 +221,7 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({ onSelectProject, loa
               <div
                 key={project.id}
                 onClick={() => handleCardClick(project.id)}
-                className={`group paper-card-interactive p-3 sm:p-3.5 space-y-2.5 cursor-pointer transition-all border flex flex-col justify-between relative overflow-hidden ${
+                className={`group paper-card-interactive p-3 sm:p-3.5 space-y-2.5 cursor-pointer transition-all border flex flex-col justify-between relative overflow-hidden rounded-xl ${
                   isLoading
                     ? "border-[var(--forest-green)] ring-2 ring-[var(--forest-green)]/40 bg-[var(--surface-hover)] shadow-md scale-[1.01]"
                     : isOtherLoading
@@ -236,19 +236,19 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({ onSelectProject, loa
                   </div>
                 )}
 
-                <div className="space-y-2">
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <h2 className="text-lg font-bold text-[var(--text-heading)] group-hover:text-[var(--crimson)] transition-colors">
+                <div className="space-y-1.5">
+                  <div className="flex items-start justify-between gap-2.5">
+                    <div className="min-w-0">
+                      <h2 className="text-base font-bold text-[var(--text-heading)] group-hover:text-[var(--crimson)] transition-colors truncate">
                         {project.name}
                       </h2>
                       {project.category && (
-                        <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider block mt-0.5">
+                        <span className="text-[10px] font-bold text-[var(--forest-green)] uppercase tracking-wider block mt-0.5">
                           {project.category}
                         </span>
                       )}
                     </div>
-                    <span className={`px-3 py-1 rounded-md text-xs font-bold shrink-0 ${statusInfo.badgeClass}`}>
+                    <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold shrink-0 ${statusInfo.badgeClass}`}>
                       {statusInfo.label}
                     </span>
                   </div>
@@ -260,17 +260,17 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({ onSelectProject, loa
                   )}
                 </div>
 
-                <div className="space-y-3 pt-3 border-t border-[var(--border-default)]">
+                <div className="space-y-2 pt-2 border-t border-[var(--border-subtle)]">
                   {/* Current milestone indicator */}
                   {project.currentMilestoneTitle && (
-                    <div className="text-xs text-[var(--forest-green)] font-medium bg-[var(--pale-sage)] px-3 py-1.5 rounded flex items-center space-x-2">
-                      <Flag className="h-3.5 w-3.5 text-[var(--forest-green)] shrink-0" />
+                    <div className="text-[11px] text-[var(--forest-green)] font-medium bg-[var(--pale-sage)] px-2.5 py-1 rounded-md flex items-center space-x-1.5">
+                      <Flag className="h-3 w-3 text-[var(--forest-green)] shrink-0" />
                       <span className="truncate">Current milestone: <strong>{project.currentMilestoneTitle}</strong></span>
                     </div>
                   )}
 
                   {/* Task progress & Effort summary */}
-                  <div className="flex items-center justify-between text-xs text-[var(--text-muted)] pt-1">
+                  <div className="flex items-center justify-between text-xs text-[var(--text-muted)]">
                     <span>
                       <strong className="text-[var(--text-heading)]">{project.completedTasksCount}</strong> of{" "}
                       <strong className="text-[var(--text-heading)]">{project.totalTasksCount}</strong> tasks completed

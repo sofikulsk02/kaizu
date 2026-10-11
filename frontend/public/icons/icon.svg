@@ -9,8 +9,8 @@
       <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.18"/>
       <stop offset="100%" stop-color="#000000" stop-opacity="0.25"/>
     </radialGradient>
-    <filter id="kanjiShadow" x="-10%" y="-10%" width="120%" height="120%">
-      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#4A0E18" flood-opacity="0.6"/>
+    <filter id="kShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#4A0E18" flood-opacity="0.6"/>
     </filter>
   </defs>
 
@@ -21,29 +21,13 @@
   <!-- Subtle refined gold rim -->
   <rect x="22" y="22" width="468" height="468" rx="102" fill="none" stroke="#F5E6CC" stroke-width="4" stroke-opacity="0.45"/>
 
-  <!-- Japanese Kanji 改善 (Kaizen) in center -->
-  <text 
-    x="256" 
-    y="320" 
-    font-family="-apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Noto Sans JP', 'Segoe UI', sans-serif" 
-    font-size="210" 
-    font-weight="900" 
-    text-anchor="middle" 
-    fill="#FFFFFF" 
-    filter="url(#kanjiShadow)"
-    letter-spacing="2"
-  >改善</text>
-
-  <!-- Subtitle pill text "KAIZU" at bottom -->
-  <rect x="196" y="405" width="120" height="28" rx="14" fill="#FAF7F0" fill-opacity="0.2"/>
-  <text 
-    x="256" 
-    y="424" 
-    font-family="system-ui, -apple-system, sans-serif" 
-    font-size="16" 
-    font-weight="800" 
-    letter-spacing="5" 
-    text-anchor="middle" 
-    fill="#FAF7F0"
-  >KAIZU</text>
+  <!-- Stylized Modern Geometric "K" Icon -->
+  <g filter="url(#kShadow)">
+    <!-- Vertical stem -->
+    <rect x="146" y="128" width="56" height="256" rx="18" fill="#FFFFFF"/>
+    <!-- Top-right diagonal arm -->
+    <path d="M 196 262 L 328 136 C 336 128 350 128 358 136 C 366 144 366 158 358 166 L 236 284 Z" fill="#FFFFFF"/>
+    <!-- Bottom-right diagonal arm -->
+    <path d="M 218 242 L 332 350 C 340 358 340 372 332 380 C 324 388 310 388 302 380 L 196 274 Z" fill="#FFFFFF"/>
+  </g>
 </svg>

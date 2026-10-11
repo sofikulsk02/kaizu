@@ -24,6 +24,9 @@ import {
   Layers,
   History,
   AlertTriangle,
+  ChevronDown,
+  ChevronRight,
+  ChevronsUpDown,
 } from "lucide-react";
 import { Subject, Chapter, Topic, StudySession, TopicStatus, Api } from "../lib/api";
 
@@ -130,6 +133,33 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
   const [topicResources, setTopicResources] = useState("");
   const [topicNextStep, setTopicNextStep] = useState("");
   const [topicRevisionDate, setTopicRevisionDate] = useState("");
+
+  // Collapsed chapters state
+  const [collapsedChapterIds, setCollapsedChapterIds] = useState<Set<string>>(new Set());
+
+  const toggleChapterCollapse = (chapterId: string) => {
+    setCollapsedChapterIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(chapterId)) {
+        next.delete(chapterId);
+      } else {
+        next.add(chapterId);
+      }
+      return next;
+    });
+  };
+
+  const handleOpenAddTopic = (chapterId: string) => {
+    setActiveChapterForTopic(chapterId);
+    setCollapsedChapterIds((prev) => {
+      if (prev.has(chapterId)) {
+        const next = new Set(prev);
+        next.delete(chapterId);
+        return next;
+      }
+      return prev;
+    });
+  };
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -663,13 +693,41 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
                 Organize your study into chapters, topics, mastery ratings, and next actions.
               </p>
             </div>
-            <button
-              onClick={() => setShowAddChapter(true)}
-              className="paper-btn-primary px-3 sm:px-4 py-1.5 sm:py-2 text-xs font-bold flex items-center space-x-1 shadow-xs shrink-0 cursor-pointer active:scale-95"
-            >
-              <Plus className="h-3.5 w-3.5" />
-              <span>Add Chapter</span>
-            </button>
+            <div className="flex items-center space-x-2 shrink-0">
+              {chapters.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const allCollapsed = chapters.every((c) => collapsedChapterIds.has(c.id));
+                    if (allCollapsed) {
+                      setCollapsedChapterIds(new Set());
+                    } else {
+                      setCollapsedChapterIds(new Set(chapters.map((c) => c.id)));
+                    }
+                  }}
+                  className="paper-btn-secondary px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs font-bold flex items-center space-x-1.5 cursor-pointer active:scale-95"
+                  title={
+                    chapters.every((c) => collapsedChapterIds.has(c.id))
+                      ? "Expand all chapters"
+                      : "Collapse all chapters"
+                  }
+                >
+                  <ChevronsUpDown className="h-3.5 w-3.5 text-[var(--text-muted)]" />
+                  <span>
+                    {chapters.every((c) => collapsedChapterIds.has(c.id))
+                      ? "Expand All"
+                      : "Collapse All"}
+                  </span>
+                </button>
+              )}
+              <button
+                onClick={() => setShowAddChapter(true)}
+                className="paper-btn-primary px-3 sm:px-4 py-1.5 sm:py-2 text-xs font-bold flex items-center space-x-1 shadow-xs shrink-0 cursor-pointer active:scale-95"
+              >
+                <Plus className="h-3.5 w-3.5" />
+                <span>Add Chapter</span>
+              </button>
+            </div>
           </div>
 
           {/* Add Chapter Form Modal/Accordion */}
@@ -757,27 +815,53 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
             <div className="space-y-3 sm:space-y-3.5">
               {chapters.map((chapter, cIndex) => {
                 const chapterTopics = chapter.topics || [];
+                const isCollapsed = collapsedChapterIds.has(chapter.id);
+                const masteredCount = chapterTopics.filter(
+                  (t) => t.status === "STUDIED" || t.status === "UNDERSTOOD"
+                ).length;
 
                 return (
                   <div
                     key={chapter.id}
                     className="paper-card p-3 sm:p-4 space-y-2.5 border border-[var(--border-default)] rounded-xl shadow-2xs hover:border-[var(--border-strong)] transition-all"
                   >
-                    {/* Chapter Header Card */}
-                    <div className="flex items-center justify-between gap-2 pb-2.5 border-b border-[var(--border-subtle)]">
+                    {/* Chapter Header Card - Clickable to toggle collapse */}
+                    <div
+                      onClick={() => toggleChapterCollapse(chapter.id)}
+                      className={`flex items-center justify-between gap-2 cursor-pointer select-none rounded-lg group transition-colors ${
+                        !isCollapsed ? "pb-2.5 border-b border-[var(--border-subtle)]" : ""
+                      }`}
+                    >
                       <div className="flex items-center space-x-2.5 min-w-0">
+                        {/* Collapse / Expand Chevron Icon */}
+                        <div
+                          className="text-[var(--text-muted)] group-hover:text-[var(--forest-green)] transition-colors p-0.5 shrink-0"
+                          title={isCollapsed ? "Expand chapter" : "Collapse chapter"}
+                        >
+                          {isCollapsed ? (
+                            <ChevronRight className="h-4 w-4" />
+                          ) : (
+                            <ChevronDown className="h-4 w-4" />
+                          )}
+                        </div>
+
                         {/* Chapter Number Badge */}
                         <div className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-lg bg-[var(--forest-green)] text-white font-black text-xs shrink-0 shadow-2xs">
                           {String(cIndex + 1).padStart(2, "0")}
                         </div>
                         <div className="min-w-0">
                           <div className="flex items-center space-x-2 flex-wrap">
-                            <h3 className="font-extrabold text-[var(--text-heading)] text-sm sm:text-base truncate">
+                            <h3 className="font-extrabold text-[var(--text-heading)] text-sm sm:text-base truncate group-hover:text-[var(--forest-green)] transition-colors">
                               {chapter.title}
                             </h3>
                             <span className="text-[10px] font-bold text-[var(--text-muted)] bg-[var(--surface-secondary)] px-1.5 py-0.5 rounded shrink-0">
                               {chapterTopics.length} {chapterTopics.length === 1 ? "topic" : "topics"}
                             </span>
+                            {isCollapsed && chapterTopics.length > 0 && (
+                              <span className="text-[10px] font-semibold text-[var(--forest-green)] bg-[var(--forest-green)]/10 px-1.5 py-0.5 rounded shrink-0">
+                                {masteredCount}/{chapterTopics.length} mastered
+                              </span>
+                            )}
                           </div>
                           {chapter.description && (
                             <p className="text-[11px] text-[var(--text-muted)] truncate">
@@ -788,9 +872,12 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
                       </div>
 
                       {/* Chapter Action Buttons */}
-                      <div className="flex items-center space-x-1.5 shrink-0">
+                      <div
+                        className="flex items-center space-x-1.5 shrink-0"
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         <button
-                          onClick={() => setActiveChapterForTopic(chapter.id)}
+                          onClick={() => handleOpenAddTopic(chapter.id)}
                           className="btn-pill-action px-2.5 py-1 text-xs font-bold space-x-1 cursor-pointer active:scale-95"
                         >
                           <Plus className="h-3 w-3" />
@@ -807,8 +894,9 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
                       </div>
                     </div>
 
-                    {/* Topics List Container */}
-                    <div className="space-y-2">
+                    {/* Topics List Container - Hidden when collapsed */}
+                    {!isCollapsed && (
+                      <div className="space-y-2 pt-0.5">
                       {chapterTopics.length > 0 ? (
                         chapterTopics.map((topic) => {
                           const statusInfo = STATUS_CONFIG[topic.status || "NOT_STARTED"];
@@ -967,6 +1055,7 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
                         </div>
                       )}
                     </div>
+                    )}
                   </div>
                 );
               })}

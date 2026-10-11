@@ -500,13 +500,6 @@ export default function Page() {
         onSelectTab={handleSelectTab}
       />
 
-      {/* Global Top Navigation Loading Bar */}
-      {(loadingSubjectId || loadingGoalId || loadingProjectId) && (
-        <div className="fixed top-14 sm:top-16 left-0 right-0 z-50 h-0.5 sm:h-1 bg-[var(--surface-secondary)] overflow-hidden">
-          <div className="h-full bg-gradient-to-r from-[var(--forest-green)] via-[var(--crimson)] to-[var(--forest-green)] wave-shimmer-anim w-full" />
-        </div>
-      )}
-
       {/* Main Container */}
       <div className="flex flex-1 pt-14 sm:pt-16">
         {/* Sidebar Navigation */}
@@ -515,10 +508,6 @@ export default function Page() {
           onToggleSidebar={handleToggleSidebar}
           activeTab={activeTab}
           onSelectTab={handleSelectTab}
-          counts={{
-            subjects: subjects.length,
-            goals: goals.length,
-          }}
         />
 
         {/* Content Area */}

@@ -794,10 +794,19 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
                 <button
                   onClick={handleGenerateBreakdown}
                   disabled={generatingBreakdown}
-                  className="paper-btn-primary px-4 py-2 text-xs font-bold cursor-pointer inline-flex items-center gap-1.5"
+                  className="paper-btn-primary px-4 py-2 text-xs font-bold cursor-pointer inline-flex items-center gap-1.5 disabled:opacity-50"
                 >
-                  <Sparkles className="h-3.5 w-3.5" />
-                  <span>Auto-Suggest Milestones</span>
+                  {generatingBreakdown ? (
+                    <>
+                      <div className="h-3.5 w-3.5 rounded-full border-2 border-white border-t-transparent animate-spin" />
+                      <span>Generating Plan...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="h-3.5 w-3.5" />
+                      <span>Auto-Suggest Milestones</span>
+                    </>
+                  )}
                 </button>
               </div>
             </div>

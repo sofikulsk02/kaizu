@@ -1,5 +1,5 @@
 // Kaizu PWA Service Worker
-const CACHE_NAME = "kaizu-cache-v1";
+const CACHE_NAME = "kaizu-cache-v2";
 
 const PRECACHE_ASSETS = [
   "/",
