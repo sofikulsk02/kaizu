@@ -1,16 +1,15 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { getActiveUserId, setActiveUserId, clearAuth, getJwtToken, Api, User } from "../lib/api";
+import { clearAuth, getJwtToken, Api, User } from "../lib/api";
 import { THEMES, getActiveThemeId, applyTheme } from "../lib/theme";
-import { Palette, Globe, ShieldCheck } from "lucide-react";
+import { Palette, Globe, Check } from "lucide-react";
 
 interface SettingsViewProps {
   onUserChanged: () => void;
 }
 
 export const SettingsView: React.FC<SettingsViewProps> = ({ onUserChanged }) => {
-  const currentUserId = getActiveUserId();
   const jwtToken = getJwtToken();
 
   const [activeUser, setActiveUser] = useState<User | null>(null);
@@ -18,34 +17,12 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onUserChanged }) => 
   const [selectedThemeId, setSelectedThemeId] = useState<string>("theme-matcha-ricepaper");
   const [themeFilter, setThemeFilter] = useState<"all" | "light" | "dark">("all");
 
-  const [customUserId, setCustomUserId] = useState("");
-  const [customUserName, setCustomUserName] = useState("");
-  const [customUserEmail, setCustomUserEmail] = useState("");
-
-  const presetUsers = [
-    {
-      id: "11111111-1111-1111-1111-111111111111",
-      name: "User A (Primary Learner)",
-      email: "usera@kaizu.app",
-    },
-    {
-      id: "22222222-2222-2222-2222-222222222222",
-      name: "User B (Secondary Learner)",
-      email: "userb@kaizu.app",
-    },
-    {
-      id: "00000000-0000-0000-0000-000000000001",
-      name: "Default Dev Learner",
-      email: "learner@kaizu.app",
-    },
-  ];
-
   useEffect(() => {
     setSelectedThemeId(getActiveThemeId());
     Api.getMe()
       .then((u) => setActiveUser(u))
       .catch(() => setActiveUser(null));
-  }, [currentUserId, jwtToken]);
+  }, [jwtToken]);
 
   const handleSelectTheme = (themeId: string) => {
     setSelectedThemeId(themeId);
@@ -68,33 +45,6 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onUserChanged }) => 
   const handleLogout = () => {
     clearAuth();
     onUserChanged();
-  };
-
-  const handleSwitchUser = async (userId: string) => {
-    setActiveUserId(userId);
-    onUserChanged();
-  };
-
-  const handleCreateCustomDevUser = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!customUserId.trim() || !customUserName.trim() || !customUserEmail.trim()) {
-      alert("All fields are required for creating custom dev user");
-      return;
-    }
-    try {
-      const res = await Api.createDevUser({
-        id: customUserId.trim(),
-        name: customUserName.trim(),
-        email: customUserEmail.trim(),
-      });
-      setActiveUserId(res.user.id);
-      onUserChanged();
-      setCustomUserId("");
-      setCustomUserName("");
-      setCustomUserEmail("");
-    } catch (err: any) {
-      alert(err.message || "Failed to create dev user");
-    }
   };
 
   return (
@@ -157,61 +107,109 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onUserChanged }) => 
           </div>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 pt-2">
+        <div className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-3 pt-2">
           {THEMES.filter((t) => (themeFilter === "all" ? true : t.category === themeFilter)).map((theme) => {
             const isSelected = selectedThemeId === theme.id;
             return (
               <div
                 key={theme.id}
                 onClick={() => handleSelectTheme(theme.id)}
-                className={`cursor-pointer rounded-xl p-5 transition flex flex-col justify-between space-y-4 border ${
+                className={`group cursor-pointer rounded-xl p-3.5 transition-all flex flex-col justify-between border card-lift relative overflow-hidden ${
                   isSelected
                     ? "paper-card border-[var(--forest-green)] ring-2 ring-[var(--forest-green)]/30 shadow-md scale-[1.01]"
-                    : "paper-card bg-[var(--surface-secondary)] border-[var(--border-default)] hover:border-[var(--forest-green)]/70 hover:shadow-xs"
+                    : "paper-card bg-[var(--surface-secondary)] border-[var(--border-default)] hover:border-[var(--forest-green)]/60 hover:shadow-xs"
                 }`}
               >
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-sm font-bold text-[var(--text-heading)]">{theme.name}</span>
+                {/* Visual Theme Preview Banner */}
+                <div
+                  className="h-20 w-full rounded-lg p-2.5 flex flex-col justify-between border border-black/10 dark:border-white/10 shadow-inner relative overflow-hidden transition-transform group-hover:scale-[1.01]"
+                  style={{ backgroundColor: theme.colors[1] }}
+                >
+                  {/* Miniature Surface Window Preview */}
+                  <div
+                    className="h-9 w-full rounded-md px-2.5 flex items-center justify-between border border-black/5 dark:border-white/10 shadow-2xs"
+                    style={{ backgroundColor: theme.colors[2] }}
+                  >
+                    <div className="flex items-center space-x-2">
+                      <div
+                        className="h-4 w-4 rounded-full flex items-center justify-center text-[9px] font-black text-white shadow-2xs shrink-0"
+                        style={{ backgroundColor: theme.colors[0] }}
+                      >
+                        佳
+                      </div>
+                      <div className="space-y-0.5">
+                        <div
+                          className="h-1.5 w-12 rounded-full"
+                          style={{ backgroundColor: theme.colors[0], opacity: 0.9 }}
+                        />
+                        <div
+                          className="h-1 w-7 rounded-full"
+                          style={{ backgroundColor: theme.colors[3], opacity: 0.7 }}
+                        />
+                      </div>
+                    </div>
+                    <div
+                      className="px-1.5 py-0.5 rounded text-[9px] font-bold"
+                      style={{
+                        backgroundColor: `${theme.colors[0]}18`,
+                        color: theme.colors[0],
+                      }}
+                    >
+                      Kaizu
+                    </div>
+                  </div>
+
+                  {/* Overlapping Swatch Ring & Category Tag */}
+                  <div className="flex items-center justify-between pt-1">
+                    <div className="flex items-center -space-x-1">
+                      {theme.colors.map((color, idx) => (
+                        <div
+                          key={idx}
+                          className="h-4 w-4 rounded-full border border-white/80 dark:border-neutral-900 shadow-2xs"
+                          style={{ backgroundColor: color }}
+                          title={`${theme.labels[idx]}: ${color}`}
+                        />
+                      ))}
+                    </div>
+                    <span
+                      className="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded shadow-2xs"
+                      style={{
+                        backgroundColor: theme.category === "dark" ? "rgba(0,0,0,0.4)" : "rgba(255,255,255,0.75)",
+                        color: theme.category === "dark" ? "#E2E8F0" : "#1A202C",
+                      }}
+                    >
+                      {theme.category}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Theme Name, Tagline & Description */}
+                <div className="mt-3 space-y-1">
+                  <div className="flex items-center justify-between gap-1.5">
+                    <span className="text-sm font-bold text-[var(--text-heading)] group-hover:text-[var(--forest-green)] transition-colors">
+                      {theme.name}
+                    </span>
                     {isSelected ? (
-                      <span className="bg-[var(--pale-sage)] text-[var(--forest-green)] px-2 py-0.5 text-[10px] font-black rounded tracking-wider shrink-0">
-                        ACTIVE
+                      <span className="inline-flex items-center gap-1 bg-[var(--pale-sage)] text-[var(--forest-green)] px-2 py-0.5 text-[10px] font-black rounded-full shadow-2xs shrink-0">
+                        <Check className="h-3 w-3 stroke-[2.5]" />
+                        <span>Active</span>
                       </span>
                     ) : (
-                      <span className="text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-wider shrink-0">
-                        {theme.category}
+                      <span className="text-[10px] font-semibold text-[var(--text-muted)] group-hover:text-[var(--forest-green)]">
+                        Select
                       </span>
                     )}
                   </div>
+
                   {theme.tagline && (
                     <div className="text-[11px] font-semibold text-[var(--forest-green)]">
                       {theme.tagline}
                     </div>
                   )}
-                  <p className="text-xs text-[var(--text-muted)] line-clamp-2 leading-relaxed">
+
+                  <p className="text-xs text-[var(--text-muted)] line-clamp-2 leading-relaxed pt-0.5">
                     {theme.description}
                   </p>
-                </div>
-
-                {/* Color Swatch Circle Plate */}
-                <div className="pt-3 border-t border-[var(--border-default)] space-y-2">
-                  <div className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
-                    Color Swatch Palette
-                  </div>
-                  <div className="flex items-center flex-wrap gap-2.5">
-                    {theme.colors.map((color, idx) => (
-                      <div key={idx} className="group relative flex flex-col items-center">
-                        <div
-                          className="h-7 w-7 rounded-full border border-[var(--border-default)] shadow-xs transition-transform group-hover:scale-115"
-                          style={{ backgroundColor: color }}
-                          title={`${theme.labels[idx]}: ${color}`}
-                        />
-                        <span className="mt-1 text-[9px] font-semibold text-[var(--text-muted)] max-w-[55px] truncate text-center">
-                          {theme.labels[idx]}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
                 </div>
               </div>
             );
@@ -254,7 +252,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onUserChanged }) => 
               onClick={handleLogout}
               className="paper-btn-secondary px-4 py-2 text-xs font-bold text-red-600 border-red-200 hover:bg-red-50"
             >
-              Sign Out / Clear Token
+              Sign Out
             </button>
           </div>
         ) : (
@@ -292,87 +290,6 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onUserChanged }) => 
         )}
       </div>
 
-      {/* Cross-User Security Testing & Identity Switcher */}
-      <div className="paper-card p-6 space-y-4 border border-[var(--border-default)]">
-        <div className="flex items-center space-x-2">
-          <ShieldCheck className="h-5 w-5 text-[var(--forest-green)]" />
-          <h2 className="text-lg font-bold text-[var(--text-heading)]">Dev Security & Multi-User Switcher</h2>
-        </div>
-        <p className="text-xs text-[var(--text-muted)]">
-          Kaizu enforces strict server-side ownership. Switch users below to verify that User A cannot see, edit, or delete User B's subjects, chapters, topics, or goals.
-        </p>
-
-        <div className="grid gap-3 sm:grid-cols-3 pt-2">
-          {presetUsers.map((user) => {
-            const isSelected = currentUserId === user.id;
-            return (
-              <div
-                key={user.id}
-                onClick={() => handleSwitchUser(user.id)}
-                className={`cursor-pointer rounded-xl border p-4 transition ${
-                  isSelected
-                    ? "paper-btn-primary border-transparent"
-                    : "paper-card bg-[var(--surface-secondary)] border-[var(--border-default)] hover:border-[var(--forest-green)]"
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <span className={`text-xs font-bold ${isSelected ? "text-white" : "text-[var(--text-heading)]"}`}>{user.name}</span>
-                  {isSelected && <span className="bg-white/20 px-2 py-0.5 text-[10px] font-bold text-white rounded">ACTIVE</span>}
-                </div>
-                <div className={`text-xs mt-1 ${isSelected ? "text-white/80" : "text-[var(--text-muted)]"}`}>{user.email}</div>
-                <div className={`text-[10px] font-mono mt-2 truncate ${isSelected ? "text-white/70" : "text-[var(--text-muted)]"}`}>
-                  ID: {user.id}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Provision Custom Dev User */}
-      <div className="paper-card p-6 space-y-4 border border-[var(--border-default)]">
-        <h2 className="text-lg font-bold text-[var(--text-heading)]">Provision Test User</h2>
-        <form onSubmit={handleCreateCustomDevUser} className="space-y-4">
-          <div className="grid gap-4 sm:grid-cols-3">
-            <div>
-              <label className="block text-xs font-bold text-[var(--text-muted)]">User UUID</label>
-              <input
-                type="text"
-                placeholder="33333333-3333-3333-3333-333333333333"
-                value={customUserId}
-                onChange={(e) => setCustomUserId(e.target.value)}
-                className="paper-input mt-1.5 w-full px-3.5 py-2 text-xs"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-[var(--text-muted)]">Name</label>
-              <input
-                type="text"
-                placeholder="User C (Tester)"
-                value={customUserName}
-                onChange={(e) => setCustomUserName(e.target.value)}
-                className="paper-input mt-1.5 w-full px-3.5 py-2 text-xs"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-[var(--text-muted)]">Email</label>
-              <input
-                type="email"
-                placeholder="userc@kaizu.app"
-                value={customUserEmail}
-                onChange={(e) => setCustomUserEmail(e.target.value)}
-                className="paper-input mt-1.5 w-full px-3.5 py-2 text-xs"
-              />
-            </div>
-          </div>
-          <button
-            type="submit"
-            className="paper-btn-primary px-5 py-2.5 text-xs font-bold"
-          >
-            Provision & Switch User
-          </button>
-        </form>
-      </div>
     </div>
   );
 };

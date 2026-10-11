@@ -460,8 +460,7 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
 
             {/* Seamless Overall Mastery Progress Bar */}
             <div className="mt-3 p-2.5 sm:p-3 rounded-xl bg-[var(--surface-secondary)] border border-[var(--border-default)] flex items-center justify-between gap-3">
-              <div className="flex items-center space-x-2 min-w-0">
-                <Sparkles className="h-4 w-4 text-[var(--forest-green)] shrink-0" />
+              <div className="flex items-center min-w-0">
                 <span className="text-xs font-bold text-[var(--text-heading)] truncate">Overall Mastery</span>
               </div>
               <div className="flex items-center space-x-2.5 shrink-0">

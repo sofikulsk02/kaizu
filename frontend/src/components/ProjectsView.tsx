@@ -3,9 +3,11 @@
 import React, { useState, useEffect } from "react";
 import { ProjectListItem, ProjectStatus, Api } from "../lib/api";
 import { FolderKanban, Plus, Flag, ArrowRight, Search, X } from "lucide-react";
+import { Portal } from "./Portal";
 
 interface ProjectsViewProps {
   onSelectProject: (projectId: string) => void;
+  loadingProjectId?: string | null;
 }
 
 const STATUS_CONFIG: Record<ProjectStatus, { label: string; badgeClass: string }> = {
@@ -25,10 +27,19 @@ function formatMinutes(mins: number): string {
   return `${m}m`;
 }
 
-export const ProjectsView: React.FC<ProjectsViewProps> = ({ onSelectProject }) => {
+export const ProjectsView: React.FC<ProjectsViewProps> = ({ onSelectProject, loadingProjectId }) => {
   const [projects, setProjects] = useState<ProjectListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [localLoadingId, setLocalLoadingId] = useState<string | null>(null);
+
+  const activeLoadingId = loadingProjectId || localLoadingId;
+
+  const handleCardClick = (projectId: string) => {
+    if (activeLoadingId) return;
+    setLocalLoadingId(projectId);
+    onSelectProject(projectId);
+  };
 
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStatusFilter, setSelectedStatusFilter] = useState<string>("ALL");
@@ -203,12 +214,28 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({ onSelectProject }) =
         <div className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-2">
           {filteredProjects.map((project) => {
             const statusInfo = STATUS_CONFIG[project.status] || STATUS_CONFIG.IN_PROGRESS;
+            const isLoading = activeLoadingId === project.id;
+            const isOtherLoading = activeLoadingId !== null && !isLoading;
+
             return (
               <div
                 key={project.id}
-                onClick={() => onSelectProject(project.id)}
-                className="group paper-card-interactive p-3.5 sm:p-4 space-y-3 cursor-pointer hover:border-[var(--forest-green)] transition-all border border-[var(--border-default)] flex flex-col justify-between"
+                onClick={() => handleCardClick(project.id)}
+                className={`group paper-card-interactive p-3.5 sm:p-4 space-y-3 cursor-pointer transition-all border flex flex-col justify-between relative overflow-hidden ${
+                  isLoading
+                    ? "border-[var(--forest-green)] ring-2 ring-[var(--forest-green)]/40 bg-[var(--surface-hover)] shadow-md scale-[1.01]"
+                    : isOtherLoading
+                    ? "opacity-50 pointer-events-none border-[var(--border-default)]"
+                    : "border-[var(--border-default)] hover:border-[var(--forest-green)]"
+                }`}
               >
+                {/* Top Shimmer Loading Line when this card is opening */}
+                {isLoading && (
+                  <div className="absolute top-0 left-0 right-0 h-1 bg-[var(--surface-inset)] overflow-hidden z-10">
+                    <div className="h-full bg-gradient-to-r from-[var(--forest-green)] via-[var(--crimson)] to-[var(--forest-green)] wave-shimmer-anim w-full" />
+                  </div>
+                )}
+
                 <div className="space-y-2">
                   <div className="flex items-start justify-between gap-3">
                     <div>
@@ -255,10 +282,17 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({ onSelectProject }) =
                   </div>
 
                   <div className="flex items-center justify-end pt-1">
-                    <span className="inline-flex items-center gap-1 text-xs font-black text-[var(--crimson)] group-hover:underline">
-                      <span>Open project</span>
-                      <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
-                    </span>
+                    {isLoading ? (
+                      <span className="inline-flex items-center gap-1.5 text-xs font-bold text-[var(--crimson)] animate-pulse">
+                        <div className="h-2.5 w-2.5 rounded-full border-2 border-[var(--crimson)] border-t-transparent animate-spin" />
+                        <span>Opening project...</span>
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 text-xs font-black text-[var(--crimson)] group-hover:underline">
+                        <span>Open project</span>
+                        <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>
@@ -269,87 +303,91 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({ onSelectProject }) =
 
       {/* CREATE PROJECT MODAL */}
       {showCreateModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
-          <div className="paper-modal bg-[var(--surface-primary)] w-full max-w-lg p-6 space-y-5 rounded-xl border border-[var(--border-default)] shadow-2xl">
-            <div className="flex items-center justify-between border-b border-[var(--border-default)] pb-4">
-              <div>
-                <h3 className="text-lg font-black text-[var(--text-heading)]">Create New Project</h3>
-                <p className="text-xs text-[var(--text-muted)]">Define a new software or delivery project</p>
+        <Portal>
+          <div className="fixed inset-0 z-[100] overflow-y-auto bg-black/60 backdrop-blur-xs p-4 sm:p-6">
+            <div className="flex min-h-full items-center justify-center pt-16 sm:pt-20 pb-8">
+              <div className="paper-modal bg-[var(--surface-primary)] w-full max-w-lg p-6 space-y-5 rounded-xl border border-[var(--border-default)] shadow-2xl relative my-auto">
+                <div className="flex items-center justify-between border-b border-[var(--border-default)] pb-4">
+                  <div>
+                    <h3 className="text-lg font-black text-[var(--text-heading)]">Create New Project</h3>
+                    <p className="text-xs text-[var(--text-muted)]">Define a new software or delivery project</p>
+                  </div>
+                  <button
+                    onClick={() => setShowCreateModal(false)}
+                    className="flex h-7 w-7 items-center justify-center rounded-lg text-[var(--text-muted)] hover:text-[var(--text-heading)] hover:bg-[var(--surface-secondary)] transition cursor-pointer"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+
+                <form onSubmit={handleCreateProject} className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-bold text-[var(--text-muted)]">Project Name *</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Cella DB, Kaizu OS, Vector Indexer"
+                      value={newName}
+                      onChange={(e) => setNewName(e.target.value)}
+                      required
+                      className="paper-input mt-1.5 w-full px-4 py-2.5 text-sm"
+                      autoFocus
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-[var(--text-muted)]">Category / Work Area</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Database Kernel, Web Application, Compiler"
+                      value={newCategory}
+                      onChange={(e) => setNewCategory(e.target.value)}
+                      className="paper-input mt-1.5 w-full px-4 py-2.5 text-sm"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-[var(--text-muted)]">Description</label>
+                    <textarea
+                      placeholder="What is this project delivering or building?"
+                      value={newDesc}
+                      onChange={(e) => setNewDesc(e.target.value)}
+                      rows={3}
+                      className="paper-input mt-1.5 w-full px-4 py-2.5 text-sm"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-[var(--text-muted)]">Initial Next Action (Optional)</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Implement B-Tree leaf node split logic"
+                      value={newNextAction}
+                      onChange={(e) => setNewNextAction(e.target.value)}
+                      className="paper-input mt-1.5 w-full px-4 py-2.5 text-sm"
+                    />
+                  </div>
+
+                  <div className="flex justify-end space-x-3 pt-3 border-t border-[var(--border-default)]">
+                    <button
+                      type="button"
+                      onClick={() => setShowCreateModal(false)}
+                      className="paper-btn-secondary px-4 py-2 text-xs font-bold"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="paper-btn-primary px-6 py-2 text-xs font-bold"
+                    >
+                      Create Project
+                    </button>
+                  </div>
+                </form>
               </div>
-              <button
-                onClick={() => setShowCreateModal(false)}
-                className="flex h-7 w-7 items-center justify-center rounded-lg text-[var(--text-muted)] hover:text-[var(--text-heading)] hover:bg-[var(--surface-secondary)] transition cursor-pointer"
-              >
-                <X className="h-4 w-4" />
-              </button>
             </div>
-
-            <form onSubmit={handleCreateProject} className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-[var(--text-muted)]">Project Name *</label>
-                <input
-                  type="text"
-                  placeholder="e.g. Cella DB, Kaizu OS, Vector Indexer"
-                  value={newName}
-                  onChange={(e) => setNewName(e.target.value)}
-                  required
-                  className="paper-input mt-1.5 w-full px-4 py-2.5 text-sm"
-                  autoFocus
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-[var(--text-muted)]">Category / Work Area</label>
-                <input
-                  type="text"
-                  placeholder="e.g. Database Kernel, Web Application, Compiler"
-                  value={newCategory}
-                  onChange={(e) => setNewCategory(e.target.value)}
-                  className="paper-input mt-1.5 w-full px-4 py-2.5 text-sm"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-[var(--text-muted)]">Description</label>
-                <textarea
-                  placeholder="What is this project delivering or building?"
-                  value={newDesc}
-                  onChange={(e) => setNewDesc(e.target.value)}
-                  rows={3}
-                  className="paper-input mt-1.5 w-full px-4 py-2.5 text-sm"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-[var(--text-muted)]">Initial Next Action (Optional)</label>
-                <input
-                  type="text"
-                  placeholder="e.g. Implement B-Tree leaf node split logic"
-                  value={newNextAction}
-                  onChange={(e) => setNewNextAction(e.target.value)}
-                  className="paper-input mt-1.5 w-full px-4 py-2.5 text-sm"
-                />
-              </div>
-
-              <div className="flex justify-end space-x-3 pt-3 border-t border-[var(--border-default)]">
-                <button
-                  type="button"
-                  onClick={() => setShowCreateModal(false)}
-                  className="paper-btn-secondary px-4 py-2 text-xs font-bold"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="paper-btn-primary px-6 py-2 text-xs font-bold"
-                >
-                  Create Project
-                </button>
-              </div>
-            </form>
           </div>
-        </div>
+        </Portal>
       )}
     </div>
   );

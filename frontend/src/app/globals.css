@@ -624,11 +624,76 @@ body[data-theme="theme-sumi-monochrome"] {
   --color-danger: #E06B52;
 }
 
+/* ==========================================================================
+   THEME 7: Yozakura (Night Sakura · 夜桜)
+   Moonlit · Sakura Bloom · Serene
+   Primary: #F472B6 | Page: #13111A | Cards: #1D1927 | Accent: #FBBF24 | Text: #F3E8FF | Border: #322B42
+   ========================================================================== */
+html[data-theme="theme-yozakura"],
+body[data-theme="theme-yozakura"] {
+  --bg-main: #13111A;
+  --surface-primary: #1D1927;
+  --surface-hover: #262133;
+  --surface-secondary: #171420;
+  --surface-inset: #0F0D14;
+  --surface-dialog: #231E2F;
+  
+  --text-primary: #F3E8FF;
+  --text-heading: #FFFFFF;
+  --text-secondary: #BDB3CE;
+  --text-muted: #847B95;
+  --text-disabled: #585066;
+  
+  --forest-green: #F472B6;
+  --deep-forest: #EC4899;
+  --crimson: #FB7185;
+  --crimson-hover: #E11D48;
+  --sage: #F472B6;
+  --pale-sage: #2C223B;
+  
+  --border-default: #322B42;
+  --border-strong: #463C5C;
+  --border-subtle: #241E30;
+  
+  --sidebar-bg: #171420;
+  --sidebar-text: #847B95;
+  --sidebar-active-bg: #262133;
+  --sidebar-active-text: #F472B6;
+  --sidebar-badge-bg: #2C223B;
+  --sidebar-badge-text: #F3E8FF;
+  
+  --fg-main: #F3E8FF;
+  --surface-bg: #1D1927;
+  --surface-nested: #171420;
+  --badge-bg: #2C223B;
+  --input-bg: #171420;
+  --btn-primary-bg: #F472B6;
+  --btn-primary-text: #13111A;
+  --btn-secondary-bg: #262133;
+  --btn-secondary-text: #F3E8FF;
+  --accent-color: #FBBF24;
+  --muted-text: #847B95;
+
+  /* Semantic Design Tokens */
+  --color-primary: #F472B6;
+  --color-page: #13111A;
+  --color-card: #1D1927;
+  --color-surface-elevated: #231E2F;
+  --color-accent: #FBBF24;
+  --color-text: #F3E8FF;
+  --color-text-muted: #847B95;
+  --color-border: #322B42;
+  --color-success: #34D399;
+  --color-warning: #FBBF24;
+  --color-danger: #FB7185;
+}
+
 /* Texture Dampener for Low-Glare Dark Themes */
 html[data-theme="theme-midnight-indigo"] body::before,
 html[data-theme="theme-charcoal-copper"] body::before,
 html[data-theme="theme-sumi-monochrome"] body::before,
 html[data-theme="theme-orange-black"] body::before,
+html[data-theme="theme-yozakura"] body::before,
 html[data-theme="paper-charcoal"] body::before {
   opacity: 0.18;
   mix-blend-mode: screen;
@@ -1009,3 +1074,75 @@ button, a, input, select, textarea {
     padding-right: env(safe-area-inset-right);
   }
 }
+
+/* ==========================================================================
+   Zen Ensō & Japanese Paper Custom Loader Animations
+   ========================================================================== */
+
+@keyframes ensoDraw {
+  0% {
+    stroke-dashoffset: 251.2;
+    transform: rotate(0deg);
+  }
+  50% {
+    stroke-dashoffset: 60;
+    transform: rotate(180deg);
+  }
+  100% {
+    stroke-dashoffset: 251.2;
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes zenBreathe {
+  0%, 100% {
+    transform: scale(0.95);
+    opacity: 0.92;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+}
+
+@keyframes waveShimmer {
+  0% {
+    transform: translateX(-150%);
+  }
+  100% {
+    transform: translateX(250%);
+  }
+}
+
+@keyframes ripplePulse {
+  0% {
+    transform: scale(0.85);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0.2;
+  }
+  100% {
+    transform: scale(0.85);
+    opacity: 0.7;
+  }
+}
+
+.enso-circle-anim {
+  animation: ensoDraw 3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  transform-origin: center;
+}
+
+.zen-breathe-anim {
+  animation: zenBreathe 3.2s ease-in-out infinite;
+}
+
+.wave-shimmer-anim {
+  animation: waveShimmer 2s ease-in-out infinite;
+}
+
+.ripple-pulse-anim {
+  animation: ripplePulse 3s ease-in-out infinite;
+}
+

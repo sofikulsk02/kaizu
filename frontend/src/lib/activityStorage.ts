@@ -130,3 +130,55 @@ export function computeStreakStats(map: Record<string, number>): ActivityStats {
     totalActivities,
   };
 }
+
+export interface DailyReflection {
+  date: string;
+  wentWell: string;
+  difficulty: string;
+  changeTomorrow: string;
+  savedAt: string;
+}
+
+const REFLECTIONS_KEY = "kaizu_daily_reflections";
+
+export function getTodayReflection(): DailyReflection | null {
+  if (typeof window === "undefined") return null;
+  const todayStr = getLocalDateString();
+  try {
+    const raw = localStorage.getItem(REFLECTIONS_KEY);
+    if (!raw) return null;
+    const all = JSON.parse(raw) as Record<string, DailyReflection>;
+    return all[todayStr] || null;
+  } catch {
+    return null;
+  }
+}
+
+export function saveDailyReflection(reflection: {
+  wentWell: string;
+  difficulty: string;
+  changeTomorrow: string;
+}): DailyReflection {
+  const todayStr = getLocalDateString();
+  const entry: DailyReflection = {
+    date: todayStr,
+    wentWell: reflection.wentWell.trim(),
+    difficulty: reflection.difficulty.trim(),
+    changeTomorrow: reflection.changeTomorrow.trim(),
+    savedAt: new Date().toISOString(),
+  };
+
+  if (typeof window !== "undefined") {
+    try {
+      const raw = localStorage.getItem(REFLECTIONS_KEY);
+      const all: Record<string, DailyReflection> = raw ? JSON.parse(raw) : {};
+      all[todayStr] = entry;
+      localStorage.setItem(REFLECTIONS_KEY, JSON.stringify(all));
+    } catch (e) {}
+
+    // Record activity on the heatmap
+    recordTodayActivity(1);
+  }
+
+  return entry;
+}

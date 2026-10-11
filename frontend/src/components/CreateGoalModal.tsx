@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { Api, GoalStatus } from "../lib/api";
 import { X } from "lucide-react";
+import { Portal } from "./Portal";
 
 interface CreateGoalModalProps {
   isOpen: boolean;
@@ -59,8 +60,10 @@ export const CreateGoalModal: React.FC<CreateGoalModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
-      <div className="paper-modal bg-[var(--surface-primary)] w-full max-w-md p-6 space-y-5 rounded-xl border border-[var(--border-default)] shadow-2xl">
+    <Portal>
+      <div className="fixed inset-0 z-[100] overflow-y-auto bg-black/60 backdrop-blur-xs p-4 sm:p-6">
+        <div className="flex min-h-full items-center justify-center pt-16 sm:pt-20 pb-8">
+          <div className="paper-modal bg-[var(--surface-primary)] w-full max-w-md p-6 space-y-5 rounded-xl border border-[var(--border-default)] shadow-2xl relative my-auto">
         <div className="flex items-center justify-between border-b border-[var(--border-default)] pb-3">
           <div>
             <h2 className="text-xl font-bold text-[var(--text-heading)]">Create Goal</h2>
@@ -175,7 +178,9 @@ export const CreateGoalModal: React.FC<CreateGoalModalProps> = ({
             </button>
           </div>
         </form>
+          </div>
+        </div>
       </div>
-    </div>
+    </Portal>
   );
 };

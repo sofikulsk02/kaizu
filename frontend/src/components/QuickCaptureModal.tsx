@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { Api, Goal } from "../lib/api";
 import { Zap, X, Check } from "lucide-react";
+import { Portal } from "./Portal";
 
 interface QuickCaptureModalProps {
   isOpen: boolean;
@@ -50,8 +51,10 @@ export const QuickCaptureModal: React.FC<QuickCaptureModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
-      <div className="paper-modal bg-[var(--surface-primary)] w-full max-w-lg p-6 space-y-5 rounded-xl border border-[var(--border-default)] shadow-2xl">
+    <Portal>
+      <div className="fixed inset-0 z-[100] overflow-y-auto bg-black/60 backdrop-blur-xs p-4 sm:p-6">
+        <div className="flex min-h-full items-center justify-center pt-16 sm:pt-20 pb-8">
+          <div className="paper-modal bg-[var(--surface-primary)] w-full max-w-lg p-6 space-y-5 rounded-xl border border-[var(--border-default)] shadow-2xl relative my-auto">
         <div className="flex items-center justify-between border-b border-[var(--border-default)] pb-3">
           <div>
             <h2 className="text-xl font-bold text-[var(--text-heading)] inline-flex items-center gap-2">
@@ -124,7 +127,9 @@ export const QuickCaptureModal: React.FC<QuickCaptureModalProps> = ({
             </button>
           </div>
         </form>
+          </div>
+        </div>
       </div>
-    </div>
+    </Portal>
   );
 };

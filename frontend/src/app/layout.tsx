@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "KAIZU — Continuous Improvement OS",
+  title: "KAIZU",
   description: "A personal operating system for learning, building, doing, reflecting, and continuously improving.",
   manifest: "/manifest.json",
   appleWebApp: {

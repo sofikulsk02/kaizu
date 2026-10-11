@@ -14,6 +14,7 @@ import {
   Api,
 } from "../lib/api";
 import { Target, Flag, FileText, Plus, Trash2, X } from "lucide-react";
+import { Portal } from "./Portal";
 
 interface ProjectDetailViewProps {
   projectId: string;
@@ -297,8 +298,67 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({ projectId,
 
   if (loading && !project) {
     return (
-      <div className="clay-surface p-12 text-center text-sm text-[#8b98a5] animate-pulse">
-        Loading Project Workspace...
+      <div className="space-y-4 animate-fadeIn">
+        {/* Top Header Bar Skeleton */}
+        <div className="flex items-center justify-between gap-2.5">
+          <div className="h-8 w-36 rounded-lg bg-[var(--surface-secondary)] border border-[var(--border-subtle)] animate-pulse" />
+          <div className="flex items-center space-x-2">
+            <div className="h-8 w-24 rounded-lg bg-[var(--surface-secondary)] border border-[var(--border-subtle)] animate-pulse" />
+            <div className="h-8 w-16 rounded-lg bg-[var(--surface-secondary)] border border-[var(--border-subtle)] animate-pulse" />
+          </div>
+        </div>
+
+        {/* Project Header Hero Card Skeleton */}
+        <div className="paper-card p-4 sm:p-5 space-y-4 border border-[var(--border-default)] relative overflow-hidden">
+          {/* Top shimmer wave */}
+          <div className="absolute top-0 left-0 right-0 h-1 bg-[var(--surface-inset)] overflow-hidden">
+            <div className="h-full bg-gradient-to-r from-[var(--forest-green)] via-[var(--crimson)] to-[var(--forest-green)] wave-shimmer-anim w-full" />
+          </div>
+
+          <div className="flex items-start justify-between gap-3">
+            <div className="space-y-2 flex-1">
+              <div className="h-6 w-52 rounded bg-[var(--surface-secondary)] animate-pulse" />
+              <div className="h-3.5 w-28 rounded bg-[var(--surface-secondary)] animate-pulse" />
+              <div className="h-4 w-3/4 rounded bg-[var(--surface-secondary)] animate-pulse mt-2" />
+            </div>
+            <div className="h-6 w-20 rounded-md bg-[var(--surface-secondary)] animate-pulse shrink-0" />
+          </div>
+
+          {/* Current milestone & metrics skeleton */}
+          <div className="pt-3 border-t border-[var(--border-subtle)] space-y-2">
+            <div className="h-8 w-full rounded bg-[var(--surface-secondary)] animate-pulse" />
+            <div className="flex justify-between items-center pt-1">
+              <div className="h-3 w-36 rounded bg-[var(--surface-secondary)] animate-pulse" />
+              <div className="h-3 w-20 rounded bg-[var(--surface-secondary)] animate-pulse" />
+            </div>
+          </div>
+        </div>
+
+        {/* Tab Pills Bar Skeleton */}
+        <div className="flex space-x-2 overflow-x-auto pb-1">
+          <div className="h-8 w-36 rounded-lg bg-[var(--surface-secondary)] animate-pulse shrink-0" />
+          <div className="h-8 w-28 rounded-lg bg-[var(--surface-secondary)] animate-pulse shrink-0" />
+          <div className="h-8 w-36 rounded-lg bg-[var(--surface-secondary)] animate-pulse shrink-0" />
+        </div>
+
+        {/* Milestone Cards Shimmer List Skeleton */}
+        <div className="space-y-3">
+          {[1, 2].map((i) => (
+            <div key={i} className="paper-card p-4 space-y-3 border border-[var(--border-default)] relative overflow-hidden">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <div className="h-4 w-4 rounded bg-[var(--surface-secondary)] animate-pulse" />
+                  <div className="h-5 w-40 rounded bg-[var(--surface-secondary)] animate-pulse" />
+                </div>
+                <div className="h-5 w-16 rounded bg-[var(--surface-secondary)] animate-pulse" />
+              </div>
+              <div className="space-y-2 pl-6 pt-1">
+                <div className="h-7 w-full rounded bg-[var(--surface-secondary)]/70 animate-pulse" />
+                <div className="h-7 w-4/5 rounded bg-[var(--surface-secondary)]/70 animate-pulse" />
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
@@ -325,29 +385,36 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({ projectId,
 
   return (
     <div className="space-y-4">
+      {/* Top Background Sync Shimmer */}
+      {loading && project && (
+        <div className="fixed top-14 sm:top-16 left-0 right-0 z-50 h-0.5 sm:h-1 bg-[var(--surface-secondary)] overflow-hidden">
+          <div className="h-full bg-gradient-to-r from-[var(--forest-green)] via-[var(--crimson)] to-[var(--forest-green)] wave-shimmer-anim w-full" />
+        </div>
+      )}
+
       {/* Top Header Bar */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-2.5">
         <button
           onClick={onBack}
-          className="clay-btn-secondary px-3.5 py-1.5 text-xs font-bold flex items-center space-x-2"
+          className="clay-btn-secondary px-3 py-1.5 text-xs font-bold flex items-center space-x-1.5 cursor-pointer"
         >
           <span>← Back to Projects</span>
         </button>
 
-        <div className="flex items-center space-x-2 sm:space-x-3">
+        <div className="flex items-center space-x-2">
           <button
             onClick={() => setShowWorkModal(true)}
-            className="clay-btn-primary px-3.5 py-1.5 text-xs font-bold flex items-center space-x-1.5"
+            className="clay-btn-primary px-3 py-1.5 text-xs font-bold flex items-center space-x-1 cursor-pointer"
           >
-            <span>⏱ Log Work Session</span>
+            <span>⏱ Log Work</span>
           </button>
           <button
             onClick={() => setEditingProject(!editingProject)}
-            className="clay-btn-secondary px-3 py-1.5 text-xs font-bold"
+            className="clay-btn-secondary px-3 py-1.5 text-xs font-bold cursor-pointer"
           >
-            {editingProject ? "Cancel Edit" : "Edit Project"}
+            {editingProject ? "Cancel" : "Edit"}
           </button>
-          <button onClick={handleDeleteProject} className="clay-btn-danger px-3 py-1.5 text-xs font-bold">
+          <button onClick={handleDeleteProject} className="clay-btn-danger px-3 py-1.5 text-xs font-bold cursor-pointer">
             Delete
           </button>
         </div>
@@ -434,53 +501,53 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({ projectId,
         )}
 
         {/* Analytics Bar */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
-          <div className="clay-surface bg-[#10171e] p-3.5 rounded-lg border border-[#232d39]">
-            <div className="text-[11px] font-bold uppercase tracking-wider text-[#8b98a5]">Effort Logged</div>
-            <div className="text-xl font-black text-white mt-1">{formatMinutes(metrics.totalEffortMinutes)}</div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 pt-2">
+          <div className="clay-surface bg-[#10171e] p-3 sm:p-3.5 rounded-lg border border-[#232d39]">
+            <div className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#8b98a5]">Effort Logged</div>
+            <div className="text-lg sm:text-xl font-black text-white mt-0.5">{formatMinutes(metrics.totalEffortMinutes)}</div>
           </div>
 
-          <div className="clay-surface bg-[#10171e] p-3.5 rounded-lg border border-[#232d39]">
-            <div className="text-[11px] font-bold uppercase tracking-wider text-[#8b98a5]">Tasks</div>
-            <div className="text-xl font-black text-[#60a5fa] mt-1">
+          <div className="clay-surface bg-[#10171e] p-3 sm:p-3.5 rounded-lg border border-[#232d39]">
+            <div className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#8b98a5]">Tasks</div>
+            <div className="text-lg sm:text-xl font-black text-[#60a5fa] mt-0.5">
               {metrics.completedTasksCount} / {metrics.totalTasksCount}
             </div>
           </div>
 
-          <div className="clay-surface bg-[#10171e] p-3.5 rounded-lg border border-[#232d39]">
-            <div className="text-[11px] font-bold uppercase tracking-wider text-[#8b98a5]">Milestones</div>
-            <div className="text-xl font-black text-[#34d399] mt-1">
+          <div className="clay-surface bg-[#10171e] p-3 sm:p-3.5 rounded-lg border border-[#232d39]">
+            <div className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#8b98a5]">Milestones</div>
+            <div className="text-lg sm:text-xl font-black text-[#34d399] mt-0.5">
               {metrics.completedMilestonesCount} / {metrics.totalMilestonesCount}
             </div>
           </div>
 
-          <div className="clay-surface bg-[#10171e] p-3.5 rounded-lg border border-[#232d39]">
-            <div className="text-[11px] font-bold uppercase tracking-wider text-[#8b98a5]">Active Days</div>
-            <div className="text-xl font-black text-[#fb923c] mt-1">{metrics.activeDaysCount}</div>
+          <div className="clay-surface bg-[#10171e] p-3 sm:p-3.5 rounded-lg border border-[#232d39]">
+            <div className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#8b98a5]">Active Days</div>
+            <div className="text-lg sm:text-xl font-black text-[#fb923c] mt-0.5">{metrics.activeDaysCount}</div>
           </div>
         </div>
       </div>
 
       {/* Next Action Hero Card */}
-      <div className="clay-surface bg-gradient-to-r from-[#172431] to-[#121c27] p-6 border border-[#26374a]">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <div className="text-xs font-extrabold uppercase tracking-wider text-[#10b981] flex items-center space-x-1.5">
-              <Target className="h-4 w-4" />
+      <div className="clay-surface bg-gradient-to-r from-[#172431] to-[#121c27] p-4 sm:p-6 border border-[#26374a] rounded-xl">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+          <div className="space-y-1 min-w-0">
+            <div className="text-[11px] sm:text-xs font-extrabold uppercase tracking-wider text-[#10b981] flex items-center space-x-1.5">
+              <Target className="h-4 w-4 shrink-0" />
               <span>Next Action</span>
             </div>
             {project.nextAction ? (
-              <div>
-                <h3 className="text-lg font-bold text-white mt-1">{project.nextAction}</h3>
+              <div className="min-w-0">
+                <h3 className="text-base sm:text-lg font-bold text-white mt-1 break-words">{project.nextAction}</h3>
                 {project.currentMilestone && (
-                  <div className="text-xs text-[#8b98a5] mt-0.5">
+                  <div className="text-xs text-[#8b98a5] mt-0.5 truncate">
                     Milestone: <span className="text-[#60a5fa] font-semibold">{project.currentMilestone.title}</span>
                   </div>
                 )}
               </div>
             ) : (
               <div>
-                <h3 className="text-base font-bold text-white mt-1">No next action set for {project.name}</h3>
+                <h3 className="text-sm sm:text-base font-bold text-white mt-1">No next action set for {project.name}</h3>
                 <p className="text-xs text-[#8b98a5]">Set your next meaningful action to keep momentum moving forward.</p>
               </div>
             )}
@@ -493,7 +560,7 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({ projectId,
               }
               setShowWorkModal(true);
             }}
-            className="clay-btn-primary px-6 py-3 text-xs font-black uppercase tracking-wider shadow-lg hover:scale-105 transition-transform flex items-center justify-center space-x-2 self-start md:self-center shrink-0"
+            className="clay-btn-primary px-5 py-2.5 sm:px-6 sm:py-3 text-xs font-black uppercase tracking-wider shadow-lg hover:scale-105 transition-transform flex items-center justify-center space-x-2 w-full sm:w-auto shrink-0 cursor-pointer"
           >
             <span>Log Work Session →</span>
           </button>
@@ -501,43 +568,43 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({ projectId,
       </div>
 
       {/* Workspace Navigation Tabs */}
-      <div className="flex border-b border-[var(--border-default)] space-x-6 text-sm font-bold text-[var(--text-secondary)]">
+      <div className="flex border-b border-[#232d39] gap-1 sm:gap-6 text-xs sm:text-sm font-bold text-[#8b98a5] overflow-x-auto no-scrollbar scroll-smooth pb-px">
         <button
           onClick={() => setActiveTab("milestones")}
-          className={`pb-3 transition-colors border-b-2 cursor-pointer ${
+          className={`pb-2.5 px-3 sm:px-1 transition-colors border-b-2 whitespace-nowrap shrink-0 cursor-pointer ${
             activeTab === "milestones"
-              ? "border-[var(--forest-green)] text-[var(--text-heading)] font-extrabold"
-              : "border-transparent hover:text-[var(--text-heading)]"
+              ? "border-[#10b981] text-white font-extrabold"
+              : "border-transparent hover:text-white"
           }`}
         >
           Milestones & Tasks ({allTasks.length})
         </button>
         <button
           onClick={() => setActiveTab("sessions")}
-          className={`pb-3 transition-colors border-b-2 cursor-pointer ${
+          className={`pb-2.5 px-3 sm:px-1 transition-colors border-b-2 whitespace-nowrap shrink-0 cursor-pointer ${
             activeTab === "sessions"
-              ? "border-[var(--forest-green)] text-[var(--text-heading)] font-extrabold"
-              : "border-transparent hover:text-[var(--text-heading)]"
+              ? "border-[#10b981] text-white font-extrabold"
+              : "border-transparent hover:text-white"
           }`}
         >
           Recent Work ({workSessions.length})
         </button>
         <button
           onClick={() => setActiveTab("notes")}
-          className={`pb-3 transition-colors border-b-2 cursor-pointer ${
+          className={`pb-2.5 px-3 sm:px-1 transition-colors border-b-2 whitespace-nowrap shrink-0 cursor-pointer ${
             activeTab === "notes"
-              ? "border-[var(--forest-green)] text-[var(--text-heading)] font-extrabold"
-              : "border-transparent hover:text-[var(--text-heading)]"
+              ? "border-[#10b981] text-white font-extrabold"
+              : "border-transparent hover:text-white"
           }`}
         >
           Notes & Context ({notes.length})
         </button>
         <button
           onClick={() => setActiveTab("reports")}
-          className={`pb-3 transition-colors border-b-2 cursor-pointer ${
+          className={`pb-2.5 px-3 sm:px-1 transition-colors border-b-2 whitespace-nowrap shrink-0 cursor-pointer ${
             activeTab === "reports"
-              ? "border-[var(--forest-green)] text-[var(--text-heading)] font-extrabold"
-              : "border-transparent hover:text-[var(--text-heading)]"
+              ? "border-[#10b981] text-white font-extrabold"
+              : "border-transparent hover:text-white"
           }`}
         >
           Reports & Progress
@@ -546,25 +613,25 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({ projectId,
 
       {/* TAB 1: MILESTONES & TASKS */}
       {activeTab === "milestones" && (
-        <div className="clay-surface p-7 space-y-6 border border-[#232d39]">
-          <div className="flex items-center justify-between">
+        <div className="clay-surface p-4 sm:p-7 space-y-4 sm:space-y-6 border border-[#232d39]">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <h2 className="text-xl font-bold text-white">Milestones & Tasks</h2>
+              <h2 className="text-lg sm:text-xl font-bold text-white">Milestones & Tasks</h2>
               <p className="text-xs text-[#8b98a5]">Organize work into stages and tasks without upfront syllabus lock</p>
             </div>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center gap-2 w-full sm:w-auto">
               <button
                 onClick={() => {
                   setTaskTargetMilestoneId("");
                   setShowTaskModal(true);
                 }}
-                className="clay-btn-secondary px-4 py-2 text-xs font-bold"
+                className="clay-btn-secondary flex-1 sm:flex-initial px-3 sm:px-4 py-2 text-xs font-bold text-center justify-center whitespace-nowrap cursor-pointer"
               >
                 + Add Direct Task
               </button>
               <button
                 onClick={() => setShowMilestoneModal(true)}
-                className="clay-btn-primary px-4 py-2 text-xs font-bold"
+                className="clay-btn-primary flex-1 sm:flex-initial px-3 sm:px-4 py-2 text-xs font-bold text-center justify-center whitespace-nowrap cursor-pointer"
               >
                 + Add Milestone
               </button>
@@ -600,36 +667,36 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({ projectId,
                 const mStatus = MILESTONE_STATUS_CONFIG[milestone.status] || MILESTONE_STATUS_CONFIG.UPCOMING;
 
                 return (
-                  <div key={milestone.id} className="clay-surface bg-[#10171e] p-5 space-y-4 border border-[#232d39]">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#232d39] pb-3">
-                      <div>
-                        <div className="flex items-center space-x-2.5">
-                          <span className={`px-2.5 py-0.5 rounded text-[11px] font-bold ${mStatus.badgeClass}`}>
+                  <div key={milestone.id} className="clay-surface bg-[#10171e] p-3.5 sm:p-5 space-y-3.5 sm:space-y-4 border border-[#232d39]">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-[#232d39] pb-3">
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className={`px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-bold ${mStatus.badgeClass}`}>
                             {mStatus.label}
                           </span>
-                          <h3 className="font-bold text-white text-base">{milestone.title}</h3>
+                          <h3 className="font-bold text-white text-sm sm:text-base break-words">{milestone.title}</h3>
                           <span className="text-xs font-semibold text-[#8b98a5]">
                             ({completedMTasks}/{milestoneTasks.length} tasks)
                           </span>
                         </div>
                         {milestone.description && (
-                          <p className="text-xs text-[#8b98a5] mt-1">{milestone.description}</p>
+                          <p className="text-xs text-[#8b98a5] mt-1 break-words">{milestone.description}</p>
                         )}
                       </div>
 
-                      <div className="flex items-center space-x-3 self-end sm:self-center">
+                      <div className="flex items-center gap-2 self-start sm:self-center shrink-0">
                         <button
                           onClick={() => {
                             setTaskTargetMilestoneId(milestone.id);
                             setShowTaskModal(true);
                           }}
-                          className="text-xs font-bold text-[#3b82f6] hover:underline"
+                          className="bg-[#3b82f6]/15 hover:bg-[#3b82f6]/25 text-[#60a5fa] px-2.5 py-1 rounded text-xs font-bold transition cursor-pointer"
                         >
                           + Add Task
                         </button>
                         <button
                           onClick={() => handleDeleteMilestone(milestone.id)}
-                          className="text-xs font-semibold text-[#8b98a5] hover:text-red-400"
+                          className="text-xs font-semibold text-[#8b98a5] hover:text-red-400 px-2 py-1 transition cursor-pointer"
                         >
                           Delete
                         </button>
@@ -646,22 +713,22 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({ projectId,
                           return (
                             <div
                               key={task.id}
-                              className="clay-surface bg-[#161e27] p-3 text-xs flex items-center justify-between hover:border-[#3b82f6]/40 transition-colors"
+                              className="clay-surface bg-[#161e27] p-2.5 sm:p-3 text-xs flex items-center justify-between gap-3 hover:border-[#3b82f6]/40 transition-colors"
                             >
-                              <div className="flex items-center space-x-3">
+                              <div className="flex items-center space-x-2.5 min-w-0">
                                 <input
                                   type="checkbox"
                                   checked={isDone}
                                   onChange={() => handleToggleTaskStatus(task)}
-                                  className="h-4 w-4 rounded accent-[#10b981] cursor-pointer"
+                                  className="h-4 w-4 rounded accent-[#10b981] cursor-pointer shrink-0"
                                 />
-                                <span className={`font-semibold ${isDone ? "line-through text-[#8b98a5]" : "text-white"}`}>
+                                <span className={`font-semibold break-words min-w-0 ${isDone ? "line-through text-[#8b98a5]" : "text-white"}`}>
                                   {task.title}
                                 </span>
                               </div>
 
-                              <div className="flex items-center space-x-3">
-                                <span className={`text-[10px] font-extrabold uppercase ${priorityInfo.color}`}>
+                              <div className="flex items-center space-x-2.5 shrink-0">
+                                <span className={`text-[10px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-white/5 ${priorityInfo.color}`}>
                                   {priorityInfo.label}
                                 </span>
                                 <button
@@ -669,7 +736,7 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({ projectId,
                                   className="text-[#8b98a5] hover:text-red-400 p-1 rounded transition cursor-pointer"
                                   title="Delete task"
                                 >
-                                  <Trash2 className="h-3 w-3" />
+                                  <Trash2 className="h-3.5 w-3.5" />
                                 </button>
                               </div>
                             </div>
@@ -685,8 +752,8 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({ projectId,
 
               {/* Direct Un-grouped Tasks */}
               {directTasks.length > 0 && (
-                <div className="clay-surface bg-[#10171e] p-5 space-y-3 border border-[#232d39]">
-                  <h3 className="font-bold text-white text-sm uppercase tracking-wider text-[#8b98a5]">
+                <div className="clay-surface bg-[#10171e] p-3.5 sm:p-5 space-y-3 border border-[#232d39]">
+                  <h3 className="font-bold text-white text-xs sm:text-sm uppercase tracking-wider text-[#8b98a5]">
                     Direct Project Tasks (Un-grouped)
                   </h3>
                   <div className="space-y-2">
@@ -697,22 +764,22 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({ projectId,
                       return (
                         <div
                           key={task.id}
-                          className="clay-surface bg-[#161e27] p-3 text-xs flex items-center justify-between"
+                          className="clay-surface bg-[#161e27] p-2.5 sm:p-3 text-xs flex items-center justify-between gap-3"
                         >
-                          <div className="flex items-center space-x-3">
+                          <div className="flex items-center space-x-2.5 min-w-0">
                             <input
                               type="checkbox"
                               checked={isDone}
                               onChange={() => handleToggleTaskStatus(task)}
-                              className="h-4 w-4 rounded accent-[#10b981] cursor-pointer"
+                              className="h-4 w-4 rounded accent-[#10b981] cursor-pointer shrink-0"
                             />
-                            <span className={`font-semibold ${isDone ? "line-through text-[#8b98a5]" : "text-white"}`}>
+                            <span className={`font-semibold break-words min-w-0 ${isDone ? "line-through text-[#8b98a5]" : "text-white"}`}>
                               {task.title}
                             </span>
                           </div>
 
-                          <div className="flex items-center space-x-3">
-                            <span className={`text-[10px] font-extrabold uppercase ${priorityInfo.color}`}>
+                          <div className="flex items-center space-x-2.5 shrink-0">
+                            <span className={`text-[10px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-white/5 ${priorityInfo.color}`}>
                               {priorityInfo.label}
                             </span>
                             <button
@@ -720,7 +787,7 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({ projectId,
                               className="text-[#8b98a5] hover:text-red-400 p-1 rounded transition cursor-pointer"
                               title="Delete task"
                             >
-                              <Trash2 className="h-3 w-3" />
+                              <Trash2 className="h-3.5 w-3.5" />
                             </button>
                           </div>
                         </div>
@@ -736,15 +803,15 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({ projectId,
 
       {/* TAB 2: RECENT WORK (SESSIONS LOG) */}
       {activeTab === "sessions" && (
-        <div className="clay-surface p-7 space-y-6 border border-[#232d39]">
-          <div className="flex items-center justify-between">
+        <div className="clay-surface p-4 sm:p-7 space-y-4 sm:space-y-6 border border-[#232d39]">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <h2 className="text-xl font-bold text-white">Recent Work & Activity Log</h2>
+              <h2 className="text-lg sm:text-xl font-bold text-white">Recent Work & Activity Log</h2>
               <p className="text-xs text-[#8b98a5]">Record coding, debugging, testing, and research sessions for {project.name}</p>
             </div>
             <button
               onClick={() => setShowWorkModal(true)}
-              className="clay-btn-primary px-4 py-2 text-xs font-bold"
+              className="clay-btn-primary px-4 py-2 text-xs font-bold w-full sm:w-auto text-center justify-center cursor-pointer"
             >
               + Log Work Session
             </button>
@@ -820,15 +887,15 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({ projectId,
 
       {/* TAB 3: NOTES & TECHNICAL CONTEXT */}
       {activeTab === "notes" && (
-        <div className="clay-surface p-7 space-y-6 border border-[#232d39]">
-          <div className="flex items-center justify-between">
+        <div className="clay-surface p-4 sm:p-7 space-y-4 sm:space-y-6 border border-[#232d39]">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <h2 className="text-xl font-bold text-white">Technical Context & Decisions</h2>
+              <h2 className="text-lg sm:text-xl font-bold text-white">Technical Context & Decisions</h2>
               <p className="text-xs text-[#8b98a5]">Architectural decisions, links, notes, and lessons learned</p>
             </div>
             <button
               onClick={() => setShowNoteModal(true)}
-              className="clay-btn-primary px-4 py-2 text-xs font-bold"
+              className="clay-btn-primary px-4 py-2 text-xs font-bold w-full sm:w-auto text-center justify-center cursor-pointer"
             >
               + Add Technical Note
             </button>
@@ -886,16 +953,16 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({ projectId,
 
       {/* TAB 4: REPORTS & PROGRESS */}
       {activeTab === "reports" && (
-        <div className="clay-surface p-7 space-y-6 border border-[#232d39]">
+        <div className="clay-surface p-4 sm:p-7 space-y-4 sm:space-y-6 border border-[#232d39]">
           <div>
-            <h2 className="text-xl font-bold text-white">Project Progress & Effort Reports</h2>
+            <h2 className="text-lg sm:text-xl font-bold text-white">Project Progress & Effort Reports</h2>
             <p className="text-xs text-[#8b98a5]">Honest metrics on completed tasks, active days, and logged effort</p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="clay-surface bg-[#10171e] p-5 rounded-lg border border-[#232d39] space-y-2">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+            <div className="clay-surface bg-[#10171e] p-4 sm:p-5 rounded-lg border border-[#232d39] space-y-1.5 sm:space-y-2">
               <div className="text-xs font-bold uppercase tracking-wider text-[#8b98a5]">Task Completion Rate</div>
-              <div className="text-3xl font-black text-[#34d399]">
+              <div className="text-2xl sm:text-3xl font-black text-[#34d399]">
                 {metrics.taskProgressPercentage !== null ? `${metrics.taskProgressPercentage}%` : "—"}
               </div>
               <div className="text-xs text-[#8b98a5]">
@@ -903,17 +970,17 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({ projectId,
               </div>
             </div>
 
-            <div className="clay-surface bg-[#10171e] p-5 rounded-lg border border-[#232d39] space-y-2">
+            <div className="clay-surface bg-[#10171e] p-4 sm:p-5 rounded-lg border border-[#232d39] space-y-1.5 sm:space-y-2">
               <div className="text-xs font-bold uppercase tracking-wider text-[#8b98a5]">Milestones Progress</div>
-              <div className="text-3xl font-black text-[#60a5fa]">
+              <div className="text-2xl sm:text-3xl font-black text-[#60a5fa]">
                 {metrics.completedMilestonesCount} / {metrics.totalMilestonesCount}
               </div>
               <div className="text-xs text-[#8b98a5]">Milestones finished</div>
             </div>
 
-            <div className="clay-surface bg-[#10171e] p-5 rounded-lg border border-[#232d39] space-y-2">
+            <div className="clay-surface bg-[#10171e] p-4 sm:p-5 rounded-lg border border-[#232d39] space-y-1.5 sm:space-y-2">
               <div className="text-xs font-bold uppercase tracking-wider text-[#8b98a5]">Total Effort Invested</div>
-              <div className="text-3xl font-black text-white">
+              <div className="text-2xl sm:text-3xl font-black text-white">
                 {formatMinutes(metrics.totalEffortMinutes)}
               </div>
               <div className="text-xs text-[#8b98a5]">Across {metrics.activeDaysCount} active days</div>
@@ -924,8 +991,10 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({ projectId,
 
       {/* MODAL: LOG WORK SESSION */}
       {showWorkModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-          <div className="clay-surface bg-[#161e27] w-full max-w-xl p-7 space-y-5 rounded-xl border border-[#232d39] max-h-[90vh] overflow-y-auto">
+        <Portal>
+          <div className="fixed inset-0 z-[100] overflow-y-auto bg-black/70 backdrop-blur-xs p-4 sm:p-6">
+            <div className="flex min-h-full items-center justify-center pt-16 sm:pt-20 pb-8">
+              <div className="clay-surface bg-[#161e27] w-full max-w-xl p-7 space-y-5 rounded-xl border border-[#232d39] max-h-[90vh] overflow-y-auto relative my-auto">
             <div className="flex items-center justify-between border-b border-[#232d39] pb-4">
               <div>
                 <h3 className="text-lg font-black text-[var(--text-heading)]">Log Work Session</h3>
@@ -1038,13 +1107,17 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({ projectId,
               </div>
             </form>
           </div>
-        </div>
+            </div>
+          </div>
+        </Portal>
       )}
 
       {/* MODAL: ADD MILESTONE */}
       {showMilestoneModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-          <div className="clay-surface bg-[#161e27] w-full max-w-lg p-7 space-y-5 rounded-xl border border-[#232d39]">
+        <Portal>
+          <div className="fixed inset-0 z-[100] overflow-y-auto bg-black/70 backdrop-blur-xs p-4 sm:p-6">
+            <div className="flex min-h-full items-center justify-center pt-16 sm:pt-20 pb-8">
+              <div className="clay-surface bg-[#161e27] w-full max-w-lg p-7 space-y-5 rounded-xl border border-[#232d39] relative my-auto">
             <div className="flex items-center justify-between border-b border-[#232d39] pb-4">
               <div>
                 <h3 className="text-lg font-black text-[var(--text-heading)]">Add Milestone</h3>
@@ -1095,13 +1168,17 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({ projectId,
               </div>
             </form>
           </div>
-        </div>
+            </div>
+          </div>
+        </Portal>
       )}
 
       {/* MODAL: ADD TASK */}
       {showTaskModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-          <div className="clay-surface bg-[#161e27] w-full max-w-lg p-7 space-y-5 rounded-xl border border-[#232d39]">
+        <Portal>
+          <div className="fixed inset-0 z-[100] overflow-y-auto bg-black/70 backdrop-blur-xs p-4 sm:p-6">
+            <div className="flex min-h-full items-center justify-center pt-16 sm:pt-20 pb-8">
+              <div className="clay-surface bg-[#161e27] w-full max-w-lg p-7 space-y-5 rounded-xl border border-[#232d39] relative my-auto">
             <div className="flex items-center justify-between border-b border-[#232d39] pb-4">
               <div>
                 <h3 className="text-lg font-black text-[var(--text-heading)]">Add Task</h3>
@@ -1172,13 +1249,17 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({ projectId,
               </div>
             </form>
           </div>
-        </div>
+            </div>
+          </div>
+        </Portal>
       )}
 
       {/* MODAL: ADD NOTE */}
       {showNoteModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-          <div className="clay-surface bg-[#161e27] w-full max-w-lg p-7 space-y-5 rounded-xl border border-[#232d39]">
+        <Portal>
+          <div className="fixed inset-0 z-[100] overflow-y-auto bg-black/70 backdrop-blur-xs p-4 sm:p-6">
+            <div className="flex min-h-full items-center justify-center pt-16 sm:pt-20 pb-8">
+              <div className="clay-surface bg-[#161e27] w-full max-w-lg p-7 space-y-5 rounded-xl border border-[#232d39] relative my-auto">
             <div className="flex items-center justify-between border-b border-[#232d39] pb-4">
               <div>
                 <h3 className="text-lg font-black text-[var(--text-heading)]">Add Technical Note / Decision</h3>
@@ -1243,7 +1324,9 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({ projectId,
               </div>
             </form>
           </div>
-        </div>
+            </div>
+          </div>
+        </Portal>
       )}
     </div>
   );

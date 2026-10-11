@@ -51,7 +51,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               KAIZU
             </span>
             <span className="ml-2 hidden text-xs font-semibold text-[var(--text-muted)] sm:inline-block">
-              Continuous Improvement OS
+              A little better, every day.
             </span>
           </div>
         </div>

@@ -29,6 +29,18 @@ import { CreateGoalModal } from "../components/CreateGoalModal";
 import { QuickCaptureModal } from "../components/QuickCaptureModal";
 import { LoginScreen } from "../components/LoginScreen";
 import { MichiAssistant } from "../components/assistant";
+import { KaizuLoader } from "../components/KaizuLoader";
+
+interface NavHistoryState {
+  tab?: string;
+  subjectId?: string | null;
+  goalId?: string | null;
+  projectId?: string | null;
+  modal?: "subject" | "goal" | "quickCapture" | null;
+  drawer?: string | null;
+  isSettings?: boolean;
+  depth?: number;
+}
 
 export default function Page() {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -52,11 +64,20 @@ export default function Page() {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [loadingSubjectId, setLoadingSubjectId] = useState<string | null>(null);
+  const [loadingGoalId, setLoadingGoalId] = useState<string | null>(null);
+  const [loadingProjectId, setLoadingProjectId] = useState<string | null>(null);
 
   // Synchronization refs to eliminate stale closure overwrites
   const selectedSubjectRef = useRef<Subject | null>(null);
   const selectedGoalDetailRef = useRef<GoalDetail | null>(null);
+  const selectedProjectIdRef = useRef<string | null>(null);
   const activeTabRef = useRef<string>(activeTab);
+  const showCreateSubjectRef = useRef<boolean>(showCreateSubject);
+  const showCreateGoalRef = useRef<boolean>(showCreateGoal);
+  const showQuickCaptureRef = useRef<boolean>(showQuickCapture);
+  const isSidebarOpenRef = useRef<boolean>(isSidebarOpen);
+  const currentDepthRef = useRef<number>(0);
 
   useEffect(() => {
     selectedSubjectRef.current = selectedSubject;
@@ -67,8 +88,28 @@ export default function Page() {
   }, [selectedGoalDetail]);
 
   useEffect(() => {
+    selectedProjectIdRef.current = selectedProjectId;
+  }, [selectedProjectId]);
+
+  useEffect(() => {
     activeTabRef.current = activeTab;
   }, [activeTab]);
+
+  useEffect(() => {
+    showCreateSubjectRef.current = showCreateSubject;
+  }, [showCreateSubject]);
+
+  useEffect(() => {
+    showCreateGoalRef.current = showCreateGoal;
+  }, [showCreateGoal]);
+
+  useEffect(() => {
+    showQuickCaptureRef.current = showQuickCapture;
+  }, [showQuickCapture]);
+
+  useEffect(() => {
+    isSidebarOpenRef.current = isSidebarOpen;
+  }, [isSidebarOpen]);
 
   // 1. Instant Client Hydration: Load cached state immediately (0ms start on mobile)
   useEffect(() => {
@@ -198,6 +239,144 @@ export default function Page() {
     }
   }, [fetchData]);
 
+  // Push new navigation step into mobile history stack
+  const pushNav = (entry: Partial<NavHistoryState>) => {
+    if (typeof window === "undefined") return;
+    const nextDepth = (currentDepthRef.current || 0) + 1;
+    currentDepthRef.current = nextDepth;
+    const newState: NavHistoryState = {
+      tab: entry.tab ?? activeTabRef.current,
+      subjectId: entry.subjectId !== undefined ? entry.subjectId : selectedSubjectRef.current?.id || null,
+      goalId: entry.goalId !== undefined ? entry.goalId : selectedGoalDetailRef.current?.id || null,
+      projectId: entry.projectId !== undefined ? entry.projectId : selectedProjectIdRef.current,
+      modal: entry.modal ?? null,
+      drawer: entry.drawer ?? null,
+      isSettings: entry.isSettings ?? false,
+      depth: nextDepth,
+    };
+    window.history.pushState(newState, "");
+  };
+
+  // Unified in-app Back handler that pops history when available
+  const handleBack = () => {
+    if (typeof window !== "undefined" && currentDepthRef.current > 0) {
+      window.history.back();
+    } else {
+      // Direct state fallback if history was reset
+      if (selectedSubjectRef.current) setSelectedSubject(null);
+      else if (selectedGoalDetailRef.current) setSelectedGoalDetail(null);
+      else if (selectedProjectIdRef.current) setSelectedProjectId(null);
+      else if (activeTabRef.current === "settings" && previousView) {
+        setActiveTab(previousView.tab);
+        setSelectedSubject(previousView.selectedSubject);
+        setSelectedGoalDetail(previousView.selectedGoalDetail);
+        setSelectedProjectId(previousView.selectedProjectId);
+        setPreviousView(null);
+      } else if (activeTabRef.current !== "dashboard") {
+        setActiveTab("dashboard");
+      }
+    }
+  };
+
+  const handleOpenModal = (modal: "subject" | "goal" | "quickCapture") => {
+    if (modal === "subject") setShowCreateSubject(true);
+    if (modal === "goal") setShowCreateGoal(true);
+    if (modal === "quickCapture") setShowQuickCapture(true);
+    pushNav({ modal });
+  };
+
+  const handleCloseModal = () => {
+    if (showCreateSubjectRef.current) setShowCreateSubject(false);
+    if (showCreateGoalRef.current) setShowCreateGoal(false);
+    if (showQuickCaptureRef.current) setShowQuickCapture(false);
+    if (typeof window !== "undefined" && window.history.state?.modal) {
+      window.history.back();
+    }
+  };
+
+  const handleToggleSidebar = () => {
+    setIsSidebarOpen((prev) => {
+      const next = !prev;
+      if (next && typeof window !== "undefined" && window.innerWidth < 768) {
+        pushNav({ drawer: "sidebar" });
+      } else if (!next && typeof window !== "undefined" && window.history.state?.drawer === "sidebar") {
+        window.history.back();
+      }
+      return next;
+    });
+  };
+
+  // PWA Hardware/Gesture Back Button Interception (prevents app from closing on mobile)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    // Ensure root entry starts at depth 0
+    window.history.replaceState({ tab: "dashboard", depth: 0 }, "");
+    currentDepthRef.current = 0;
+
+    const handlePopState = (event: PopStateEvent) => {
+      const state = event.state as NavHistoryState | null;
+      currentDepthRef.current = state?.depth ?? Math.max(0, currentDepthRef.current - 1);
+
+      // 1. If any modal was open, close it without closing the app
+      if (showQuickCaptureRef.current) {
+        setShowQuickCapture(false);
+        return;
+      }
+      if (showCreateSubjectRef.current) {
+        setShowCreateSubject(false);
+        return;
+      }
+      if (showCreateGoalRef.current) {
+        setShowCreateGoal(false);
+        return;
+      }
+
+      // 2. If mobile sidebar drawer was open, close it
+      if (isSidebarOpenRef.current && window.innerWidth < 768) {
+        setIsSidebarOpen(false);
+        return;
+      }
+
+      // 3. If popped to a valid history state:
+      if (state) {
+        if (state.tab && state.tab !== activeTabRef.current) {
+          setActiveTab(state.tab);
+        }
+
+        if (!state.subjectId && selectedSubjectRef.current) {
+          setSelectedSubject(null);
+        }
+
+        if (!state.goalId && selectedGoalDetailRef.current) {
+          setSelectedGoalDetail(null);
+        }
+
+        if (!state.projectId && selectedProjectIdRef.current) {
+          setSelectedProjectId(null);
+        }
+
+        if (!state.isSettings && activeTabRef.current === "settings") {
+          setPreviousView(null);
+        }
+
+        return;
+      }
+
+      // 4. Fallback if popped to root without state:
+      if (selectedSubjectRef.current || selectedGoalDetailRef.current || selectedProjectIdRef.current) {
+        setSelectedSubject(null);
+        setSelectedGoalDetail(null);
+        setSelectedProjectId(null);
+      } else if (activeTabRef.current !== "dashboard") {
+        setActiveTab("dashboard");
+      }
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
+
   // Auto-close sidebar when resizing to mobile
   useEffect(() => {
     const handleResize = () => {
@@ -210,27 +389,45 @@ export default function Page() {
   }, []);
 
   const handleSelectSubject = async (subject: Subject) => {
+    setLoadingSubjectId(subject.id);
     try {
       const detail = await Api.getSubjectById(subject.id);
       setSelectedSubject(detail);
       setSelectedGoalDetail(null);
       setSelectedProjectId(null);
       setActiveTab("subjects");
+      pushNav({ tab: "subjects", subjectId: detail.id });
     } catch (err: any) {
       alert(err.message || "Failed to load subject details");
+    } finally {
+      setLoadingSubjectId(null);
     }
   };
 
   const handleSelectGoal = async (goal: Goal) => {
+    setLoadingGoalId(goal.id);
     try {
       const detail = await Api.getGoalById(goal.id);
       setSelectedGoalDetail(detail);
       setSelectedSubject(null);
       setSelectedProjectId(null);
       setActiveTab("goals");
+      pushNav({ tab: "goals", goalId: detail.id });
     } catch (err: any) {
       alert(err.message || "Failed to load goal workspace");
+    } finally {
+      setLoadingGoalId(null);
     }
+  };
+
+  const handleSelectProject = (projectId: string) => {
+    setLoadingProjectId(projectId);
+    setSelectedProjectId(projectId);
+    setSelectedSubject(null);
+    setSelectedGoalDetail(null);
+    setActiveTab("projects");
+    pushNav({ tab: "projects", projectId });
+    setTimeout(() => setLoadingProjectId(null), 300);
   };
 
   const handleUserChanged = () => {
@@ -247,11 +444,15 @@ export default function Page() {
   };
 
   const handleSelectTab = (tab: string) => {
+    if (tab === activeTab && !selectedSubject && !selectedGoalDetail && !selectedProjectId) {
+      return;
+    }
     resetSelection();
     setActiveTab(tab);
     if (tab !== "settings") {
       setPreviousView(null);
     }
+    pushNav({ tab });
   };
 
   const isSettingsOpen =
@@ -262,18 +463,8 @@ export default function Page() {
 
   const handleToggleSettings = () => {
     if (isSettingsOpen) {
-      // Toggle back to earlier view
-      if (previousView) {
-        setActiveTab(previousView.tab);
-        setSelectedSubject(previousView.selectedSubject);
-        setSelectedGoalDetail(previousView.selectedGoalDetail);
-        setSelectedProjectId(previousView.selectedProjectId);
-        setPreviousView(null);
-      } else {
-        handleSelectTab("dashboard");
-      }
+      handleBack();
     } else {
-      // Save snapshot of earlier view and open settings
       setPreviousView({
         tab: activeTab,
         selectedSubject,
@@ -282,20 +473,13 @@ export default function Page() {
       });
       resetSelection();
       setActiveTab("settings");
+      pushNav({ tab: "settings", isSettings: true });
     }
   };
 
   // If initial auth check is running
   if (loading && !activeUser) {
-    return (
-      <div className="flex min-h-screen flex-col items-center justify-center p-6 text-center bg-[var(--bg-main)]">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--forest-green)] border-t-transparent mb-4"></div>
-        <span className="font-bold text-sm text-[var(--text-heading)]">Connecting to Kaizu Cloud OS...</span>
-        <span className="text-xs text-[var(--text-muted)] mt-1.5 max-w-xs">
-          Waking up cloud server. (Render free tier cold starts may take ~30–45 seconds if inactive).
-        </span>
-      </div>
-    );
+    return <KaizuLoader />;
   }
 
   // Mandatory Authentication Gate: Unauthenticated users MUST see LoginScreen
@@ -310,18 +494,25 @@ export default function Page() {
         activeUser={activeUser}
         isSidebarOpen={isSidebarOpen}
         isSettingsOpen={isSettingsOpen}
-        onToggleSidebar={() => setIsSidebarOpen((prev) => !prev)}
-        onOpenQuickAdd={() => setShowQuickCapture(true)}
+        onToggleSidebar={handleToggleSidebar}
+        onOpenQuickAdd={() => handleOpenModal("quickCapture")}
         onToggleSettings={handleToggleSettings}
         onSelectTab={handleSelectTab}
       />
+
+      {/* Global Top Navigation Loading Bar */}
+      {(loadingSubjectId || loadingGoalId || loadingProjectId) && (
+        <div className="fixed top-14 sm:top-16 left-0 right-0 z-50 h-0.5 sm:h-1 bg-[var(--surface-secondary)] overflow-hidden">
+          <div className="h-full bg-gradient-to-r from-[var(--forest-green)] via-[var(--crimson)] to-[var(--forest-green)] wave-shimmer-anim w-full" />
+        </div>
+      )}
 
       {/* Main Container */}
       <div className="flex flex-1 pt-14 sm:pt-16">
         {/* Sidebar Navigation */}
         <Sidebar
           isOpen={isSidebarOpen}
-          onToggleSidebar={() => setIsSidebarOpen((prev) => !prev)}
+          onToggleSidebar={handleToggleSidebar}
           activeTab={activeTab}
           onSelectTab={handleSelectTab}
           counts={{
@@ -352,8 +543,10 @@ export default function Page() {
               onSelectTab={handleSelectTab}
               onSelectSubject={handleSelectSubject}
               onSelectGoal={handleSelectGoal}
-              onOpenCreateSubject={() => setShowCreateSubject(true)}
-              onOpenCreateGoal={() => setShowCreateGoal(true)}
+              onOpenCreateSubject={() => handleOpenModal("subject")}
+              onOpenCreateGoal={() => handleOpenModal("goal")}
+              loadingSubjectId={loadingSubjectId}
+              loadingGoalId={loadingGoalId}
             />
           )}
 
@@ -361,14 +554,15 @@ export default function Page() {
             selectedSubject ? (
               <SubjectDetailView
                 subject={selectedSubject}
-                onBack={() => setSelectedSubject(null)}
+                onBack={handleBack}
                 onRefresh={refreshCurrentSubject}
               />
             ) : (
               <SubjectsView
                 subjects={subjects}
                 onSelectSubject={handleSelectSubject}
-                onOpenCreateSubject={() => setShowCreateSubject(true)}
+                onOpenCreateSubject={() => handleOpenModal("subject")}
+                loadingSubjectId={loadingSubjectId}
               />
             )
           )}
@@ -377,15 +571,16 @@ export default function Page() {
             selectedGoalDetail ? (
               <GoalDetailView
                 goalDetail={selectedGoalDetail}
-                onBack={() => setSelectedGoalDetail(null)}
+                onBack={handleBack}
                 onRefresh={refreshCurrentGoal}
               />
             ) : (
               <GoalsView
                 goals={goals}
                 onSelectGoal={handleSelectGoal}
-                onOpenCreateGoal={() => setShowCreateGoal(true)}
+                onOpenCreateGoal={() => handleOpenModal("goal")}
                 onRefresh={fetchData}
+                loadingGoalId={loadingGoalId}
               />
             )
           )}
@@ -394,11 +589,12 @@ export default function Page() {
             selectedProjectId ? (
               <ProjectDetailView
                 projectId={selectedProjectId}
-                onBack={() => setSelectedProjectId(null)}
+                onBack={handleBack}
               />
             ) : (
               <ProjectsView
-                onSelectProject={(id) => setSelectedProjectId(id)}
+                onSelectProject={handleSelectProject}
+                loadingProjectId={loadingProjectId}
               />
             )
           )}
@@ -416,20 +612,20 @@ export default function Page() {
       {/* Modals */}
       <CreateSubjectModal
         isOpen={showCreateSubject}
-        onClose={() => setShowCreateSubject(false)}
+        onClose={handleCloseModal}
         onSuccess={fetchData}
       />
 
       <CreateGoalModal
         isOpen={showCreateGoal}
-        onClose={() => setShowCreateGoal(false)}
+        onClose={handleCloseModal}
         onSuccess={fetchData}
       />
 
       <QuickCaptureModal
         isOpen={showQuickCapture}
         goals={goals}
-        onClose={() => setShowQuickCapture(false)}
+        onClose={handleCloseModal}
         onSuccess={fetchData}
       />
 

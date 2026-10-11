@@ -64,6 +64,14 @@ export const MichiAssistant: React.FC<MichiAssistantProps> = ({ pageContext }) =
     }
   }, [isOpen, fetchConversations]);
 
+  useEffect(() => {
+    const handleOpenMichi = () => {
+      setIsOpen(true);
+    };
+    window.addEventListener("open-michi", handleOpenMichi);
+    return () => window.removeEventListener("open-michi", handleOpenMichi);
+  }, []);
+
   // Load selected conversation messages
   const handleSelectConversation = async (convId: string) => {
     try {
