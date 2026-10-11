@@ -257,24 +257,41 @@ export default function Page() {
     window.history.pushState(newState, "");
   };
 
-  // Unified in-app Back handler that pops history when available
+  // Dedicated handlers to return cleanly to section listings (Subjects, Goals, Projects)
+  const handleBackFromSubject = () => {
+    setSelectedSubject(null);
+    setActiveTab("subjects");
+  };
+
+  const handleBackFromGoal = () => {
+    setSelectedGoalDetail(null);
+    setActiveTab("goals");
+  };
+
+  const handleBackFromProject = () => {
+    setSelectedProjectId(null);
+    setActiveTab("projects");
+  };
+
+  // Unified in-app Back handler (used for settings and general fallback)
   const handleBack = () => {
-    if (typeof window !== "undefined" && currentDepthRef.current > 0) {
-      window.history.back();
-    } else {
-      // Direct state fallback if history was reset
-      if (selectedSubjectRef.current) setSelectedSubject(null);
-      else if (selectedGoalDetailRef.current) setSelectedGoalDetail(null);
-      else if (selectedProjectIdRef.current) setSelectedProjectId(null);
-      else if (activeTabRef.current === "settings" && previousView) {
-        setActiveTab(previousView.tab);
-        setSelectedSubject(previousView.selectedSubject);
-        setSelectedGoalDetail(previousView.selectedGoalDetail);
-        setSelectedProjectId(previousView.selectedProjectId);
-        setPreviousView(null);
-      } else if (activeTabRef.current !== "dashboard") {
-        setActiveTab("dashboard");
-      }
+    if (activeTabRef.current === "settings" && previousView) {
+      setActiveTab(previousView.tab);
+      setSelectedSubject(previousView.selectedSubject);
+      setSelectedGoalDetail(previousView.selectedGoalDetail);
+      setSelectedProjectId(previousView.selectedProjectId);
+      setPreviousView(null);
+    } else if (selectedSubjectRef.current) {
+      setSelectedSubject(null);
+      setActiveTab("subjects");
+    } else if (selectedGoalDetailRef.current) {
+      setSelectedGoalDetail(null);
+      setActiveTab("goals");
+    } else if (selectedProjectIdRef.current) {
+      setSelectedProjectId(null);
+      setActiveTab("projects");
+    } else if (activeTabRef.current !== "dashboard") {
+      setActiveTab("dashboard");
     }
   };
 
@@ -282,16 +299,12 @@ export default function Page() {
     if (modal === "subject") setShowCreateSubject(true);
     if (modal === "goal") setShowCreateGoal(true);
     if (modal === "quickCapture") setShowQuickCapture(true);
-    pushNav({ modal });
   };
 
   const handleCloseModal = () => {
-    if (showCreateSubjectRef.current) setShowCreateSubject(false);
-    if (showCreateGoalRef.current) setShowCreateGoal(false);
-    if (showQuickCaptureRef.current) setShowQuickCapture(false);
-    if (typeof window !== "undefined" && window.history.state?.modal) {
-      window.history.back();
-    }
+    setShowCreateSubject(false);
+    setShowCreateGoal(false);
+    setShowQuickCapture(false);
   };
 
   const handleToggleSidebar = () => {
@@ -364,10 +377,15 @@ export default function Page() {
       }
 
       // 4. Fallback if popped to root without state:
-      if (selectedSubjectRef.current || selectedGoalDetailRef.current || selectedProjectIdRef.current) {
+      if (selectedSubjectRef.current) {
         setSelectedSubject(null);
+        setActiveTab("subjects");
+      } else if (selectedGoalDetailRef.current) {
         setSelectedGoalDetail(null);
+        setActiveTab("goals");
+      } else if (selectedProjectIdRef.current) {
         setSelectedProjectId(null);
+        setActiveTab("projects");
       } else if (activeTabRef.current !== "dashboard") {
         setActiveTab("dashboard");
       }
@@ -543,7 +561,7 @@ export default function Page() {
             selectedSubject ? (
               <SubjectDetailView
                 subject={selectedSubject}
-                onBack={handleBack}
+                onBack={handleBackFromSubject}
                 onRefresh={refreshCurrentSubject}
               />
             ) : (
@@ -560,7 +578,7 @@ export default function Page() {
             selectedGoalDetail ? (
               <GoalDetailView
                 goalDetail={selectedGoalDetail}
-                onBack={handleBack}
+                onBack={handleBackFromGoal}
                 onRefresh={refreshCurrentGoal}
               />
             ) : (
@@ -578,7 +596,7 @@ export default function Page() {
             selectedProjectId ? (
               <ProjectDetailView
                 projectId={selectedProjectId}
-                onBack={handleBack}
+                onBack={handleBackFromProject}
               />
             ) : (
               <ProjectsView
@@ -602,13 +620,21 @@ export default function Page() {
       <CreateSubjectModal
         isOpen={showCreateSubject}
         onClose={handleCloseModal}
-        onSuccess={fetchData}
+        onSuccess={() => {
+          fetchData();
+          setActiveTab("subjects");
+          setSelectedSubject(null);
+        }}
       />
 
       <CreateGoalModal
         isOpen={showCreateGoal}
         onClose={handleCloseModal}
-        onSuccess={fetchData}
+        onSuccess={() => {
+          fetchData();
+          setActiveTab("goals");
+          setSelectedGoalDetail(null);
+        }}
       />
 
       <QuickCaptureModal
