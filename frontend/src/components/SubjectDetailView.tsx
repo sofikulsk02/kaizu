@@ -337,7 +337,7 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-3 sm:space-y-4">
       {/* Top Header Navigation & Action Bar */}
       <div className="flex items-center justify-between gap-2">
         {/* Back Button with Tactile Hover */}
@@ -394,7 +394,7 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
       )}
 
       {/* Subject Hero Header & Analytics */}
-      <div className="paper-card p-3.5 sm:p-5 space-y-3 sm:space-y-4 border border-[var(--border-default)]">
+      <div className="paper-card p-3 sm:p-4 space-y-2.5 sm:space-y-3 border border-[var(--border-default)]">
         {editingSubject ? (
           <form onSubmit={handleUpdateSubject} className="space-y-4">
             <div>
@@ -459,7 +459,7 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
             </div>
 
             {/* Seamless Overall Mastery Progress Bar */}
-            <div className="mt-3 p-2.5 sm:p-3 rounded-xl bg-[var(--surface-secondary)] border border-[var(--border-default)] flex items-center justify-between gap-3">
+            <div className="mt-2.5 p-2 sm:p-2.5 rounded-xl bg-[var(--surface-secondary)] border border-[var(--border-default)] flex items-center justify-between gap-2.5">
               <div className="flex items-center min-w-0">
                 <span className="text-xs font-bold text-[var(--text-heading)] truncate">Overall Mastery</span>
               </div>
@@ -479,8 +479,8 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
         )}
 
         {/* 4 Analytics Metrics Cards with Balanced Proportions */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 pt-1">
-          <div className="paper-card bg-[var(--surface-secondary)] p-2.5 sm:p-3.5 border border-[var(--border-default)] card-lift">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5 pt-1">
+          <div className="paper-card bg-[var(--surface-secondary)] p-2 sm:p-3 border border-[var(--border-default)] card-lift">
             <div className="flex items-center justify-between text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
               <span>Time Studied</span>
               <Clock className="h-3.5 w-3.5 text-[var(--forest-green)]" />
@@ -490,7 +490,7 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
             </div>
           </div>
 
-          <div className="paper-card bg-[var(--surface-secondary)] p-2.5 sm:p-3.5 border border-[var(--border-default)] card-lift">
+          <div className="paper-card bg-[var(--surface-secondary)] p-2 sm:p-3 border border-[var(--border-default)] card-lift">
             <div className="flex items-center justify-between text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
               <span>Topics Tracked</span>
               <BookOpen className="h-3.5 w-3.5 text-[var(--forest-green)]" />
@@ -500,7 +500,7 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
             </div>
           </div>
 
-          <div className="paper-card bg-[var(--surface-secondary)] p-2.5 sm:p-3.5 border border-[var(--border-default)] card-lift">
+          <div className="paper-card bg-[var(--surface-secondary)] p-2 sm:p-3 border border-[var(--border-default)] card-lift">
             <div className="flex items-center justify-between text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
               <span>Active Days</span>
               <Zap className="h-3.5 w-3.5 text-[var(--forest-green)]" />
@@ -510,7 +510,7 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
             </div>
           </div>
 
-          <div className="paper-card bg-[var(--surface-secondary)] p-2.5 sm:p-3.5 border border-[var(--border-default)] card-lift">
+          <div className="paper-card bg-[var(--surface-secondary)] p-2 sm:p-3 border border-[var(--border-default)] card-lift">
             <div className="flex items-center justify-between text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
               <span>Needs Revision</span>
               <Flame className="h-3.5 w-3.5 text-[#C2410C]" />
@@ -523,7 +523,7 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
       </div>
 
       {/* Continue Learning Spotlight Hero Card */}
-      <div className="paper-card bg-[var(--surface-secondary)] p-3.5 sm:p-5 border border-[var(--border-default)] card-lift">
+      <div className="paper-card bg-[var(--surface-secondary)] p-3 sm:p-4 border border-[var(--border-default)] card-lift">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="space-y-1">
             <div className="text-[11px] font-extrabold uppercase tracking-wider text-[var(--forest-green)] flex items-center space-x-1.5">
@@ -652,7 +652,7 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
           TAB 1: STRUCTURE & TOPICS (REDESIGNED)
           ========================================== */}
       {activeTab === "structure" && (
-        <div className="space-y-4 sm:space-y-6">
+        <div className="space-y-3 sm:space-y-4">
           {/* Section Header */}
           <div className="flex items-center justify-between gap-2 pb-2 border-b border-[var(--border-subtle)]">
             <div>
@@ -754,14 +754,14 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
               </button>
             </div>
           ) : (
-            <div className="space-y-4 sm:space-y-6">
+            <div className="space-y-3 sm:space-y-3.5">
               {chapters.map((chapter, cIndex) => {
                 const chapterTopics = chapter.topics || [];
 
                 return (
                   <div
                     key={chapter.id}
-                    className="paper-card p-3.5 sm:p-5 space-y-3 border border-[var(--border-default)] rounded-xl shadow-2xs hover:border-[var(--border-strong)] transition-all"
+                    className="paper-card p-3 sm:p-4 space-y-2.5 border border-[var(--border-default)] rounded-xl shadow-2xs hover:border-[var(--border-strong)] transition-all"
                   >
                     {/* Chapter Header Card */}
                     <div className="flex items-center justify-between gap-2 pb-2.5 border-b border-[var(--border-subtle)]">
@@ -808,7 +808,7 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
                     </div>
 
                     {/* Topics List Container */}
-                    <div className="space-y-2.5">
+                    <div className="space-y-2">
                       {chapterTopics.length > 0 ? (
                         chapterTopics.map((topic) => {
                           const statusInfo = STATUS_CONFIG[topic.status || "NOT_STARTED"];
@@ -817,7 +817,7 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
                           return (
                             <div
                               key={topic.id}
-                              className="paper-card bg-[var(--surface-primary)] p-3 sm:p-4 rounded-xl border border-[var(--border-default)] hover:border-[var(--forest-green)] transition-all card-lift space-y-2.5 shadow-2xs"
+                              className="paper-card bg-[var(--surface-primary)] p-2.5 sm:p-3 rounded-lg border border-[var(--border-default)] hover:border-[var(--forest-green)] transition-all card-lift space-y-2 shadow-2xs"
                             >
                               {/* Row 1: Status Pill (left) & 5-Star Confidence (right) */}
                               <div className="flex items-center justify-between gap-2">
@@ -1021,11 +1021,11 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
               </button>
             </div>
           ) : (
-            <div className="space-y-3.5">
+            <div className="space-y-2.5">
               {studySessions.map((session) => (
                 <div
                   key={session.id}
-                  className="paper-card p-5 space-y-3 border border-[var(--border-default)] rounded-xl card-lift"
+                  className="paper-card p-3 sm:p-4 space-y-2 border border-[var(--border-default)] rounded-xl card-lift"
                 >
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
                     <div>
@@ -1104,7 +1104,7 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
           TAB 3: UNDERSTANDING & REVISION FOCUS
           ========================================== */}
       {activeTab === "revision" && (
-        <div className="space-y-4 sm:space-y-6">
+        <div className="space-y-3 sm:space-y-4">
           <div className="pb-2 border-b border-[var(--border-subtle)]">
             <h2 className="text-base sm:text-xl font-black text-[var(--text-heading)]">
               Understanding & Revision Focus
@@ -1130,11 +1130,11 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
               </p>
             </div>
           ) : (
-            <div className="space-y-3.5">
+            <div className="space-y-2.5">
               {topicsNeedingRevision.map((topic) => (
                 <div
                   key={topic.id}
-                  className="paper-card p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border border-[var(--border-default)] rounded-xl card-lift"
+                  className="paper-card p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border border-[var(--border-default)] rounded-xl card-lift"
                 >
                   <div className="space-y-1.5">
                     <div className="flex items-center space-x-2">

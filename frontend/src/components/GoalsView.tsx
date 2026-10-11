@@ -47,8 +47,8 @@ export const GoalsView: React.FC<GoalsViewProps> = ({
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+    <div className="space-y-3 sm:space-y-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3">
         <div>
           <h1 className="text-xl font-black text-[var(--text-heading)] sm:text-2xl">Goals Workspace</h1>
           <p className="text-xs text-[var(--text-muted)]">
@@ -84,7 +84,7 @@ export const GoalsView: React.FC<GoalsViewProps> = ({
 
       {/* Goals Grid */}
       {filteredGoals.length === 0 ? (
-        <div className="paper-card p-8 text-center space-y-3">
+        <div className="paper-card p-6 sm:p-8 text-center space-y-3">
           <div className="flex justify-center">
             <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#FFEAE8] text-[var(--crimson)] shadow-xs">
               <Target className="h-6 w-6" strokeWidth={1.8} />
@@ -105,7 +105,7 @@ export const GoalsView: React.FC<GoalsViewProps> = ({
           </button>
         </div>
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-2.5 sm:gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {filteredGoals.map((goal) => {
             const isLoading = activeLoadingId === goal.id;
             const isOtherLoading = activeLoadingId !== null && !isLoading;
@@ -114,7 +114,7 @@ export const GoalsView: React.FC<GoalsViewProps> = ({
               <div
                 key={goal.id}
                 onClick={() => handleCardClick(goal)}
-                className={`group paper-card-interactive cursor-pointer p-3.5 sm:p-4 flex flex-col justify-between space-y-3 border transition-all relative overflow-hidden ${
+                className={`group paper-card-interactive cursor-pointer p-3 sm:p-3.5 flex flex-col justify-between space-y-2.5 border transition-all relative overflow-hidden ${
                   isLoading
                     ? "border-[var(--forest-green)] ring-2 ring-[var(--forest-green)]/40 bg-[var(--surface-hover)] shadow-md scale-[1.01]"
                     : isOtherLoading

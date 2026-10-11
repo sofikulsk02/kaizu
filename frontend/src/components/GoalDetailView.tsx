@@ -66,6 +66,17 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
   const [msTargetDate, setMsTargetDate] = useState("");
   const [loadingMilestone, setLoadingMilestone] = useState(false);
 
+  // Edit Milestone State
+  const [editingMilestone, setEditingMilestone] = useState<Milestone | null>(null);
+  const [editMsTitle, setEditMsTitle] = useState("");
+  const [editMsDesc, setEditMsDesc] = useState("");
+  const [editMsTargetDate, setEditMsTargetDate] = useState("");
+  const [editMsStatus, setEditMsStatus] = useState<MilestoneStatus>("UPCOMING");
+  const [loadingEditMilestone, setLoadingEditMilestone] = useState(false);
+
+  // Deleting Milestone State
+  const [deletingMilestoneId, setDeletingMilestoneId] = useState<string | null>(null);
+
   // Add Task Form State
   const [taskTitle, setTaskTitle] = useState("");
   const [taskDesc, setTaskDesc] = useState("");
@@ -160,6 +171,63 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
       alert(err.message || "Failed to create milestone");
     } finally {
       setLoadingMilestone(false);
+    }
+  };
+
+  const handleDeleteMilestone = async (milestoneId: string, milestoneTitle: string) => {
+    if (
+      !confirm(
+        `Are you sure you want to delete milestone "${milestoneTitle}"? Any tasks in this milestone will remain in the goal without a milestone.`
+      )
+    ) {
+      return;
+    }
+    setDeletingMilestoneId(milestoneId);
+    try {
+      await Api.deleteMilestone(goalDetail.id, milestoneId);
+      onRefresh();
+    } catch (err: any) {
+      alert(err.message || "Failed to delete milestone");
+    } finally {
+      setDeletingMilestoneId(null);
+    }
+  };
+
+  const handleOpenEditMilestone = (ms: Milestone) => {
+    setEditingMilestone(ms);
+    setEditMsTitle(ms.title);
+    setEditMsDesc(ms.description || "");
+    setEditMsTargetDate(ms.targetDate ? ms.targetDate.split("T")[0] : "");
+    setEditMsStatus(ms.status);
+  };
+
+  const handleSaveMilestoneEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingMilestone || !editMsTitle.trim()) return;
+    setLoadingEditMilestone(true);
+    try {
+      await Api.updateMilestone(goalDetail.id, editingMilestone.id, {
+        title: editMsTitle.trim(),
+        description: editMsDesc.trim() || null,
+        targetDate: editMsTargetDate || null,
+        status: editMsStatus,
+      });
+      setEditingMilestone(null);
+      onRefresh();
+    } catch (err: any) {
+      alert(err.message || "Failed to update milestone");
+    } finally {
+      setLoadingEditMilestone(false);
+    }
+  };
+
+  const handleDeleteTask = async (taskId: string) => {
+    if (!confirm("Are you sure you want to delete this task?")) return;
+    try {
+      await Api.deleteGoalTask(goalDetail.id, taskId);
+      onRefresh();
+    } catch (err: any) {
+      alert(err.message || "Failed to delete task");
     }
   };
 
@@ -280,7 +348,7 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
     : null;
 
   return (
-    <div className="space-y-4 sm:space-y-6 pb-8">
+    <div className="space-y-3 sm:space-y-4 pb-6">
       {/* Top Header Navigation & Action Bar */}
       <div className="flex items-center justify-between gap-2">
         {/* Back Button */}
@@ -330,7 +398,7 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
       </div>
 
       {/* Goal Hero Header & Analytics */}
-      <div className="paper-card p-3.5 sm:p-5 space-y-3 sm:space-y-4 border border-[var(--border-default)]">
+      <div className="paper-card p-3 sm:p-4 space-y-2.5 sm:space-y-3 border border-[var(--border-default)]">
         <div className="space-y-2">
           <div className="flex flex-wrap items-center gap-1.5">
             <span className="paper-badge px-2.5 py-0.5 text-[11px] font-bold text-[var(--forest-green)]">
@@ -380,7 +448,7 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
           )}
 
           {/* Integrated Execution Progress Bar */}
-          <div className="mt-2 p-2.5 sm:p-3 rounded-xl bg-[var(--surface-secondary)] border border-[var(--border-default)] flex items-center justify-between gap-3">
+          <div className="mt-2.5 p-2 sm:p-2.5 rounded-xl bg-[var(--surface-secondary)] border border-[var(--border-default)] flex items-center justify-between gap-2.5">
             <div className="flex items-center space-x-2 min-w-0">
               <Sparkles className="h-4 w-4 text-[var(--forest-green)] shrink-0" />
               <div className="min-w-0">
@@ -407,8 +475,8 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
         </div>
 
         {/* 4 Analytics Metrics Cards with Balanced 2x2 Mobile Proportions */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 pt-1 border-t border-[var(--border-subtle)]">
-          <div className="paper-card bg-[var(--surface-secondary)] p-2.5 sm:p-3.5 border border-[var(--border-default)] card-lift">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5 pt-1 border-t border-[var(--border-subtle)]">
+          <div className="paper-card bg-[var(--surface-secondary)] p-2 sm:p-3 border border-[var(--border-default)] card-lift">
             <div className="flex items-center justify-between text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
               <span>Milestones</span>
               <Map className="h-3.5 w-3.5 text-[var(--forest-green)]" />
@@ -421,7 +489,7 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
             </div>
           </div>
 
-          <div className="paper-card bg-[var(--surface-secondary)] p-2.5 sm:p-3.5 border border-[var(--border-default)] card-lift">
+          <div className="paper-card bg-[var(--surface-secondary)] p-2 sm:p-3 border border-[var(--border-default)] card-lift">
             <div className="flex items-center justify-between text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
               <span>Tasks Done</span>
               <Check className="h-3.5 w-3.5 text-[var(--forest-green)]" />
@@ -432,7 +500,7 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
             <div className="text-[10px] text-[var(--text-muted)] truncate">Actionable items</div>
           </div>
 
-          <div className="paper-card bg-[var(--surface-secondary)] p-2.5 sm:p-3.5 border border-[var(--border-default)] card-lift">
+          <div className="paper-card bg-[var(--surface-secondary)] p-2 sm:p-3 border border-[var(--border-default)] card-lift">
             <div className="flex items-center justify-between text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
               <span>Logged Effort</span>
               <Clock className="h-3.5 w-3.5 text-[var(--crimson)]" />
@@ -445,7 +513,7 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
             <div className="text-[10px] text-[var(--text-muted)] truncate">Actual time recorded</div>
           </div>
 
-          <div className="paper-card bg-[var(--surface-secondary)] p-2.5 sm:p-3.5 border border-[var(--border-default)] card-lift">
+          <div className="paper-card bg-[var(--surface-secondary)] p-2 sm:p-3 border border-[var(--border-default)] card-lift">
             <div className="flex items-center justify-between text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
               <span>Consistency</span>
               <Zap className="h-3.5 w-3.5 text-[var(--forest-green)]" />
@@ -460,7 +528,7 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
 
       {/* INTELLIGENT GOAL COACH WIDGET */}
       {coachAnalysis && (
-        <div className="paper-card p-3.5 sm:p-5 space-y-3 bg-[var(--surface-secondary)] border border-[var(--forest-green)]/30 rounded-xl card-lift">
+        <div className="paper-card p-3 sm:p-4 space-y-2.5 bg-[var(--surface-secondary)] border border-[var(--forest-green)]/30 rounded-xl card-lift">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
             <div className="flex items-center space-x-2 flex-wrap gap-y-1">
               <span className="paper-badge bg-[var(--surface-primary)] px-2.5 py-0.5 text-xs font-black text-[var(--forest-green)] inline-flex items-center gap-1.5 border border-[var(--border-default)]">
@@ -520,7 +588,7 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
       )}
 
       {/* 1. TODAY'S FOCUS SECTION */}
-      <div className="paper-card bg-[var(--surface-secondary)] p-3.5 sm:p-5 space-y-3.5 border border-[var(--border-default)] card-lift">
+      <div className="paper-card bg-[var(--surface-secondary)] p-3 sm:p-4 space-y-2.5 border border-[var(--border-default)] card-lift">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
           <div>
             <div className="inline-flex items-center space-x-1.5 paper-badge px-2.5 py-0.5 text-[11px] font-bold text-[var(--forest-green)]">
@@ -545,7 +613,7 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
         </div>
 
         {todaysFocusTask ? (
-          <div className="paper-card bg-[var(--surface-primary)] p-3.5 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-3.5 rounded-xl border border-[var(--border-default)]">
+          <div className="paper-card bg-[var(--surface-primary)] p-3 sm:p-4 flex flex-col md:flex-row md:items-center justify-between gap-3 rounded-xl border border-[var(--border-default)]">
             <div className="space-y-1.5 min-w-0">
               <div className="flex items-center space-x-2">
                 <span className="px-2 py-0.5 text-[10px] font-black rounded bg-[var(--surface-secondary)] text-[var(--forest-green)] border border-[var(--border-default)]">
@@ -687,7 +755,7 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
 
       {/* 2. PLAN & MILESTONES SECTION */}
       {(activeTabSection === "focus" || activeTabSection === "plan") && (
-        <div className="space-y-4 sm:space-y-6">
+        <div className="space-y-3 sm:space-y-4">
           <div className="flex items-center justify-between gap-2 pb-2 border-b border-[var(--border-subtle)]">
             <div>
               <h2 className="text-base sm:text-xl font-black text-[var(--text-heading)]">Plan & Milestones</h2>
@@ -734,11 +802,11 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
               </div>
             </div>
           ) : (
-            <div className="space-y-3.5 sm:space-y-4">
+            <div className="space-y-2.5 sm:space-y-3">
               {goalDetail.milestones.map((ms, idx) => {
                 const msCompletedTasks = ms.tasks.filter((t) => t.status === "COMPLETED").length;
                 return (
-                  <div key={ms.id} className="paper-card p-3.5 sm:p-5 space-y-3 border border-[var(--border-default)] rounded-xl shadow-2xs hover:border-[var(--border-strong)] transition-all">
+                  <div key={ms.id} className="paper-card p-3 sm:p-4 space-y-2.5 border border-[var(--border-default)] rounded-xl shadow-2xs hover:border-[var(--border-strong)] transition-all">
                     <div className="flex items-center justify-between gap-2 pb-2 border-b border-[var(--border-subtle)]">
                       <div className="flex items-center space-x-2.5 min-w-0">
                         <div className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-lg bg-[var(--forest-green)] text-white font-black text-xs shrink-0 shadow-2xs">
@@ -763,7 +831,7 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
                         </div>
                       </div>
 
-                      <div className="flex items-center space-x-2 shrink-0">
+                      <div className="flex items-center space-x-1.5 sm:space-x-2 shrink-0">
                         <span className="hidden sm:inline text-xs font-bold text-[var(--text-muted)]">
                           {msCompletedTasks} / {ms.tasks.length} tasks
                         </span>
@@ -773,9 +841,25 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
                             setShowAddTask(true);
                           }}
                           className="btn-pill-action px-2.5 py-1 text-xs font-bold space-x-1 cursor-pointer active:scale-95"
+                          title="Add task to milestone"
                         >
                           <Plus className="h-3 w-3" />
                           <span>Task</span>
+                        </button>
+                        <button
+                          onClick={() => handleOpenEditMilestone(ms)}
+                          className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-heading)] hover:bg-[var(--surface-hover)] transition-colors cursor-pointer"
+                          title="Edit milestone"
+                        >
+                          <Pencil className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteMilestone(ms.id, ms.title)}
+                          disabled={deletingMilestoneId === ms.id}
+                          className="p-1.5 rounded-lg text-red-400 hover:text-red-500 hover:bg-red-500/10 transition-colors cursor-pointer disabled:opacity-50"
+                          title="Delete milestone"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
                         </button>
                       </div>
                     </div>
@@ -815,6 +899,13 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
                                   {task.estimateMinutes}m
                                 </span>
                               )}
+                              <button
+                                onClick={() => handleDeleteTask(task.id)}
+                                className="text-red-400 hover:text-red-500 cursor-pointer p-1 transition-colors"
+                                title="Delete task"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </button>
                             </div>
                           </div>
                         ))}
@@ -834,7 +925,7 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
 
       {/* 3. TASKS SECTION (Unfinished / All Tasks) */}
       {activeTabSection === "tasks" && (
-        <div className="space-y-4 sm:space-y-6">
+        <div className="space-y-3 sm:space-y-4">
           <div className="flex items-center justify-between gap-2 pb-2 border-b border-[var(--border-subtle)]">
             <div>
               <h2 className="text-base sm:text-xl font-black text-[var(--text-heading)]">Tasks & Actionable Work</h2>
@@ -859,11 +950,11 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
               No tasks defined yet. Click "+ Add Task" to create one.
             </div>
           ) : (
-            <div className="space-y-2.5">
+            <div className="space-y-2">
               {goalDetail.tasks.map((task) => (
                 <div
                   key={task.id}
-                  className="paper-card bg-[var(--surface-primary)] p-3 sm:p-3.5 rounded-xl border border-[var(--border-default)] flex items-center justify-between gap-3 text-xs shadow-2xs hover:border-[var(--forest-green)] transition-all"
+                  className="paper-card bg-[var(--surface-primary)] p-2.5 sm:p-3 rounded-xl border border-[var(--border-default)] flex items-center justify-between gap-2.5 text-xs shadow-2xs hover:border-[var(--forest-green)] transition-all"
                 >
                   <div className="flex items-center space-x-3 min-w-0">
                     <input
@@ -895,8 +986,9 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
                       {task.priority}
                     </span>
                     <button
-                      onClick={() => Api.deleteGoalTask(goalDetail.id, task.id).then(onRefresh)}
-                      className="text-[11px] font-bold text-red-400 hover:underline cursor-pointer p-1"
+                      onClick={() => handleDeleteTask(task.id)}
+                      className="text-[11px] font-bold text-red-400 hover:text-red-500 cursor-pointer p-1"
+                      title="Delete task"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
@@ -910,7 +1002,7 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
 
       {/* 4. DAILY ACTIONS SECTION */}
       {activeTabSection === "actions" && (
-        <div className="space-y-4 sm:space-y-6">
+        <div className="space-y-3 sm:space-y-4">
           <div className="flex items-center justify-between gap-2 pb-2 border-b border-[var(--border-subtle)]">
             <div>
               <h2 className="text-base sm:text-xl font-black text-[var(--text-heading)]">Daily Actions Log</h2>
@@ -932,9 +1024,9 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
               No daily actions logged yet. Log what you actually did today to build evidence of progress!
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               {goalDetail.dailyActions.map((action) => (
-                <div key={action.id} className="paper-card bg-[var(--surface-primary)] p-3.5 sm:p-4 space-y-2.5 rounded-xl border border-[var(--border-default)] shadow-2xs">
+                <div key={action.id} className="paper-card bg-[var(--surface-primary)] p-3 sm:p-3.5 space-y-2 rounded-xl border border-[var(--border-default)] shadow-2xs">
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <div className="text-xs font-bold text-[var(--forest-green)] flex items-center gap-1.5">
@@ -998,7 +1090,7 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
 
       {/* 5. REFLECTION & HANSEI SECTION */}
       {activeTabSection === "reflection" && (
-        <div className="space-y-4 sm:space-y-6">
+        <div className="space-y-3 sm:space-y-4">
           <div className="pb-2 border-b border-[var(--border-subtle)]">
             <h2 className="text-base sm:text-xl font-black text-[var(--text-heading)]">Hansei & Reflections</h2>
             <p className="text-[11px] sm:text-xs text-[var(--text-muted)]">
@@ -1011,9 +1103,9 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
               No reflections recorded yet. Add a reflection when logging work or reviewing progress.
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               {goalDetail.reflections.map((ref) => (
-                <div key={ref.id} className="paper-card bg-[var(--surface-primary)] p-3.5 sm:p-4 space-y-2 rounded-xl border border-[var(--border-default)] shadow-2xs">
+                <div key={ref.id} className="paper-card bg-[var(--surface-primary)] p-3 sm:p-3.5 space-y-2 rounded-xl border border-[var(--border-default)] shadow-2xs">
                   <div className="text-xs font-bold text-[var(--forest-green)]">
                     Reflection on {new Date(ref.createdAt).toLocaleDateString()}
                   </div>
@@ -1113,6 +1205,111 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
                 >
                   {loadingMilestone ? "Creating..." : "Save Milestone"}
                 </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: EDIT MILESTONE */}
+      {editingMilestone && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="paper-card bg-[var(--surface-primary)] w-full max-w-md p-5 sm:p-6 space-y-4 rounded-2xl border border-[var(--border-default)] shadow-xl">
+            <div className="flex items-center justify-between pb-2 border-b border-[var(--border-subtle)]">
+              <h3 className="text-base font-black text-[var(--text-heading)]">Edit Milestone</h3>
+              <button
+                type="button"
+                onClick={() => setEditingMilestone(null)}
+                className="text-xs text-[var(--text-muted)] hover:text-[var(--text-heading)] cursor-pointer"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <form onSubmit={handleSaveMilestoneEdit} className="space-y-3.5 text-xs font-bold">
+              <div>
+                <label className="block text-[var(--text-muted)] mb-1 uppercase tracking-wider text-[10px]">
+                  Milestone Title *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={editMsTitle}
+                  onChange={(e) => setEditMsTitle(e.target.value)}
+                  className="paper-input w-full p-2.5 text-xs font-semibold"
+                  autoFocus
+                />
+              </div>
+
+              <div>
+                <label className="block text-[var(--text-muted)] mb-1 uppercase tracking-wider text-[10px]">
+                  Status
+                </label>
+                <select
+                  value={editMsStatus}
+                  onChange={(e) => setEditMsStatus(e.target.value as MilestoneStatus)}
+                  className="paper-input w-full p-2.5 text-xs font-semibold"
+                >
+                  <option value="UPCOMING">Upcoming</option>
+                  <option value="IN_PROGRESS">In Progress</option>
+                  <option value="COMPLETED">Completed</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[var(--text-muted)] mb-1 uppercase tracking-wider text-[10px]">
+                  Description (Optional)
+                </label>
+                <textarea
+                  placeholder="What major outcome must happen in this stage?"
+                  value={editMsDesc}
+                  onChange={(e) => setEditMsDesc(e.target.value)}
+                  className="paper-input w-full p-2.5 text-xs h-20"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[var(--text-muted)] mb-1 uppercase tracking-wider text-[10px]">
+                  Target Date (Optional)
+                </label>
+                <input
+                  type="date"
+                  value={editMsTargetDate}
+                  onChange={(e) => setEditMsTargetDate(e.target.value)}
+                  className="paper-input w-full p-2.5 text-xs"
+                />
+              </div>
+
+              <div className="flex items-center justify-between pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const idToDelete = editingMilestone.id;
+                    const titleToDelete = editingMilestone.title;
+                    setEditingMilestone(null);
+                    handleDeleteMilestone(idToDelete, titleToDelete);
+                  }}
+                  className="paper-btn-danger px-3 py-2 text-xs font-bold flex items-center space-x-1 cursor-pointer"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  <span>Delete</span>
+                </button>
+
+                <div className="flex space-x-2.5">
+                  <button
+                    type="button"
+                    onClick={() => setEditingMilestone(null)}
+                    className="paper-btn-secondary px-4 py-2 text-xs font-bold cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={loadingEditMilestone}
+                    className="paper-btn-primary px-5 py-2 text-xs font-extrabold cursor-pointer"
+                  >
+                    {loadingEditMilestone ? "Saving..." : "Save Changes"}
+                  </button>
+                </div>
               </div>
             </form>
           </div>

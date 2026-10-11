@@ -111,33 +111,33 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({ onSelectProject, loa
   const pausedCount = projects.filter((p) => p.status === "PAUSED" || p.status === "STOPPED").length;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3 sm:space-y-4">
       {/* Header bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3">
         <div>
-          <h1 className="text-3xl font-black text-[var(--text-heading)]">Projects</h1>
-          <p className="text-sm text-[var(--text-muted)] mt-1">
+          <h1 className="text-xl font-black text-[var(--text-heading)] sm:text-2xl">Projects</h1>
+          <p className="text-xs text-[var(--text-muted)]">
             Things you're building or delivering. Plan work, execute, log activity, and track progress.
           </p>
         </div>
 
         <button
           onClick={() => setShowCreateModal(true)}
-          className="paper-btn-primary px-5 py-2.5 text-xs font-bold self-start sm:self-center shadow-xs"
+          className="paper-btn-primary px-3.5 py-2 text-xs font-bold self-start sm:self-center shadow-xs cursor-pointer active:scale-95 transition-all"
         >
           + Create Project
         </button>
       </div>
 
       {error && (
-        <div className="paper-card bg-red-500/10 p-4 text-xs font-semibold text-red-700 border border-red-200">
+        <div className="paper-card bg-red-500/10 p-3 text-xs font-semibold text-red-700 border border-red-200">
           {error}
         </div>
       )}
 
       {/* Summary Stat Counter Bar */}
-      <div className="grid grid-cols-3 gap-2.5">
-        <div className="paper-card bg-[var(--surface-secondary)] p-3 text-center border border-[var(--border-default)]">
+      <div className="grid grid-cols-3 gap-2 sm:gap-2.5">
+        <div className="paper-card bg-[var(--surface-secondary)] p-2.5 sm:p-3 text-center border border-[var(--border-default)]">
           <div className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Active / In Progress</div>
           <div className="text-xl font-black text-[var(--forest-green)] mt-0.5">{activeCount}</div>
         </div>
@@ -211,7 +211,7 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({ onSelectProject, loa
           )}
         </div>
       ) : (
-        <div className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-2">
+        <div className="grid gap-2.5 sm:gap-3 sm:grid-cols-2 lg:grid-cols-2">
           {filteredProjects.map((project) => {
             const statusInfo = STATUS_CONFIG[project.status] || STATUS_CONFIG.IN_PROGRESS;
             const isLoading = activeLoadingId === project.id;
@@ -221,7 +221,7 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({ onSelectProject, loa
               <div
                 key={project.id}
                 onClick={() => handleCardClick(project.id)}
-                className={`group paper-card-interactive p-3.5 sm:p-4 space-y-3 cursor-pointer transition-all border flex flex-col justify-between relative overflow-hidden ${
+                className={`group paper-card-interactive p-3 sm:p-3.5 space-y-2.5 cursor-pointer transition-all border flex flex-col justify-between relative overflow-hidden ${
                   isLoading
                     ? "border-[var(--forest-green)] ring-2 ring-[var(--forest-green)]/40 bg-[var(--surface-hover)] shadow-md scale-[1.01]"
                     : isOtherLoading

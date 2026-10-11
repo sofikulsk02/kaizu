@@ -384,7 +384,7 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({ projectId,
   const statusInfo = PROJECT_STATUS_CONFIG[project.status] || PROJECT_STATUS_CONFIG.IN_PROGRESS;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 sm:space-y-4">
       {/* Top Background Sync Shimmer */}
       {loading && project && (
         <div className="fixed top-14 sm:top-16 left-0 right-0 z-50 h-0.5 sm:h-1 bg-[var(--surface-secondary)] overflow-hidden">
@@ -427,7 +427,7 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({ projectId,
       )}
 
       {/* Project Header Info */}
-      <div className="clay-surface p-4 sm:p-5 space-y-4 border border-[#232d39]">
+      <div className="clay-surface p-3 sm:p-4 space-y-2.5 sm:space-y-3 border border-[#232d39]">
         {editingProject ? (
           <form onSubmit={handleUpdateProject} className="space-y-4">
             <div>
@@ -501,27 +501,27 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({ projectId,
         )}
 
         {/* Analytics Bar */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 pt-2">
-          <div className="clay-surface bg-[#10171e] p-3 sm:p-3.5 rounded-lg border border-[#232d39]">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5 pt-1.5">
+          <div className="clay-surface bg-[#10171e] p-2.5 sm:p-3 rounded-lg border border-[#232d39]">
             <div className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#8b98a5]">Effort Logged</div>
             <div className="text-lg sm:text-xl font-black text-white mt-0.5">{formatMinutes(metrics.totalEffortMinutes)}</div>
           </div>
 
-          <div className="clay-surface bg-[#10171e] p-3 sm:p-3.5 rounded-lg border border-[#232d39]">
+          <div className="clay-surface bg-[#10171e] p-2.5 sm:p-3 rounded-lg border border-[#232d39]">
             <div className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#8b98a5]">Tasks</div>
             <div className="text-lg sm:text-xl font-black text-[#60a5fa] mt-0.5">
               {metrics.completedTasksCount} / {metrics.totalTasksCount}
             </div>
           </div>
 
-          <div className="clay-surface bg-[#10171e] p-3 sm:p-3.5 rounded-lg border border-[#232d39]">
+          <div className="clay-surface bg-[#10171e] p-2.5 sm:p-3 rounded-lg border border-[#232d39]">
             <div className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#8b98a5]">Milestones</div>
             <div className="text-lg sm:text-xl font-black text-[#34d399] mt-0.5">
               {metrics.completedMilestonesCount} / {metrics.totalMilestonesCount}
             </div>
           </div>
 
-          <div className="clay-surface bg-[#10171e] p-3 sm:p-3.5 rounded-lg border border-[#232d39]">
+          <div className="clay-surface bg-[#10171e] p-2.5 sm:p-3 rounded-lg border border-[#232d39]">
             <div className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#8b98a5]">Active Days</div>
             <div className="text-lg sm:text-xl font-black text-[#fb923c] mt-0.5">{metrics.activeDaysCount}</div>
           </div>
@@ -529,7 +529,7 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({ projectId,
       </div>
 
       {/* Next Action Hero Card */}
-      <div className="clay-surface bg-gradient-to-r from-[#172431] to-[#121c27] p-4 sm:p-6 border border-[#26374a] rounded-xl">
+      <div className="clay-surface bg-gradient-to-r from-[#172431] to-[#121c27] p-3 sm:p-4 border border-[#26374a] rounded-xl">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
           <div className="space-y-1 min-w-0">
             <div className="text-[11px] sm:text-xs font-extrabold uppercase tracking-wider text-[#10b981] flex items-center space-x-1.5">
@@ -613,7 +613,7 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({ projectId,
 
       {/* TAB 1: MILESTONES & TASKS */}
       {activeTab === "milestones" && (
-        <div className="clay-surface p-4 sm:p-7 space-y-4 sm:space-y-6 border border-[#232d39]">
+        <div className="clay-surface p-3 sm:p-4 space-y-3 sm:space-y-4 border border-[#232d39]">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <h2 className="text-lg sm:text-xl font-bold text-white">Milestones & Tasks</h2>
@@ -659,7 +659,7 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({ projectId,
               </div>
             </div>
           ) : (
-            <div className="space-y-6">
+            <div className="space-y-3 sm:space-y-3.5">
               {/* Milestones Hierarchy */}
               {milestones.map((milestone) => {
                 const milestoneTasks = milestone.tasks || [];
@@ -667,7 +667,7 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({ projectId,
                 const mStatus = MILESTONE_STATUS_CONFIG[milestone.status] || MILESTONE_STATUS_CONFIG.UPCOMING;
 
                 return (
-                  <div key={milestone.id} className="clay-surface bg-[#10171e] p-3.5 sm:p-5 space-y-3.5 sm:space-y-4 border border-[#232d39]">
+                  <div key={milestone.id} className="clay-surface bg-[#10171e] p-3 sm:p-4 space-y-2.5 sm:space-y-3 border border-[#232d39]">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-[#232d39] pb-3">
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
@@ -803,7 +803,7 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({ projectId,
 
       {/* TAB 2: RECENT WORK (SESSIONS LOG) */}
       {activeTab === "sessions" && (
-        <div className="clay-surface p-4 sm:p-7 space-y-4 sm:space-y-6 border border-[#232d39]">
+        <div className="clay-surface p-3 sm:p-4 space-y-3 sm:space-y-4 border border-[#232d39]">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <h2 className="text-lg sm:text-xl font-bold text-white">Recent Work & Activity Log</h2>
@@ -832,9 +832,9 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({ projectId,
               </button>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               {workSessions.map((session) => (
-                <div key={session.id} className="clay-surface bg-[#10171e] p-5 space-y-3 border border-[#232d39]">
+                <div key={session.id} className="clay-surface bg-[#10171e] p-3 sm:p-4 space-y-2 border border-[#232d39]">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <div>
                       <div className="flex items-center space-x-2">
@@ -887,7 +887,7 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({ projectId,
 
       {/* TAB 3: NOTES & TECHNICAL CONTEXT */}
       {activeTab === "notes" && (
-        <div className="clay-surface p-4 sm:p-7 space-y-4 sm:space-y-6 border border-[#232d39]">
+        <div className="clay-surface p-3 sm:p-4 space-y-3 sm:space-y-4 border border-[#232d39]">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <h2 className="text-lg sm:text-xl font-bold text-white">Technical Context & Decisions</h2>
@@ -920,9 +920,9 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({ projectId,
               </button>
             </div>
           ) : (
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-2.5 sm:gap-3 sm:grid-cols-2">
               {notes.map((note) => (
-                <div key={note.id} className="clay-surface bg-[#10171e] p-5 space-y-3 border border-[#232d39] flex flex-col justify-between">
+                <div key={note.id} className="clay-surface bg-[#10171e] p-3 sm:p-4 space-y-2.5 border border-[#232d39] flex flex-col justify-between">
                   <div className="space-y-2">
                     <div className="flex items-start justify-between gap-2">
                       <h4 className="text-base font-bold text-white">{note.title}</h4>
@@ -953,14 +953,14 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({ projectId,
 
       {/* TAB 4: REPORTS & PROGRESS */}
       {activeTab === "reports" && (
-        <div className="clay-surface p-4 sm:p-7 space-y-4 sm:space-y-6 border border-[#232d39]">
+        <div className="clay-surface p-3 sm:p-4 space-y-3 sm:space-y-4 border border-[#232d39]">
           <div>
             <h2 className="text-lg sm:text-xl font-bold text-white">Project Progress & Effort Reports</h2>
             <p className="text-xs text-[#8b98a5]">Honest metrics on completed tasks, active days, and logged effort</p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-            <div className="clay-surface bg-[#10171e] p-4 sm:p-5 rounded-lg border border-[#232d39] space-y-1.5 sm:space-y-2">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3">
+            <div className="clay-surface bg-[#10171e] p-3 sm:p-4 rounded-lg border border-[#232d39] space-y-1 sm:space-y-1.5">
               <div className="text-xs font-bold uppercase tracking-wider text-[#8b98a5]">Task Completion Rate</div>
               <div className="text-2xl sm:text-3xl font-black text-[#34d399]">
                 {metrics.taskProgressPercentage !== null ? `${metrics.taskProgressPercentage}%` : "—"}

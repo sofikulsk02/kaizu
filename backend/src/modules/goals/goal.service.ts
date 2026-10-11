@@ -280,9 +280,19 @@ export class GoalService {
       throw new NotFoundError("Milestone not found for this goal");
     }
 
-    await prisma.milestone.delete({
-      where: { id: milestoneId },
-    });
+    await prisma.$transaction([
+      prisma.goalTask.updateMany({
+        where: { milestoneId },
+        data: { milestoneId: null },
+      }),
+      prisma.dailyAction.updateMany({
+        where: { milestoneId },
+        data: { milestoneId: null },
+      }),
+      prisma.milestone.delete({
+        where: { id: milestoneId },
+      }),
+    ]);
 
     await CacheService.invalidateUserGoals(userId);
     return { success: true };
