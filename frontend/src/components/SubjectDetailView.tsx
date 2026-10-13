@@ -15,7 +15,6 @@ import {
   Circle,
   Sparkles,
   Plus,
-  Star,
   FileText,
   Target,
   ExternalLink,
@@ -878,10 +877,11 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
                       >
                         <button
                           onClick={() => handleOpenAddTopic(chapter.id)}
-                          className="btn-pill-action px-2.5 py-1 text-xs font-bold space-x-1 cursor-pointer active:scale-95"
+                          className="btn-pill-action px-2 sm:px-2.5 py-1 text-xs font-bold space-x-1 cursor-pointer active:scale-95"
                         >
                           <Plus className="h-3 w-3" />
-                          <span>Add Topic</span>
+                          <span className="hidden sm:inline">Add Topic</span>
+                          <span className="sm:hidden">Topic</span>
                         </button>
 
                         <button
@@ -905,9 +905,10 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
                           return (
                             <div
                               key={topic.id}
-                              className="paper-card bg-[var(--surface-primary)] p-2.5 sm:p-3 rounded-lg border border-[var(--border-default)] hover:border-[var(--forest-green)] transition-all card-lift space-y-2 shadow-2xs"
+                              onClick={() => openEditTopicModal(topic)}
+                              className="paper-card bg-[var(--surface-primary)] p-2.5 sm:p-3 rounded-lg border border-[var(--border-default)] hover:border-[var(--forest-green)] transition-all card-lift space-y-2 shadow-2xs cursor-pointer group active:scale-[0.99]"
                             >
-                              {/* Row 1: Status Pill (left) & 5-Star Confidence (right) */}
+                              {/* Row 1: Status Pill (left) & Mastery Level Meter + Quick Study (right) */}
                               <div className="flex items-center justify-between gap-2">
                                 <span
                                   className={`px-2 py-0.5 rounded-md text-[10px] sm:text-[11px] font-bold inline-flex items-center space-x-1 shrink-0 ${statusInfo.badgeClass}`}
@@ -916,33 +917,54 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
                                   <span>{statusInfo.label}</span>
                                 </span>
 
-                                <div
-                                  className="flex items-center space-x-0.5 shrink-0"
-                                  title={`Confidence Rating: ${topic.confidence || 0} of 5`}
-                                >
-                                  {[1, 2, 3, 4, 5].map((starIdx) => (
-                                    <Star
-                                      key={starIdx}
-                                      className={`h-3 w-3 ${
-                                        starIdx <= (topic.confidence || 0)
-                                          ? "fill-amber-400 text-amber-500"
-                                          : "text-[var(--border-strong)] opacity-35"
-                                      }`}
-                                    />
-                                  ))}
+                                <div className="flex items-center gap-1.5 shrink-0">
+                                  {/* Minimalist Mastery Meter (Replaces 5 gold stars) */}
+                                  <div
+                                    className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-[var(--surface-secondary)] border border-[var(--border-subtle)]"
+                                    title={`Mastery: Level ${topic.confidence || 1} of 5`}
+                                  >
+                                    <span className="text-[10px] font-bold text-[var(--text-muted)]">
+                                      L{topic.confidence || 1}
+                                    </span>
+                                    <div className="flex items-center gap-0.5">
+                                      {[1, 2, 3, 4, 5].map((lvl) => (
+                                        <span
+                                          key={lvl}
+                                          className={`h-1.5 w-1.5 rounded-full transition-colors ${
+                                            lvl <= (topic.confidence || 1)
+                                              ? "bg-[var(--forest-green)]"
+                                              : "bg-[var(--border-strong)]/30"
+                                          }`}
+                                        />
+                                      ))}
+                                    </div>
+                                  </div>
+
+                                  {/* Quick Study Button (Compact, non-intrusive) */}
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      startQuickSessionForTopic(topic);
+                                    }}
+                                    className="btn-study px-2 sm:px-2.5 py-1 text-[11px] font-bold inline-flex items-center gap-1 cursor-pointer active:scale-95 shadow-2xs"
+                                    title="Start study session for this topic"
+                                  >
+                                    <Play className="h-3 w-3 fill-current" />
+                                    <span className="hidden sm:inline">Study</span>
+                                  </button>
                                 </div>
                               </div>
 
                               {/* Row 2: Topic Title */}
                               <div>
-                                <h4 className="font-extrabold text-[var(--text-heading)] text-sm sm:text-base leading-snug break-words">
+                                <h4 className="font-extrabold text-[var(--text-heading)] text-sm sm:text-base leading-snug break-words group-hover:text-[var(--forest-green)] transition-colors">
                                   {topic.title}
                                 </h4>
                               </div>
 
                               {/* Row 3: Structured Notes & Next Steps Inset */}
                               {(topic.notes || topic.resources || topic.nextStep) && (
-                                <div className="paper-inset bg-[var(--surface-secondary)] p-2.5 rounded-lg text-xs space-y-1 border border-[var(--border-subtle)] text-[var(--text-secondary)]">
+                                <div className="paper-inset bg-[var(--surface-secondary)] p-2 sm:p-2.5 rounded-lg text-xs space-y-1 border border-[var(--border-subtle)] text-[var(--text-secondary)]">
                                   {topic.notes && (
                                     <div className="flex items-start space-x-1.5">
                                       <span className="font-bold text-[var(--text-heading)] shrink-0 flex items-center space-x-1">
@@ -976,37 +998,6 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
                                   )}
                                 </div>
                               )}
-
-                              {/* Row 4: Action Buttons (Study, Details, Delete) */}
-                              <div className="flex items-center justify-between pt-1 border-t border-[var(--border-subtle)]/60">
-                                <div className="flex items-center space-x-2">
-                                  <button
-                                    onClick={() => startQuickSessionForTopic(topic)}
-                                    className="btn-study px-3 py-1.5 text-xs font-bold space-x-1 cursor-pointer active:scale-95"
-                                    title="Log a study session for this topic"
-                                  >
-                                    <Play className="h-3 w-3 fill-current" />
-                                    <span>Study</span>
-                                  </button>
-
-                                  <button
-                                    onClick={() => openEditTopicModal(topic)}
-                                    className="btn-edit px-2.5 py-1.5 text-xs font-bold space-x-1 cursor-pointer active:scale-95"
-                                    title="Edit details, notes, and mastery"
-                                  >
-                                    <Pencil className="h-3 w-3" />
-                                    <span>Details</span>
-                                  </button>
-                                </div>
-
-                                <button
-                                  onClick={() => handleDeleteTopic(topic.id)}
-                                  title="Delete Topic"
-                                  className="btn-icon-subtle text-xs p-1.5 cursor-pointer active:scale-95"
-                                >
-                                  <Trash2 className="h-3.5 w-3.5" />
-                                </button>
-                              </div>
                             </div>
                           );
                         })
@@ -1141,19 +1132,24 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
                     <div className="flex items-center space-x-3 self-end sm:self-center">
                       {session.confidence && (
                         <div
-                          className="flex items-center space-x-0.5"
-                          title={`Confidence: ${session.confidence}/5`}
+                          className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-[var(--surface-secondary)] border border-[var(--border-subtle)]"
+                          title={`Confidence: L${session.confidence}/5`}
                         >
-                          {[1, 2, 3, 4, 5].map((s) => (
-                            <Star
-                              key={s}
-                              className={`h-3 w-3 ${
-                                s <= session.confidence!
-                                  ? "fill-amber-400 text-amber-500"
-                                  : "text-[var(--border-strong)] opacity-35"
-                              }`}
-                            />
-                          ))}
+                          <span className="text-[10px] font-bold text-[var(--text-muted)]">
+                            L{session.confidence}
+                          </span>
+                          <div className="flex items-center gap-0.5">
+                            {[1, 2, 3, 4, 5].map((s) => (
+                              <span
+                                key={s}
+                                className={`h-1.5 w-1.5 rounded-full transition-colors ${
+                                  s <= session.confidence!
+                                    ? "bg-[var(--forest-green)]"
+                                    : "bg-[var(--border-strong)]/30"
+                                }`}
+                              />
+                            ))}
+                          </div>
                         </div>
                       )}
                       <button
@@ -1354,13 +1350,18 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
 
               {/* Confidence Rating */}
               <div>
-                <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">
-                  Understanding Level
-                </label>
-                <div className="grid grid-cols-5 gap-2 mt-1.5">
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">
+                    Understanding Level
+                  </label>
+                  <span className="text-xs font-bold text-[var(--forest-green)]">
+                    Level {sessionConfidence} of 5
+                  </span>
+                </div>
+                <div className="grid grid-cols-5 gap-1.5">
                   {[
-                    { val: 1, label: "Revisit" },
-                    { val: 2, label: "Struggling" },
+                    { val: 1, label: "Novice" },
+                    { val: 2, label: "Familiar" },
                     { val: 3, label: "Fair" },
                     { val: 4, label: "Good" },
                     { val: 5, label: "Mastered" },
@@ -1369,18 +1370,26 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
                       key={item.val}
                       type="button"
                       onClick={() => setSessionConfidence(item.val)}
-                      className={`p-2 text-center rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                      className={`py-2 px-1 text-center rounded-lg text-xs font-bold transition-all cursor-pointer flex flex-col items-center justify-center gap-1 ${
                         sessionConfidence === item.val
-                          ? "bg-[var(--pale-sage)] text-[var(--forest-green)] border-2 border-[var(--forest-green)] shadow-2xs scale-102"
-                          : "bg-[var(--surface-secondary)] text-[var(--text-muted)] hover:text-[var(--text-heading)] border border-[var(--border-default)]"
+                          ? "bg-[var(--forest-green)] text-white shadow-2xs scale-102"
+                          : "bg-[var(--surface-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-heading)] border border-[var(--border-subtle)]"
                       }`}
                     >
-                      <div className="flex justify-center space-x-0.5">
+                      <span className="font-extrabold text-sm leading-none">{item.val}</span>
+                      <div className="flex gap-0.5">
                         {[...Array(item.val)].map((_, i) => (
-                          <Star key={i} className="h-2.5 w-2.5 fill-amber-400 text-amber-500" />
+                          <span
+                            key={i}
+                            className={`h-1 w-1 rounded-full ${
+                              sessionConfidence === item.val ? "bg-white" : "bg-[var(--forest-green)]"
+                            }`}
+                          />
                         ))}
                       </div>
-                      <div className="text-[10px] mt-1">{item.label}</div>
+                      <div className="text-[9px] font-medium leading-tight opacity-90 truncate max-w-full">
+                        {item.label}
+                      </div>
                     </button>
                   ))}
                 </div>
@@ -1475,26 +1484,42 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
                 </select>
               </div>
 
-              {/* Confidence Rating */}
+              {/* Mastery Level */}
               <div>
-                <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">
-                  Confidence Level: {topicConfidence} of 5
-                </label>
-                <div className="flex items-center space-x-2 mt-1.5">
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">
+                    Mastery Level
+                  </label>
+                  <span className="text-xs font-bold text-[var(--forest-green)]">
+                    Level {topicConfidence} of 5 · {
+                      topicConfidence === 1 ? "Novice" :
+                      topicConfidence === 2 ? "Familiar" :
+                      topicConfidence === 3 ? "Proficient" :
+                      topicConfidence === 4 ? "Advanced" : "Mastered"
+                    }
+                  </span>
+                </div>
+                <div className="grid grid-cols-5 gap-1.5">
                   {[1, 2, 3, 4, 5].map((val) => (
                     <button
                       key={val}
                       type="button"
                       onClick={() => setTopicConfidence(val)}
-                      className={`flex-1 py-2 text-center rounded-lg text-xs font-bold transition-all cursor-pointer flex justify-center items-center ${
+                      className={`py-2 px-1 text-center rounded-lg text-xs font-bold transition-all cursor-pointer flex flex-col items-center justify-center gap-1 ${
                         topicConfidence === val
-                          ? "bg-[var(--pale-sage)] text-[var(--forest-green)] border-2 border-[var(--forest-green)] shadow-2xs scale-102"
-                          : "bg-[var(--surface-secondary)] text-[var(--text-muted)] hover:text-[var(--text-heading)] border border-[var(--border-default)]"
+                          ? "bg-[var(--forest-green)] text-white shadow-2xs scale-102"
+                          : "bg-[var(--surface-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-heading)] border border-[var(--border-subtle)]"
                       }`}
                     >
-                      <div className="flex space-x-0.5">
+                      <span className="font-extrabold text-sm leading-none">{val}</span>
+                      <div className="flex gap-0.5">
                         {[...Array(val)].map((_, i) => (
-                          <Star key={i} className="h-3 w-3 fill-amber-400 text-amber-500" />
+                          <span
+                            key={i}
+                            className={`h-1 w-1 rounded-full ${
+                              topicConfidence === val ? "bg-white" : "bg-[var(--forest-green)]"
+                            }`}
+                          />
                         ))}
                       </div>
                     </button>
@@ -1553,21 +1578,36 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
                 />
               </div>
 
-              <div className="flex justify-end space-x-3 pt-3 border-t border-[var(--border-default)]">
+              <div className="flex items-center justify-between pt-3 border-t border-[var(--border-default)]">
                 <button
                   type="button"
-                  onClick={() => setEditingTopic(null)}
-                  className="paper-btn-secondary px-4 py-2 text-xs font-bold"
+                  onClick={() => {
+                    const id = editingTopic.id;
+                    setEditingTopic(null);
+                    handleDeleteTopic(id);
+                  }}
+                  className="text-xs font-bold text-red-500 hover:text-red-700 hover:underline flex items-center gap-1 cursor-pointer active:scale-95"
                 >
-                  Cancel
+                  <Trash2 className="h-3.5 w-3.5" />
+                  <span>Delete Topic</span>
                 </button>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="paper-btn-primary px-6 py-2 text-xs font-bold shadow-xs"
-                >
-                  Save Mastery Details
-                </button>
+
+                <div className="flex items-center space-x-2">
+                  <button
+                    type="button"
+                    onClick={() => setEditingTopic(null)}
+                    className="paper-btn-secondary px-3.5 py-2 text-xs font-bold cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="paper-btn-primary px-5 py-2 text-xs font-bold shadow-xs cursor-pointer active:scale-95"
+                  >
+                    Save Changes
+                  </button>
+                </div>
               </div>
             </form>
           </div>
