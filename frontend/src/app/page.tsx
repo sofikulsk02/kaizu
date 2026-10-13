@@ -448,6 +448,30 @@ export default function Page() {
     setTimeout(() => setLoadingProjectId(null), 300);
   };
 
+  const handleReorderSubjects = async (newSubjects: Subject[]) => {
+    setSubjects(newSubjects);
+    try {
+      localStorage.setItem("kaizu_cached_subjects", JSON.stringify(newSubjects));
+    } catch (e) {}
+    try {
+      await Api.reorderSubjects(newSubjects.map((s) => s.id));
+    } catch (err: any) {
+      console.error("Failed to persist subject reorder:", err);
+    }
+  };
+
+  const handleReorderGoals = async (newGoals: Goal[]) => {
+    setGoals(newGoals);
+    try {
+      localStorage.setItem("kaizu_cached_goals", JSON.stringify(newGoals));
+    } catch (e) {}
+    try {
+      await Api.reorderGoals(newGoals.map((g) => g.id));
+    } catch (err: any) {
+      console.error("Failed to persist goal reorder:", err);
+    }
+  };
+
   const handleUserChanged = () => {
     setSelectedSubject(null);
     setSelectedGoalDetail(null);
@@ -570,6 +594,7 @@ export default function Page() {
                 onSelectSubject={handleSelectSubject}
                 onOpenCreateSubject={() => handleOpenModal("subject")}
                 loadingSubjectId={loadingSubjectId}
+                onReorderSubjects={handleReorderSubjects}
               />
             )
           )}
@@ -588,6 +613,7 @@ export default function Page() {
                 onOpenCreateGoal={() => handleOpenModal("goal")}
                 onRefresh={fetchData}
                 loadingGoalId={loadingGoalId}
+                onReorderGoals={handleReorderGoals}
               />
             )
           )}

@@ -5,15 +5,41 @@ import { CacheService } from "../../core/cache.service";
 
 export class SubjectService {
   public static async createSubject(userId: string, dto: CreateSubjectDto) {
+    const lastSubject = await prisma.subject.findFirst({
+      where: { userId },
+      orderBy: { sortOrder: "desc" },
+      select: { sortOrder: true },
+    });
+    const nextSortOrder = (lastSubject?.sortOrder ?? -1) + 1;
+
     const res = await prisma.subject.create({
       data: {
         userId,
         name: dto.name,
         description: dto.description,
+        sortOrder: nextSortOrder,
       },
     });
     await CacheService.invalidateUserSubjects(userId);
     return res;
+  }
+
+  public static async reorderSubjects(userId: string, orderedIds: string[]) {
+    if (!orderedIds || !Array.isArray(orderedIds)) {
+      throw new BadRequestError("orderedIds must be an array of subject IDs");
+    }
+
+    await prisma.$transaction(
+      orderedIds.map((id, index) =>
+        prisma.subject.updateMany({
+          where: { id, userId },
+          data: { sortOrder: index },
+        })
+      )
+    );
+
+    await CacheService.invalidateUserSubjects(userId);
+    return { success: true };
   }
 
   public static async getSubjects(userId: string) {
@@ -21,7 +47,7 @@ export class SubjectService {
     return CacheService.fetchOrSet(cacheKey, async () => {
       const subjects = await prisma.subject.findMany({
         where: { userId },
-        orderBy: { createdAt: "desc" },
+        orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
         include: {
           chapters: {
             include: {

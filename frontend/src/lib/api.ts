@@ -80,6 +80,7 @@ export interface Subject {
   studySessions?: StudySession[];
   metrics?: SubjectMetrics;
   continueLearning?: ContinueLearning;
+  sortOrder?: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -174,6 +175,7 @@ export interface ProjectListItem {
   totalTasksCount: number;
   completedTasksCount: number;
   totalEffortMinutes: number;
+  sortOrder?: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -286,6 +288,7 @@ export interface Goal {
   totalTasksCount?: number;
   completedMilestonesCount?: number;
   totalMilestonesCount?: number;
+  sortOrder?: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -408,6 +411,8 @@ export const Api = {
   updateSubject: (id: string, data: { name?: string; description?: string }) =>
     request<Subject>(`/subjects/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
   deleteSubject: (id: string) => request<{ success: boolean }>(`/subjects/${id}`, { method: "DELETE" }),
+  reorderSubjects: (orderedIds: string[]) =>
+    request<{ success: boolean }>("/subjects/reorder", { method: "PUT", body: JSON.stringify({ orderedIds }) }),
 
   // Study Sessions
   createStudySession: (
@@ -464,6 +469,8 @@ export const Api = {
   updateGoal: (id: string, data: { title?: string; description?: string; category?: string | null; successDefinition?: string | null; targetDate?: string | null; status?: GoalStatus }) =>
     request<Goal>(`/goals/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
   deleteGoal: (id: string) => request<{ success: boolean }>(`/goals/${id}`, { method: "DELETE" }),
+  reorderGoals: (orderedIds: string[]) =>
+    request<{ success: boolean }>("/goals/reorder", { method: "PUT", body: JSON.stringify({ orderedIds }) }),
 
   // Intelligent Goal Coach & V2
   getCoachAnalysis: (goalId: string) => request<CoachAnalysis>(`/goals/${goalId}/coach`),
@@ -524,6 +531,8 @@ export const Api = {
     }
   ) => request<ProjectDetail>(`/projects/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
   deleteProject: (id: string) => request<{ success: boolean }>(`/projects/${id}`, { method: "DELETE" }),
+  reorderProjects: (orderedIds: string[]) =>
+    request<{ success: boolean }>("/projects/reorder", { method: "PUT", body: JSON.stringify({ orderedIds }) }),
 
   // Project Milestones
   createProjectMilestone: (

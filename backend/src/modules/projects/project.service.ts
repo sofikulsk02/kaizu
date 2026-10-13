@@ -1,5 +1,5 @@
 import { prisma } from "../../database/prisma";
-import { NotFoundError, ForbiddenError } from "../../core/ApiError";
+import { NotFoundError, ForbiddenError, BadRequestError } from "../../core/ApiError";
 import { CacheService } from "../../core/cache.service";
 import {
   CreateProjectDto,
@@ -41,7 +41,7 @@ export class ProjectService {
               select: { durationMinutes: true, occurredAt: true },
             },
           },
-          orderBy: { updatedAt: "desc" },
+          orderBy: [{ sortOrder: "asc" }, { updatedAt: "desc" }],
         });
 
         return projects.map((project: any) => {
@@ -166,6 +166,13 @@ export class ProjectService {
 
   // Create Project
   public static async createProject(userId: string, dto: CreateProjectDto) {
+    const lastProject = await prisma.project.findFirst({
+      where: { userId },
+      orderBy: { sortOrder: "desc" },
+      select: { sortOrder: true },
+    });
+    const nextSortOrder = (lastProject?.sortOrder ?? -1) + 1;
+
     const created = await prisma.project.create({
       data: {
         userId,
@@ -177,11 +184,31 @@ export class ProjectService {
         status: dto.status || ("IN_PROGRESS" as ProjectStatus),
         goalId: dto.goalId || undefined,
         subjectId: dto.subjectId || undefined,
+        sortOrder: nextSortOrder,
       },
     });
 
     await CacheService.invalidateUserProjects(userId);
     return created;
+  }
+
+  // Reorder Projects
+  public static async reorderProjects(userId: string, orderedIds: string[]) {
+    if (!orderedIds || !Array.isArray(orderedIds)) {
+      throw new BadRequestError("orderedIds must be an array of project IDs");
+    }
+
+    await prisma.$transaction(
+      orderedIds.map((id, index) =>
+        prisma.project.updateMany({
+          where: { id, userId },
+          data: { sortOrder: index },
+        })
+      )
+    );
+
+    await CacheService.invalidateUserProjects(userId);
+    return { success: true };
   }
 
   // Update Project

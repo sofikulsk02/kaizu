@@ -30,6 +30,13 @@ export class GoalController {
     return new SuccessResponse("Goals fetched successfully", goals).send(res);
   }
 
+  public static async reorderGoals(req: Request, res: Response): Promise<Response> {
+    const userId = req.user!.id;
+    const { orderedIds } = req.body;
+    const result = await GoalService.reorderGoals(userId, orderedIds);
+    return new SuccessResponse("Goals reordered successfully", result).send(res);
+  }
+
   public static async getGoalById(req: Request, res: Response): Promise<Response> {
     const userId = req.user!.id;
     const id = req.params.id as string;

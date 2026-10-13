@@ -79,6 +79,7 @@ model Goal {
 
   targetDate DateTime?
   status     GoalStatus @default(ACTIVE)
+  sortOrder  Int        @default(0)
 
   completedAt DateTime?
 
@@ -218,6 +219,7 @@ model Subject {
 
   name        String  @db.VarChar(255)
   description String? @db.Text
+  sortOrder   Int     @default(0)
 
   createdAt DateTime @default(now()) @db.Timestamp(6)
   updatedAt DateTime @updatedAt @db.Timestamp(6)
@@ -306,6 +308,7 @@ model Project {
   targetDate  DateTime?
   nextAction  String?       @db.Text
   completedAt DateTime?
+  sortOrder   Int           @default(0)
 
   user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   goal    Goal?    @relation(fields: [goalId], references: [id], onDelete: SetNull)

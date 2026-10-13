@@ -17,6 +17,13 @@ export class SubjectController {
     return new SuccessResponse("Subjects fetched successfully", subjects).send(res);
   }
 
+  public static async reorderSubjects(req: Request, res: Response): Promise<Response> {
+    const userId = req.user!.id;
+    const { orderedIds } = req.body;
+    const result = await SubjectService.reorderSubjects(userId, orderedIds);
+    return new SuccessResponse("Subjects reordered successfully", result).send(res);
+  }
+
   public static async getSubjectById(req: Request, res: Response): Promise<Response> {
     const userId = req.user!.id;
     const id = req.params.id as string;

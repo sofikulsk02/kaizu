@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { ProjectListItem, ProjectStatus, Api } from "../lib/api";
-import { FolderKanban, Plus, Flag, ArrowRight, Search, X } from "lucide-react";
+import { FolderKanban, Plus, Flag, ArrowRight, Search, X, GripVertical } from "lucide-react";
 import { Portal } from "./Portal";
 
 interface ProjectsViewProps {
@@ -35,14 +35,134 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({ onSelectProject, loa
 
   const activeLoadingId = loadingProjectId || localLoadingId;
 
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedStatusFilter, setSelectedStatusFilter] = useState<string>("ALL");
+
+  // Drag and drop state
+  const [draggedId, setDraggedId] = useState<string | null>(null);
+  const [dragOverId, setDragOverId] = useState<string | null>(null);
+  const touchDragIdRef = useRef<string | null>(null);
+  const isDraggingRef = useRef<boolean>(false);
+
+  const isFilterActive = !!searchTerm.trim() || selectedStatusFilter !== "ALL";
+
   const handleCardClick = (projectId: string) => {
+    if (isDraggingRef.current) {
+      isDraggingRef.current = false;
+      return;
+    }
     if (activeLoadingId) return;
     setLocalLoadingId(projectId);
     onSelectProject(projectId);
   };
 
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedStatusFilter, setSelectedStatusFilter] = useState<string>("ALL");
+  // Drag & drop handlers (HTML5 Desktop)
+  const handleDragStart = (e: React.DragEvent, id: string) => {
+    if (isFilterActive) return;
+    isDraggingRef.current = true;
+    e.dataTransfer.setData("text/plain", id);
+    e.dataTransfer.effectAllowed = "move";
+    setDraggedId(id);
+  };
+
+  const handleDragOver = (e: React.DragEvent, id: string) => {
+    if (isFilterActive || !draggedId || draggedId === id) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    if (dragOverId !== id) {
+      setDragOverId(id);
+    }
+  };
+
+  const handleDragLeave = (id: string) => {
+    if (dragOverId === id) {
+      setDragOverId(null);
+    }
+  };
+
+  const handleDrop = async (e: React.DragEvent, targetId: string) => {
+    e.preventDefault();
+    const sourceId = e.dataTransfer.getData("text/plain") || draggedId;
+    setDraggedId(null);
+    setDragOverId(null);
+    setTimeout(() => {
+      isDraggingRef.current = false;
+    }, 50);
+
+    if (!sourceId || sourceId === targetId || isFilterActive) return;
+
+    const sourceIndex = projects.findIndex((p) => p.id === sourceId);
+    const targetIndex = projects.findIndex((p) => p.id === targetId);
+    if (sourceIndex === -1 || targetIndex === -1) return;
+
+    const next = [...projects];
+    const [removed] = next.splice(sourceIndex, 1);
+    next.splice(targetIndex, 0, removed);
+
+    setProjects(next);
+    try {
+      await Api.reorderProjects(next.map((p) => p.id));
+    } catch (err: any) {
+      console.error("Failed to persist project reorder:", err);
+    }
+  };
+
+  const handleDragEnd = () => {
+    setDraggedId(null);
+    setDragOverId(null);
+    setTimeout(() => {
+      isDraggingRef.current = false;
+    }, 50);
+  };
+
+  // Touch Drag Handlers (Mobile)
+  const handleTouchStart = (id: string) => {
+    if (isFilterActive) return;
+    touchDragIdRef.current = id;
+    setDraggedId(id);
+    isDraggingRef.current = true;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!touchDragIdRef.current || isFilterActive) return;
+    const touch = e.touches[0];
+    const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
+    const cardEl = targetEl?.closest("[data-reorder-id]");
+    if (cardEl) {
+      const overId = cardEl.getAttribute("data-reorder-id");
+      if (overId && overId !== touchDragIdRef.current) {
+        setDragOverId(overId);
+      }
+    }
+  };
+
+  const handleTouchEnd = async () => {
+    const sourceId = touchDragIdRef.current;
+    const targetId = dragOverId;
+    touchDragIdRef.current = null;
+    setDraggedId(null);
+    setDragOverId(null);
+    setTimeout(() => {
+      isDraggingRef.current = false;
+    }, 50);
+
+    if (!sourceId || !targetId || sourceId === targetId || isFilterActive) return;
+
+    const sourceIndex = projects.findIndex((p) => p.id === sourceId);
+    const targetIndex = projects.findIndex((p) => p.id === targetId);
+    if (sourceIndex === -1 || targetIndex === -1) return;
+
+    const next = [...projects];
+    const [removed] = next.splice(sourceIndex, 1);
+    next.splice(targetIndex, 0, removed);
+
+    setProjects(next);
+    try {
+      await Api.reorderProjects(next.map((p) => p.id));
+    } catch (err: any) {
+      console.error("Failed to persist project reorder:", err);
+    }
+  };
 
   // Create Project Modal state
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -115,9 +235,17 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({ onSelectProject, loa
       {/* Header bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3">
         <div>
-          <h1 className="text-xl font-black text-[var(--text-heading)] sm:text-2xl">Projects</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-xl font-black text-[var(--text-heading)] sm:text-2xl">Projects</h1>
+            {!isFilterActive && projects.length > 1 && (
+              <span className="text-[10px] font-semibold text-[var(--text-muted)] bg-[var(--surface-secondary)] px-2 py-0.5 rounded-full border border-[var(--border-subtle)] hidden sm:inline-flex items-center gap-1">
+                <GripVertical className="h-2.5 w-2.5" />
+                <span>Drag cards to reorder</span>
+              </span>
+            )}
+          </div>
           <p className="text-xs text-[var(--text-muted)]">
-            Things you're building or delivering. Plan work, execute, log activity, and track progress.
+            Things you're building or delivering. Plan work, execute, and drag to rearrange.
           </p>
         </div>
 
@@ -216,17 +344,30 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({ onSelectProject, loa
             const statusInfo = STATUS_CONFIG[project.status] || STATUS_CONFIG.IN_PROGRESS;
             const isLoading = activeLoadingId === project.id;
             const isOtherLoading = activeLoadingId !== null && !isLoading;
+            const isBeingDragged = draggedId === project.id;
+            const isDropTarget = dragOverId === project.id;
 
             return (
               <div
                 key={project.id}
+                data-reorder-id={project.id}
+                draggable={!isFilterActive && !isLoading}
+                onDragStart={(e) => handleDragStart(e, project.id)}
+                onDragOver={(e) => handleDragOver(e, project.id)}
+                onDragLeave={() => handleDragLeave(project.id)}
+                onDrop={(e) => handleDrop(e, project.id)}
+                onDragEnd={handleDragEnd}
                 onClick={() => handleCardClick(project.id)}
-                className={`group paper-card-interactive p-3 sm:p-3.5 space-y-2.5 cursor-pointer transition-all border flex flex-col justify-between relative overflow-hidden rounded-xl ${
-                  isLoading
+                className={`group paper-card-interactive p-3 sm:p-3.5 space-y-2.5 transition-all border flex flex-col justify-between relative overflow-hidden rounded-xl select-none ${
+                  isBeingDragged
+                    ? "opacity-35 scale-95 border-dashed border-[var(--forest-green)] bg-[var(--pale-sage)]/20 shadow-none cursor-grabbing"
+                    : isDropTarget
+                    ? "border-[var(--forest-green)] ring-2 ring-[var(--forest-green)]/60 bg-[var(--pale-sage)]/30 scale-[1.02] shadow-md"
+                    : isLoading
                     ? "border-[var(--forest-green)] ring-2 ring-[var(--forest-green)]/40 bg-[var(--surface-hover)] shadow-md scale-[1.01]"
                     : isOtherLoading
                     ? "opacity-50 pointer-events-none border-[var(--border-default)]"
-                    : "border-[var(--border-default)] hover:border-[var(--forest-green)]"
+                    : "border-[var(--border-default)] hover:border-[var(--forest-green)] cursor-grab active:cursor-grabbing"
                 }`}
               >
                 {/* Top Shimmer Loading Line when this card is opening */}
@@ -248,9 +389,27 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({ onSelectProject, loa
                         </span>
                       )}
                     </div>
-                    <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold shrink-0 ${statusInfo.badgeClass}`}>
-                      {statusInfo.label}
-                    </span>
+
+                    <div className="flex items-center space-x-1 shrink-0">
+                      <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold shrink-0 ${statusInfo.badgeClass}`}>
+                        {statusInfo.label}
+                      </span>
+
+                      {/* Drag Grip Handle */}
+                      {!isFilterActive && (
+                        <div
+                          title="Drag to rearrange"
+                          onClick={(e) => e.stopPropagation()}
+                          onTouchStart={() => handleTouchStart(project.id)}
+                          onTouchMove={handleTouchMove}
+                          onTouchEnd={handleTouchEnd}
+                          style={{ touchAction: "none" }}
+                          className="p-1 rounded text-[var(--text-muted)] opacity-40 group-hover:opacity-100 hover:text-[var(--text-heading)] hover:bg-[var(--surface-secondary)] cursor-grab active:cursor-grabbing transition-opacity"
+                        >
+                          <GripVertical className="h-4 w-4" />
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   {project.description ? (

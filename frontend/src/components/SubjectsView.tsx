@@ -1,14 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { Subject } from "../lib/api";
-import { BookOpen, Plus, Search, ArrowRight, Layers } from "lucide-react";
+import { BookOpen, Plus, Search, ArrowRight, Layers, GripVertical } from "lucide-react";
 
 interface SubjectsViewProps {
   subjects: Subject[];
   onSelectSubject: (subject: Subject) => void;
   onOpenCreateSubject: () => void;
   loadingSubjectId?: string | null;
+  onReorderSubjects?: (subjects: Subject[]) => void;
 }
 
 export const SubjectsView: React.FC<SubjectsViewProps> = ({
@@ -16,16 +17,131 @@ export const SubjectsView: React.FC<SubjectsViewProps> = ({
   onSelectSubject,
   onOpenCreateSubject,
   loadingSubjectId,
+  onReorderSubjects,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [localLoadingId, setLocalLoadingId] = useState<string | null>(null);
 
+  // Drag and drop state
+  const [draggedId, setDraggedId] = useState<string | null>(null);
+  const [dragOverId, setDragOverId] = useState<string | null>(null);
+  const touchDragIdRef = useRef<string | null>(null);
+  const isDraggingRef = useRef<boolean>(false);
+
   const activeLoadingId = loadingSubjectId || localLoadingId;
+  const isSearchActive = !!searchTerm.trim();
 
   const handleCardClick = (subject: Subject) => {
+    // Prevent click if user just dragged
+    if (isDraggingRef.current) {
+      isDraggingRef.current = false;
+      return;
+    }
     if (activeLoadingId) return;
     setLocalLoadingId(subject.id);
     onSelectSubject(subject);
+  };
+
+  // Drag & drop handlers (HTML5 Desktop)
+  const handleDragStart = (e: React.DragEvent, id: string) => {
+    if (isSearchActive) return;
+    isDraggingRef.current = true;
+    e.dataTransfer.setData("text/plain", id);
+    e.dataTransfer.effectAllowed = "move";
+    setDraggedId(id);
+  };
+
+  const handleDragOver = (e: React.DragEvent, id: string) => {
+    if (isSearchActive || !draggedId || draggedId === id) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    if (dragOverId !== id) {
+      setDragOverId(id);
+    }
+  };
+
+  const handleDragLeave = (id: string) => {
+    if (dragOverId === id) {
+      setDragOverId(null);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent, targetId: string) => {
+    e.preventDefault();
+    const sourceId = e.dataTransfer.getData("text/plain") || draggedId;
+    setDraggedId(null);
+    setDragOverId(null);
+    setTimeout(() => {
+      isDraggingRef.current = false;
+    }, 50);
+
+    if (!sourceId || sourceId === targetId || isSearchActive) return;
+
+    const sourceIndex = subjects.findIndex((s) => s.id === sourceId);
+    const targetIndex = subjects.findIndex((s) => s.id === targetId);
+    if (sourceIndex === -1 || targetIndex === -1) return;
+
+    const next = [...subjects];
+    const [removed] = next.splice(sourceIndex, 1);
+    next.splice(targetIndex, 0, removed);
+
+    if (onReorderSubjects) {
+      onReorderSubjects(next);
+    }
+  };
+
+  const handleDragEnd = () => {
+    setDraggedId(null);
+    setDragOverId(null);
+    setTimeout(() => {
+      isDraggingRef.current = false;
+    }, 50);
+  };
+
+  // Touch Drag Handlers (Mobile)
+  const handleTouchStart = (id: string) => {
+    if (isSearchActive) return;
+    touchDragIdRef.current = id;
+    setDraggedId(id);
+    isDraggingRef.current = true;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!touchDragIdRef.current || isSearchActive) return;
+    const touch = e.touches[0];
+    const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
+    const cardEl = targetEl?.closest("[data-reorder-id]");
+    if (cardEl) {
+      const overId = cardEl.getAttribute("data-reorder-id");
+      if (overId && overId !== touchDragIdRef.current) {
+        setDragOverId(overId);
+      }
+    }
+  };
+
+  const handleTouchEnd = () => {
+    const sourceId = touchDragIdRef.current;
+    const targetId = dragOverId;
+    touchDragIdRef.current = null;
+    setDraggedId(null);
+    setDragOverId(null);
+    setTimeout(() => {
+      isDraggingRef.current = false;
+    }, 50);
+
+    if (!sourceId || !targetId || sourceId === targetId || isSearchActive) return;
+
+    const sourceIndex = subjects.findIndex((s) => s.id === sourceId);
+    const targetIndex = subjects.findIndex((s) => s.id === targetId);
+    if (sourceIndex === -1 || targetIndex === -1) return;
+
+    const next = [...subjects];
+    const [removed] = next.splice(sourceIndex, 1);
+    next.splice(targetIndex, 0, removed);
+
+    if (onReorderSubjects) {
+      onReorderSubjects(next);
+    }
   };
 
   const filteredSubjects = subjects.filter(
@@ -38,9 +154,17 @@ export const SubjectsView: React.FC<SubjectsViewProps> = ({
     <div className="space-y-3 sm:space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3">
         <div>
-          <h1 className="text-xl font-black text-[var(--text-heading)] sm:text-2xl">Subjects</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-xl font-black text-[var(--text-heading)] sm:text-2xl">Subjects</h1>
+            {!isSearchActive && subjects.length > 1 && (
+              <span className="text-[10px] font-semibold text-[var(--text-muted)] bg-[var(--surface-secondary)] px-2 py-0.5 rounded-full border border-[var(--border-subtle)] hidden sm:inline-flex items-center gap-1">
+                <GripVertical className="h-2.5 w-2.5" />
+                <span>Drag cards to reorder</span>
+              </span>
+            )}
+          </div>
           <p className="text-xs text-[var(--text-muted)]">
-            Areas of learning or practice. Start empty, grow naturally as needed.
+            Areas of learning or practice. Drag to arrange your preferred sequence.
           </p>
         </div>
 
@@ -96,17 +220,30 @@ export const SubjectsView: React.FC<SubjectsViewProps> = ({
           {filteredSubjects.map((subject) => {
             const isLoading = activeLoadingId === subject.id;
             const isOtherLoading = activeLoadingId !== null && !isLoading;
+            const isBeingDragged = draggedId === subject.id;
+            const isDropTarget = dragOverId === subject.id;
 
             return (
               <div
                 key={subject.id}
+                data-reorder-id={subject.id}
+                draggable={!isSearchActive && !isLoading}
+                onDragStart={(e) => handleDragStart(e, subject.id)}
+                onDragOver={(e) => handleDragOver(e, subject.id)}
+                onDragLeave={() => handleDragLeave(subject.id)}
+                onDrop={(e) => handleDrop(e, subject.id)}
+                onDragEnd={handleDragEnd}
                 onClick={() => handleCardClick(subject)}
-                className={`group paper-card-interactive cursor-pointer p-3 sm:p-3.5 flex flex-col justify-between space-y-2.5 border transition-all relative overflow-hidden ${
-                  isLoading
+                className={`group paper-card-interactive p-3 sm:p-3.5 flex flex-col justify-between space-y-2.5 border transition-all relative overflow-hidden select-none ${
+                  isBeingDragged
+                    ? "opacity-35 scale-95 border-dashed border-[var(--forest-green)] bg-[var(--pale-sage)]/20 shadow-none cursor-grabbing"
+                    : isDropTarget
+                    ? "border-[var(--forest-green)] ring-2 ring-[var(--forest-green)]/60 bg-[var(--pale-sage)]/30 scale-[1.02] shadow-md"
+                    : isLoading
                     ? "border-[var(--forest-green)] ring-2 ring-[var(--forest-green)]/40 bg-[var(--surface-hover)] shadow-md scale-[1.01]"
                     : isOtherLoading
                     ? "opacity-50 pointer-events-none border-[var(--border-default)]"
-                    : "border-[var(--border-default)] hover:border-[var(--forest-green)]"
+                    : "border-[var(--border-default)] hover:border-[var(--forest-green)] cursor-grab active:cursor-grabbing"
                 }`}
               >
                 {/* Top Shimmer Loading Line when this card is opening */}
@@ -117,14 +254,31 @@ export const SubjectsView: React.FC<SubjectsViewProps> = ({
                 )}
 
                 <div className="space-y-2">
-                  <div className="flex items-start justify-between">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--forest-green)] text-white font-bold text-base shadow-xs">
-                      {subject.name.charAt(0).toUpperCase()}
+                  <div className="flex items-start justify-between gap-1.5">
+                    <div className="flex items-center space-x-2">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--forest-green)] text-white font-bold text-base shadow-xs shrink-0">
+                        {subject.name.charAt(0).toUpperCase()}
+                      </div>
+                      <span className="paper-badge inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-bold">
+                        <Layers className="h-3 w-3 opacity-70" />
+                        <span>{subject.chapterCount || 0} chapters</span>
+                      </span>
                     </div>
-                    <span className="paper-badge inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-bold">
-                      <Layers className="h-3 w-3 opacity-70" />
-                      <span>{subject.chapterCount || 0} chapters</span>
-                    </span>
+
+                    {/* Drag Grip Handle */}
+                    {!isSearchActive && (
+                      <div
+                        title="Drag to rearrange"
+                        onClick={(e) => e.stopPropagation()}
+                        onTouchStart={() => handleTouchStart(subject.id)}
+                        onTouchMove={handleTouchMove}
+                        onTouchEnd={handleTouchEnd}
+                        style={{ touchAction: "none" }}
+                        className="p-1 rounded text-[var(--text-muted)] opacity-40 group-hover:opacity-100 hover:text-[var(--text-heading)] hover:bg-[var(--surface-secondary)] cursor-grab active:cursor-grabbing transition-opacity"
+                      >
+                        <GripVertical className="h-4 w-4" />
+                      </div>
+                    )}
                   </div>
 
                   <div>

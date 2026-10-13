@@ -30,6 +30,13 @@ export class ProjectController {
     return new SuccessResponse("Projects fetched successfully", projects).send(res);
   }
 
+  public static async reorderProjects(req: Request, res: Response): Promise<Response> {
+    const userId = req.user!.id;
+    const { orderedIds } = req.body;
+    const result = await ProjectService.reorderProjects(userId, orderedIds);
+    return new SuccessResponse("Projects reordered successfully", result).send(res);
+  }
+
   public static async getProjectById(req: Request, res: Response): Promise<Response> {
     const userId = req.user!.id;
     const id = req.params.id as string;

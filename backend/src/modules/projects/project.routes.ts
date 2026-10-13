@@ -10,6 +10,7 @@ router.use(authMiddleware);
 // Project CRUD
 router.post("/", asyncHandler(ProjectController.createProject));
 router.get("/", asyncHandler(ProjectController.getProjects));
+router.put("/reorder", asyncHandler(ProjectController.reorderProjects));
 router.get("/:id", asyncHandler(ProjectController.getProjectById));
 router.patch("/:id", asyncHandler(ProjectController.updateProject));
 router.delete("/:id", asyncHandler(ProjectController.deleteProject));

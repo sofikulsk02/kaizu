@@ -16,6 +16,13 @@ export class GoalService {
   public static async createGoal(userId: string, dto: CreateGoalDto) {
     const isCompleted = dto.status === GoalStatus.COMPLETED;
 
+    const lastGoal = await prisma.goal.findFirst({
+      where: { userId },
+      orderBy: { sortOrder: "desc" },
+      select: { sortOrder: true },
+    });
+    const nextSortOrder = (lastGoal?.sortOrder ?? -1) + 1;
+
     const created = await prisma.goal.create({
       data: {
         userId,
@@ -26,6 +33,7 @@ export class GoalService {
         targetDate: dto.targetDate,
         status: dto.status || GoalStatus.ACTIVE,
         completedAt: isCompleted ? new Date() : null,
+        sortOrder: nextSortOrder,
       },
       include: {
         milestones: true,
@@ -35,6 +43,24 @@ export class GoalService {
 
     await CacheService.invalidateUserGoals(userId);
     return created;
+  }
+
+  public static async reorderGoals(userId: string, orderedIds: string[]) {
+    if (!orderedIds || !Array.isArray(orderedIds)) {
+      throw new BadRequestError("orderedIds must be an array of goal IDs");
+    }
+
+    await prisma.$transaction(
+      orderedIds.map((id, index) =>
+        prisma.goal.updateMany({
+          where: { id, userId },
+          data: { sortOrder: index },
+        })
+      )
+    );
+
+    await CacheService.invalidateUserGoals(userId);
+    return { success: true };
   }
 
   public static async getGoals(userId: string, statusFilter?: GoalStatus) {
@@ -63,7 +89,7 @@ export class GoalService {
               },
             },
           },
-          orderBy: { createdAt: "desc" },
+          orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
         });
 
         return goals.map((g) => {

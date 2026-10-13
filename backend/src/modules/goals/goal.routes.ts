@@ -10,6 +10,7 @@ router.use(authMiddleware);
 // Goal CRUD
 router.post("/", asyncHandler(GoalController.createGoal));
 router.get("/", asyncHandler(GoalController.getGoals));
+router.put("/reorder", asyncHandler(GoalController.reorderGoals));
 router.get("/:id", asyncHandler(GoalController.getGoalById));
 router.patch("/:id", asyncHandler(GoalController.updateGoal));
 router.delete("/:id", asyncHandler(GoalController.deleteGoal));

@@ -23,6 +23,7 @@ import {
   Check,
   MessageSquare,
   Calendar,
+  X,
 } from "lucide-react";
 
 interface DashboardViewProps {
@@ -78,6 +79,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
   // Daily Reflection (Hansei) state
   const [reflection, setReflection] = useState<DailyReflection | null>(null);
+  const [isWritingReflection, setIsWritingReflection] = useState(false);
   const [isEditingReflection, setIsEditingReflection] = useState(false);
   const [wentWell, setWentWell] = useState("");
   const [difficulty, setDifficulty] = useState("");
@@ -107,6 +109,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       changeTomorrow,
     });
     setReflection(saved);
+    setIsWritingReflection(false);
     setIsEditingReflection(false);
     setReflectionSavedNotice(true);
     setTimeout(() => setReflectionSavedNotice(false), 3000);
@@ -139,147 +142,137 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   };
 
   return (
-    <div className="space-y-3 sm:space-y-4">
-      {/* Welcome & Spotlight Banner with Kaizen & Hansei Motto + Year Countdown Pod */}
-      <div className="paper-card p-3 sm:p-4 border border-[var(--border-default)]">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3.5">
-          {/* Left: Welcome & Motto */}
-          <div className="space-y-1.5 lg:max-w-xs xl:max-w-sm shrink-0">
-            <div className="flex flex-wrap items-center gap-1.5">
-              <span className="paper-badge px-2 py-0.5 text-[11px] font-bold text-[var(--forest-green)]">
-                Continuous Improvement Loop
-              </span>
-              {/* Motto relocated here so primary metric cards can show real actionable metrics */}
-              <span className="text-[10px] font-bold text-[var(--text-muted)] bg-[var(--surface-secondary)] px-2 py-0.5 rounded border border-[var(--border-subtle)] inline-flex items-center gap-1">
-                <span className="text-[var(--crimson)] font-black">改善</span> Kaizen &nbsp;·&nbsp;
+    <div className="space-y-3 sm:space-y-4 pb-16 sm:pb-6">
+      {/* 1. Header & Tactile Calendar Countdown (Clean, Minimal, Non-AI) */}
+      <div className="paper-card p-3.5 sm:p-4 border border-[var(--border-default)]">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+          <div>
+            <div className="flex items-center gap-2">
+              <h1 className="text-base sm:text-lg font-black text-[var(--text-heading)]">
+                Welcome back
+              </h1>
+              <span className="text-[10px] font-bold text-[var(--text-muted)] bg-[var(--surface-secondary)] px-2 py-0.5 rounded-full border border-[var(--border-subtle)] inline-flex items-center gap-1">
+                <span className="text-[var(--crimson)] font-black">改善</span> Kaizen
+                <span className="text-[var(--text-muted)]">·</span>
                 <span className="text-[var(--forest-green)] font-black">反省</span> Hansei
               </span>
             </div>
-            <h1 className="text-lg font-black text-[var(--text-heading)] sm:text-xl">
-              Welcome back to Kaizu
-            </h1>
-            <p className="text-[11px] text-[var(--text-secondary)] leading-relaxed">
-              Turn intentions into consistent action, visible progress, and thoughtful reflection.
+            <p className="text-[11px] text-[var(--text-secondary)] mt-0.5">
+              Continuous, mindful progress through daily action.
             </p>
           </div>
 
-          {/* Center: Dedicated Year Countdown Pod utilizing the empty space */}
-          <div className="paper-inset p-3 bg-[var(--surface-secondary)] border border-[var(--border-default)] rounded-xl flex flex-col justify-between flex-1 min-w-[220px]">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--forest-green)] flex items-center gap-1">
-              
-                <span>{currentYear} Annual Momentum</span>
-              </span>
-              <span className="text-[10px] text-[var(--text-muted)] font-medium">
-                Make every day count
-              </span>
-            </div>
-
-            <div className="my-1.5 flex items-baseline gap-1.5">
-              <span className="text-xl sm:text-2xl font-black text-[var(--crimson)] leading-none">
+          {/* Tactile Year Countdown Chip - Prominent & Minimal */}
+          <div className="inline-flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-[var(--surface-secondary)] border border-[var(--border-subtle)] self-start sm:self-auto shrink-0 shadow-2xs">
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[var(--crimson)]/10 text-[var(--crimson)] shrink-0">
+              <Calendar className="h-4 w-4" />
+            </span>
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-lg sm:text-xl font-black text-[var(--crimson)] leading-none">
                 {daysRemainingInYear}
               </span>
               <span className="text-xs sm:text-sm font-bold text-[var(--text-heading)] leading-none">
-                days remaining this year
+                days left in {currentYear}
               </span>
             </div>
-
-            <div className="h-2 w-full bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-full overflow-hidden shadow-inner mt-0.5">
-              <div
-                className="h-full bg-gradient-to-r from-[var(--forest-green)] via-amber-500 to-[var(--crimson)] rounded-full transition-all duration-500"
-                style={{ width: `${yearProgressPct}%` }}
-              />
-            </div>
           </div>
+        </div>
 
-          {/* Right: Continue Learning or First Subject */}
-          {recentSubject ? (
-            <div className="paper-inset p-3 text-left min-w-[200px] lg:w-[220px] bg-[var(--surface-secondary)] border border-[var(--border-default)] rounded-xl shrink-0 flex flex-col justify-between">
-              <div>
-                <div className="text-[10px] font-bold uppercase tracking-wider text-[var(--forest-green)]">
+        {/* Continue Learning Quick Jump Ribbon (Single clean row, no heavy nested boxes) */}
+        {recentSubject ? (
+          <div
+            onClick={() => !loadingSubjectId && onSelectSubject(recentSubject)}
+            className="mt-3 flex items-center justify-between p-2.5 sm:p-3 rounded-xl bg-[var(--surface-secondary)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] cursor-pointer transition-all active:scale-[0.99] group"
+          >
+            <div className="flex items-center gap-2.5 min-w-0">
+              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[var(--pale-sage)] text-[var(--forest-green)] shrink-0 font-bold text-xs">
+                <BookOpen className="h-3.5 w-3.5" />
+              </span>
+              <div className="min-w-0">
+                <div className="text-[10px] uppercase font-bold tracking-wider text-[var(--text-muted)]">
                   Continue Learning
                 </div>
-                <div className="mt-0.5 font-bold text-[var(--text-heading)] text-xs sm:text-sm truncate">
+                <div className="text-xs sm:text-sm font-bold text-[var(--text-heading)] truncate group-hover:text-[var(--forest-green)] transition-colors">
                   {recentSubject.name}
-                </div>
-                <div className="text-[10px] text-[var(--text-muted)] mt-0.5">
-                  {recentSubject.chapterCount || 0} chapters · {recentSubject.topicCount || 0} topics
+                  <span className="text-[11px] font-normal text-[var(--text-muted)] ml-2 hidden sm:inline">
+                    {recentSubject.chapterCount || 0} chapters · {recentSubject.topicCount || 0} topics
+                  </span>
                 </div>
               </div>
-              {loadingSubjectId === recentSubject.id ? (
-                <div className="mt-2 inline-flex items-center gap-1.5 text-[11px] font-bold text-[var(--crimson)] animate-pulse">
-                  <div className="h-2.5 w-2.5 rounded-full border-2 border-[var(--crimson)] border-t-transparent animate-spin" />
-                  <span>Opening workspace...</span>
-                </div>
-              ) : (
-                <button
-                  onClick={() => onSelectSubject(recentSubject)}
-                  className="mt-2 inline-flex items-center gap-1 text-[11px] font-bold text-[var(--crimson)] hover:underline cursor-pointer"
-                >
-                  <span>Resume Learning</span>
-                  <ArrowRight className="h-3 w-3" />
-                </button>
-              )}
             </div>
-          ) : (
+
+            {loadingSubjectId === recentSubject.id ? (
+              <div className="flex items-center gap-1.5 text-xs font-bold text-[var(--crimson)] animate-pulse shrink-0 pl-2">
+                <div className="h-2.5 w-2.5 rounded-full border-2 border-[var(--crimson)] border-t-transparent animate-spin" />
+                <span>Opening...</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-1 text-xs font-bold text-[var(--forest-green)] shrink-0 pl-2">
+                <span>Resume</span>
+                <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="mt-3 pt-2.5 border-t border-[var(--border-subtle)] flex items-center justify-between">
+            <span className="text-xs text-[var(--text-muted)]">No learning areas created yet</span>
             <button
               onClick={onOpenCreateSubject}
-              className="paper-btn-primary inline-flex items-center gap-1 px-3 py-2 text-xs font-bold shadow-xs cursor-pointer active:scale-95 transition-all self-center lg:self-auto shrink-0"
+              className="paper-btn-primary inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold cursor-pointer"
             >
               <Plus className="h-3.5 w-3.5" />
-              <span>Start building your first Subject</span>
+              <span>New Subject</span>
             </button>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
-      {/* Grid Summary Cards — Philosophy card replaced with Tasks & Weekly Progress Metric */}
+      {/* 2. Key Metrics - 4 Clean Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5">
         <div className="paper-card p-2.5 sm:p-3 space-y-0.5 border border-[var(--border-default)] card-lift">
           <div className="flex items-center justify-between text-[11px] font-bold text-[var(--text-muted)]">
-            <span>Total Subjects</span>
+            <span>Subjects</span>
             <span className="flex h-5 w-5 items-center justify-center rounded-md bg-[var(--pale-sage)] text-[var(--forest-green)]">
               <BookOpen className="h-3 w-3" />
             </span>
           </div>
           <div className="text-lg font-black text-[var(--text-heading)]">{subjects.length}</div>
-          <div className="text-[10px] text-[var(--text-secondary)] truncate">
+          <div className="text-[10px] text-[var(--text-muted)] truncate">
             {subjects.reduce((acc, s) => acc + (s.chapterCount || 0), 0)} tracked chapters
           </div>
         </div>
 
         <div className="paper-card p-2.5 sm:p-3 space-y-0.5 border border-[var(--border-default)] card-lift">
           <div className="flex items-center justify-between text-[11px] font-bold text-[var(--text-muted)]">
-            <span>Active Goals</span>
+            <span>Goals</span>
             <span className="flex h-5 w-5 items-center justify-center rounded-md bg-[#FFEAE8] text-[var(--crimson)]">
               <Target className="h-3 w-3" />
             </span>
           </div>
           <div className="text-lg font-black text-[var(--text-heading)]">{activeGoals.length}</div>
           <div className="text-[10px] text-[var(--forest-green)] font-semibold truncate">
-            {completedGoals.length} goals achieved
+            {completedGoals.length > 0 ? `${completedGoals.length} achieved` : "In progress"}
           </div>
         </div>
 
         <div className="paper-card p-2.5 sm:p-3 space-y-0.5 border border-[var(--border-default)] card-lift">
           <div className="flex items-center justify-between text-[11px] font-bold text-[var(--text-muted)]">
-            <span>Active Days</span>
+            <span>Streak</span>
             <span className="flex h-5 w-5 items-center justify-center rounded-md bg-amber-500/10 text-amber-600">
               <Zap className="h-3 w-3" />
             </span>
           </div>
           <div className="text-lg font-black text-[var(--forest-green)]">
-            {activityStats.currentStreak > 0 ? `${activityStats.currentStreak}d streak` : `${activityStats.totalActiveDays} days`}
+            {activityStats.currentStreak > 0 ? `${activityStats.currentStreak}d` : `${activityStats.totalActiveDays}d`}
           </div>
-          <div className="text-[10px] text-[var(--text-secondary)] truncate">
-            {activityStats.totalActiveDays} total active day{activityStats.totalActiveDays === 1 ? "" : "s"}
+          <div className="text-[10px] text-[var(--text-muted)] truncate">
+            {activityStats.currentStreak > 0 ? "Daily streak" : "Active days"}
           </div>
         </div>
 
-        {/* REPLACED PHILOSOPHY CARD: Tasks Completed / Weekly Progress */}
         <div className="paper-card p-2.5 sm:p-3 space-y-0.5 border border-[var(--border-default)] card-lift">
           <div className="flex items-center justify-between text-[11px] font-bold text-[var(--text-muted)]">
-            <span>Weekly Progress</span>
+            <span>Weekly Tasks</span>
             <span className="flex h-5 w-5 items-center justify-center rounded-md bg-[var(--pale-sage)] text-[var(--forest-green)]">
               <CheckCircle2 className="h-3 w-3" />
             </span>
@@ -287,149 +280,103 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           <div className="text-lg font-black text-[var(--text-heading)]">
             {totalTasks > 0 ? `${totalCompletedTasks} / ${totalTasks}` : `${totalCompletedTasks} done`}
           </div>
-          <div className="text-[10px] text-[var(--forest-green)] font-semibold truncate">
-            {totalTasks > 0 ? `${taskProgressPct}% task execution` : "Actionable tasks completed"}
+          <div className="text-[10px] text-[var(--text-muted)] truncate">
+            {totalCompletedTasks > 0 ? `${taskProgressPct}% completed` : "Weekly tasks"}
           </div>
         </div>
       </div>
 
-      {/* 4. Michi's Daily Suggestion & Workflow Insight */}
-      <div className="paper-card p-3.5 sm:p-4 space-y-3 bg-[var(--surface-primary)] border border-[var(--forest-green)]/30 rounded-xl card-lift">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[var(--border-subtle)] pb-2.5">
+      {/* 3. Michi's Daily Focus - Clean, Single Actionable Guidance (No AI diagnostic text dumps) */}
+      <div className="paper-card p-3 sm:p-3.5 border border-[var(--forest-green)]/25 bg-[var(--surface-primary)] rounded-xl card-lift">
+        <div className="flex items-center justify-between gap-2 mb-2">
           <div className="flex items-center space-x-2">
-            <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-[var(--forest-green)] text-white font-black text-xs shadow-2xs">
+            <span className="flex h-5 w-5 items-center justify-center rounded-md bg-[var(--forest-green)] text-white font-black text-[11px] shadow-2xs">
               道
             </span>
-            <div className="flex items-center space-x-2 flex-wrap">
-              <h2 className="text-xs sm:text-sm font-black text-[var(--text-heading)]">
-                Michi&apos;s Daily Insight
-              </h2>
-              <span className="paper-badge px-2 py-0.5 text-[9px] font-bold text-[var(--forest-green)]">
-                Grounded in your activity
-              </span>
-            </div>
+            <h2 className="text-xs sm:text-sm font-black text-[var(--text-heading)]">
+              Michi&apos;s Daily Focus
+            </h2>
           </div>
 
           <button
             onClick={() => handleOpenMichi()}
-            className="paper-btn-secondary px-2.5 py-1 text-[11px] font-bold flex items-center space-x-1 cursor-pointer self-start sm:self-auto active:scale-95"
-            title="Open Michi chat companion"
+            className="text-[11px] font-bold text-[var(--forest-green)] hover:underline inline-flex items-center gap-1 cursor-pointer"
+            title="Open Michi chat"
           >
-            <MessageSquare className="h-3 w-3 text-[var(--forest-green)]" />
-            <span>Open Michi Chat ↗</span>
+            <MessageSquare className="h-3 w-3" />
+            <span>Chat with Michi ↗</span>
           </button>
         </div>
 
-        <div className="grid gap-2.5 md:grid-cols-2">
-          {/* Section 1: Grounded Facts */}
-          <div className="paper-inset bg-[var(--surface-secondary)] p-2.5 sm:p-3 rounded-lg border border-[var(--border-subtle)] space-y-1.5">
-            <div className="flex items-center space-x-1.5 text-[10px] font-black uppercase tracking-wider text-[var(--text-muted)]">
-              <span className="h-1.5 w-1.5 rounded-full bg-[var(--text-muted)]" />
-              <span>Observed Facts (Activity)</span>
-            </div>
-            <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
-              {activityStats.currentStreak > 0
-                ? `You have maintained an active habit streak of ${activityStats.currentStreak} day${activityStats.currentStreak === 1 ? "" : "s"} across ${activityStats.totalActiveDays} total recorded day${activityStats.totalActiveDays === 1 ? "" : "s"}.`
-                : "Your daily continuous improvement journey is active today."}
-              {recentSubject
-                ? ` Most active area is "${recentSubject.name}" (${recentSubject.chapterCount || 0} chapters).`
-                : ` You are tracking ${subjects.length} learning area${subjects.length === 1 ? "" : "s"}.`}
-              {activeGoals.length > 0
-                ? ` ${activeGoals.length} goal${activeGoals.length === 1 ? "" : "s"} in progress with ${totalCompletedTasks} task${totalCompletedTasks === 1 ? "" : "s"} completed.`
-                : ""}
-            </p>
-          </div>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 p-2.5 rounded-lg bg-[var(--surface-secondary)] border border-[var(--border-subtle)]">
+          <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+            {recentSubject ? (
+              <>
+                Ready for today&apos;s progress? Build momentum on <strong className="font-bold text-[var(--text-heading)]">{recentSubject.name}</strong> with a focused session.
+              </>
+            ) : activeGoals.length > 0 ? (
+              <>
+                Focus on advancing <strong className="font-bold text-[var(--text-heading)]">{activeGoals[0].title}</strong> toward its next milestone today.
+              </>
+            ) : (
+              <>
+                Start your journey by defining your first learning subject or actionable goal.
+              </>
+            )}
+          </p>
 
-          {/* Section 2: Michi's Actionable Suggestions */}
-          <div className="paper-inset bg-[var(--surface-secondary)] p-2.5 sm:p-3 rounded-lg border border-[var(--border-subtle)] space-y-2">
-            <div className="flex items-center space-x-1.5 text-[10px] font-black uppercase tracking-wider text-[var(--forest-green)]">
-              <Sparkles className="h-3 w-3" />
-              <span>Michi&apos;s Suggested Next Steps</span>
-            </div>
-            <ul className="text-xs text-[var(--text-secondary)] space-y-1.5">
-              {recentSubject && (
-                <li className="flex items-start justify-between gap-2">
-                  <span>
-                    Continue momentum on <strong className="text-[var(--text-heading)]">{recentSubject.name}</strong> with a focused 25m session.
-                  </span>
-                  <button
-                    onClick={() => onSelectSubject(recentSubject)}
-                    className="text-[10px] font-bold text-[var(--crimson)] hover:underline shrink-0 cursor-pointer"
-                  >
-                    Resume →
-                  </button>
-                </li>
-              )}
-              {activeGoals.length > 0 && (
-                <li className="flex items-start justify-between gap-2">
-                  <span>
-                    Advance goal <strong className="text-[var(--text-heading)]">{activeGoals[0].title}</strong> by working on its next milestone task.
-                  </span>
-                  {loadingGoalId === activeGoals[0].id ? (
-                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[var(--crimson)] animate-pulse shrink-0">
-                      <div className="h-2 w-2 rounded-full border-2 border-[var(--crimson)] border-t-transparent animate-spin" />
-                      <span>Opening...</span>
-                    </span>
-                  ) : (
-                    <button
-                      onClick={() => !loadingGoalId && onSelectGoal(activeGoals[0])}
-                      className="text-[10px] font-bold text-[var(--forest-green)] hover:underline shrink-0 cursor-pointer"
-                    >
-                      Focus →
-                    </button>
-                  )}
-                </li>
-              )}
-              {!reflection && (
-                <li className="flex items-start justify-between gap-2 text-[var(--text-muted)]">
-                  <span>Take 60 seconds below to capture today&apos;s Hansei reflection and close the feedback loop.</span>
-                </li>
-              )}
-            </ul>
+          <div className="shrink-0 self-start sm:self-auto">
+            {recentSubject ? (
+              <button
+                onClick={() => onSelectSubject(recentSubject)}
+                className="paper-btn-secondary px-2.5 py-1 text-xs font-bold text-[var(--forest-green)] inline-flex items-center gap-1 cursor-pointer active:scale-95"
+              >
+                <span>Resume →</span>
+              </button>
+            ) : activeGoals.length > 0 ? (
+              <button
+                onClick={() => onSelectGoal(activeGoals[0])}
+                className="paper-btn-secondary px-2.5 py-1 text-xs font-bold text-[var(--forest-green)] inline-flex items-center gap-1 cursor-pointer active:scale-95"
+              >
+                <span>Focus Goal →</span>
+              </button>
+            ) : null}
           </div>
         </div>
       </div>
 
-      {/* 3. Daily Reflection / Hansei (Tiny End-of-Day Micro-Prompt) */}
-      <div className="paper-card p-3.5 sm:p-4 space-y-3 border border-[var(--border-default)] rounded-xl">
-        <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-2">
-          <div className="flex items-center space-x-2">
-            <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-[var(--pale-sage)] text-[var(--forest-green)]">
-              <Lightbulb className="h-3.5 w-3.5" />
-            </span>
-            <div>
+      {/* 4. Daily Reflection / Hansei (Progressive Disclosure) */}
+      {reflection && !isEditingReflection ? (
+        <div className="paper-card p-3 sm:p-3.5 border border-[var(--border-default)] rounded-xl space-y-2">
+          <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-2">
+            <div className="flex items-center space-x-2">
+              <span className="flex h-5 w-5 items-center justify-center rounded-md bg-[var(--pale-sage)] text-[var(--forest-green)]">
+                <Lightbulb className="h-3 w-3" />
+              </span>
               <h2 className="text-xs sm:text-sm font-black text-[var(--text-heading)]">
                 Daily Reflection (Hansei · 反省)
               </h2>
-              <p className="text-[10px] text-[var(--text-muted)]">
-                Tiny end-of-day check-in — connecting daily effort to continuous improvement.
-              </p>
             </div>
-          </div>
-
-          {reflection && !isEditingReflection && (
             <button
               onClick={() => setIsEditingReflection(true)}
               className="text-[11px] font-bold text-[var(--forest-green)] hover:underline cursor-pointer"
             >
               Edit Reflection
             </button>
-          )}
-        </div>
-
-        {reflectionSavedNotice && (
-          <div className="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold flex items-center space-x-1.5 animate-fadeIn">
-            <Check className="h-3.5 w-3.5 shrink-0" />
-            <span>Today&apos;s Hansei reflection saved and habit recorded!</span>
           </div>
-        )}
 
-        {reflection && !isEditingReflection ? (
+          {reflectionSavedNotice && (
+            <div className="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold flex items-center space-x-1.5 animate-fadeIn">
+              <Check className="h-3.5 w-3.5 shrink-0" />
+              <span>Today&apos;s Hansei reflection saved and habit recorded!</span>
+            </div>
+          )}
+
           <div className="paper-inset bg-[var(--surface-secondary)] p-3 rounded-lg border border-[var(--border-subtle)] space-y-2 text-xs">
             <div className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">
               Recorded for today ({new Date(reflection.savedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })})
             </div>
-            <div className="grid gap-2.5 sm:grid-cols-3">
+            <div className="grid gap-2 sm:grid-cols-3">
               <div className="space-y-0.5">
                 <span className="font-bold text-emerald-400 text-[11px] block">🌿 What went well:</span>
                 <p className="text-[var(--text-secondary)] leading-relaxed">{reflection.wentWell || "—"}</p>
@@ -444,7 +391,35 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               </div>
             </div>
           </div>
-        ) : (
+        </div>
+      ) : isWritingReflection || isEditingReflection ? (
+        <div className="paper-card p-3.5 sm:p-4 space-y-3 border border-[var(--border-default)] rounded-xl animate-fadeIn">
+          <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-2">
+            <div className="flex items-center space-x-2">
+              <span className="flex h-5 w-5 items-center justify-center rounded-md bg-[var(--pale-sage)] text-[var(--forest-green)]">
+                <Lightbulb className="h-3 w-3" />
+              </span>
+              <div>
+                <h2 className="text-xs sm:text-sm font-black text-[var(--text-heading)]">
+                  Daily Reflection (Hansei · 反省)
+                </h2>
+                <p className="text-[10px] text-[var(--text-muted)]">
+                  Tiny check-in connecting daily effort to continuous improvement.
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => {
+                setIsWritingReflection(false);
+                setIsEditingReflection(false);
+              }}
+              className="text-[11px] font-bold text-[var(--text-muted)] hover:text-[var(--text-heading)] cursor-pointer"
+            >
+              Cancel
+            </button>
+          </div>
+
           <form onSubmit={handleSaveReflection} className="space-y-2.5">
             <div className="grid gap-2 sm:grid-cols-3">
               <div>
@@ -453,7 +428,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 </label>
                 <input
                   type="text"
-                  placeholder="e.g. Mastered Chapter 1, stayed focused"
+                  placeholder="e.g. Mastered Chapter 1, focused session"
                   value={wentWell}
                   onChange={(e) => setWentWell(e.target.value)}
                   className="paper-input w-full p-2 text-xs"
@@ -466,7 +441,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 </label>
                 <input
                   type="text"
-                  placeholder="e.g. Started late, afternoon fatigue"
+                  placeholder="e.g. Started late, fatigue"
                   value={difficulty}
                   onChange={(e) => setDifficulty(e.target.value)}
                   className="paper-input w-full p-2 text-xs"
@@ -479,7 +454,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 </label>
                 <input
                   type="text"
-                  placeholder="e.g. Start 30m study session at 9 AM"
+                  placeholder="e.g. Start 30m study at 9 AM"
                   value={changeTomorrow}
                   onChange={(e) => setChangeTomorrow(e.target.value)}
                   className="paper-input w-full p-2 text-xs"
@@ -488,19 +463,18 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </div>
 
             <div className="flex items-center justify-between pt-1">
-              {/* Quick Prompt Chips */}
               <div className="hidden sm:flex items-center space-x-1.5 text-[10px]">
                 <span className="text-[var(--text-muted)] font-medium">Quick ideas:</span>
                 <button
                   type="button"
-                  onClick={() => setWentWell((prev) => prev ? `${prev}, focused deep work` : "Focused deep work")}
+                  onClick={() => setWentWell((prev) => (prev ? `${prev}, focused deep work` : "Focused deep work"))}
                   className="px-1.5 py-0.5 rounded bg-[var(--surface-secondary)] text-[var(--text-muted)] hover:text-[var(--text-heading)] border border-[var(--border-subtle)] cursor-pointer"
                 >
                   + Deep work
                 </button>
                 <button
                   type="button"
-                  onClick={() => setChangeTomorrow((prev) => prev ? `${prev}, timebox 25m` : "Timebox 25m sessions")}
+                  onClick={() => setChangeTomorrow((prev) => (prev ? `${prev}, timebox 25m` : "Timebox 25m sessions"))}
                   className="px-1.5 py-0.5 rounded bg-[var(--surface-secondary)] text-[var(--text-muted)] hover:text-[var(--text-heading)] border border-[var(--border-subtle)] cursor-pointer"
                 >
                   + Timebox 25m
@@ -508,15 +482,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               </div>
 
               <div className="flex items-center space-x-2 ml-auto">
-                {isEditingReflection && (
-                  <button
-                    type="button"
-                    onClick={() => setIsEditingReflection(false)}
-                    className="paper-btn-secondary px-3 py-1.5 text-xs font-bold cursor-pointer"
-                  >
-                    Cancel
-                  </button>
-                )}
                 <button
                   type="submit"
                   disabled={!wentWell.trim() && !difficulty.trim() && !changeTomorrow.trim()}
@@ -528,8 +493,32 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               </div>
             </div>
           </form>
-        )}
-      </div>
+        </div>
+      ) : (
+        <div className="paper-card p-2.5 sm:p-3 border border-[var(--border-default)] rounded-xl flex items-center justify-between gap-3">
+          <div className="flex items-center space-x-2.5 min-w-0">
+            <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-[var(--pale-sage)] text-[var(--forest-green)] shrink-0">
+              <Lightbulb className="h-3.5 w-3.5" />
+            </span>
+            <div className="min-w-0">
+              <h2 className="text-xs sm:text-sm font-bold text-[var(--text-heading)] truncate">
+                Daily Reflection (Hansei · 反省)
+              </h2>
+              <p className="text-[10px] text-[var(--text-muted)] truncate">
+                Take 1 minute to reflect and close today&apos;s feedback loop
+              </p>
+            </div>
+          </div>
+
+          <button
+            onClick={() => setIsWritingReflection(true)}
+            className="paper-btn-secondary px-3 py-1.5 text-xs font-bold text-[var(--forest-green)] shrink-0 cursor-pointer active:scale-95 inline-flex items-center gap-1"
+          >
+            <PenLine className="h-3 w-3" />
+            <span>Reflect</span>
+          </button>
+        </div>
+      )}
 
       {/* Main Sections: Subjects & Goals */}
       <div className="grid gap-2.5 lg:grid-cols-2">
