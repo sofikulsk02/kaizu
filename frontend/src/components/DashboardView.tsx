@@ -144,8 +144,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   return (
     <div className="space-y-3 sm:space-y-4 pb-16 sm:pb-6">
       {/* 1. Header & Tactile Calendar Countdown (Clean, Minimal, Non-AI) */}
-      <div className="paper-card p-3.5 sm:p-4 border border-[var(--border-default)]">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+      <div className="paper-card p-3.5 sm:p-4 border border-[var(--border-default)] space-y-2.5 sm:space-y-3">
+        {/* Welcome Back & Core Philosophy */}
+        <div className="flex items-center justify-between gap-2">
           <div>
             <div className="flex items-center gap-2">
               <h1 className="text-base sm:text-lg font-black text-[var(--text-heading)]">
@@ -161,28 +162,45 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               Continuous, mindful progress through daily action.
             </p>
           </div>
+        </div>
 
-          {/* Tactile Year Countdown Chip - Prominent & Minimal */}
-          <div className="inline-flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-[var(--surface-secondary)] border border-[var(--border-subtle)] self-start sm:self-auto shrink-0 shadow-2xs">
+        {/* Year Countdown Card - Full-width, perfectly aligned with the Continue Learning card below */}
+        <div className="flex items-center justify-between p-2.5 sm:p-3 rounded-xl bg-[var(--surface-secondary)] border border-[var(--border-subtle)] shadow-2xs">
+          <div className="flex items-center gap-2.5 min-w-0">
             <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[var(--crimson)]/10 text-[var(--crimson)] shrink-0">
               <Calendar className="h-4 w-4" />
             </span>
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-lg sm:text-xl font-black text-[var(--crimson)] leading-none">
-                {daysRemainingInYear}
-              </span>
-              <span className="text-xs sm:text-sm font-bold text-[var(--text-heading)] leading-none">
-                days left in {currentYear}
-              </span>
+            <div className="min-w-0">
+              <div className="text-[10px] uppercase font-bold tracking-wider text-[var(--text-muted)]">
+                {currentYear} Countdown
+              </div>
+              <div className="flex items-baseline gap-1.5 text-xs sm:text-sm font-black text-[var(--text-heading)]">
+                <span className="text-sm sm:text-base text-[var(--crimson)] leading-none">
+                  {daysRemainingInYear}
+                </span>
+                <span className="leading-none">days left</span>
+              </div>
             </div>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0 pl-2">
+            <div className="w-16 sm:w-28 h-1.5 bg-[var(--border-subtle)] rounded-full overflow-hidden">
+              <div
+                className="h-full bg-[var(--crimson)] rounded-full transition-all duration-500"
+                style={{ width: `${Math.round(((365 - daysRemainingInYear) / 365) * 100)}%` }}
+              />
+            </div>
+            <span className="text-[11px] font-bold text-[var(--text-muted)]">
+              {Math.round(((365 - daysRemainingInYear) / 365) * 100)}%
+            </span>
           </div>
         </div>
 
-        {/* Continue Learning Quick Jump Ribbon (Single clean row, no heavy nested boxes) */}
+        {/* Continue Learning Quick Jump Ribbon (Single clean row, aligned directly underneath) */}
         {recentSubject ? (
           <div
             onClick={() => !loadingSubjectId && onSelectSubject(recentSubject)}
-            className="mt-3 flex items-center justify-between p-2.5 sm:p-3 rounded-xl bg-[var(--surface-secondary)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] cursor-pointer transition-all active:scale-[0.99] group"
+            className="flex items-center justify-between p-2.5 sm:p-3 rounded-xl bg-[var(--surface-secondary)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] cursor-pointer transition-all active:scale-[0.99] group shadow-2xs"
           >
             <div className="flex items-center gap-2.5 min-w-0">
               <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[var(--pale-sage)] text-[var(--forest-green)] shrink-0 font-bold text-xs">

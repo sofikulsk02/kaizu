@@ -903,27 +903,36 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
                                 </h4>
                               </div>
 
-                              {/* Row 3: Seamless Typography Notes & Next Steps (No bulky rectangle box) */}
+                              {/* Sub-topics / Notes & Next Steps Box */}
                               {(topic.notes || topic.resources || topic.nextStep) && (
-                                <div className="pt-1.5 border-t border-[var(--border-subtle)]/40 space-y-1 text-xs">
+                                <div className="bg-[var(--surface-secondary)]/70 p-2.5 sm:p-3 rounded-lg border border-[var(--border-subtle)] space-y-1.5 text-xs">
                                   {topic.notes && (
-                                    <div className="flex items-start space-x-1.5 text-[var(--text-secondary)]">
-                                      <FileText className="h-3 w-3 text-[var(--text-muted)] mt-0.5 shrink-0" />
-                                      <span className="leading-relaxed break-words">{topic.notes}</span>
+                                    <div className="flex items-start space-x-2 text-[var(--text-secondary)]">
+                                      <FileText className="h-3.5 w-3.5 text-[var(--text-muted)] mt-0.5 shrink-0" />
+                                      <div className="leading-relaxed break-words">
+                                        <span className="font-bold text-[var(--text-heading)] mr-1">Notes:</span>
+                                        <span>{topic.notes}</span>
+                                      </div>
                                     </div>
                                   )}
 
                                   {topic.nextStep && (
-                                    <div className="flex items-start space-x-1.5 text-[var(--crimson)] font-medium">
-                                      <Target className="h-3 w-3 mt-0.5 shrink-0" />
-                                      <span className="leading-relaxed break-words">{topic.nextStep}</span>
+                                    <div className="flex items-start space-x-2 text-[var(--crimson)]">
+                                      <Target className="h-3.5 w-3.5 mt-0.5 shrink-0" />
+                                      <div className="leading-relaxed break-words font-medium">
+                                        <span className="font-bold mr-1">Next:</span>
+                                        <span>{topic.nextStep}</span>
+                                      </div>
                                     </div>
                                   )}
 
                                   {topic.resources && (
-                                    <div className="flex items-start space-x-1.5 text-[var(--forest-green)] font-medium">
-                                      <ExternalLink className="h-3 w-3 mt-0.5 shrink-0" />
-                                      <span className="truncate">{topic.resources}</span>
+                                    <div className="flex items-start space-x-2 text-[var(--forest-green)]">
+                                      <ExternalLink className="h-3.5 w-3.5 mt-0.5 shrink-0" />
+                                      <div className="leading-relaxed truncate font-medium">
+                                        <span className="font-bold mr-1">Resources:</span>
+                                        <span className="underline">{topic.resources}</span>
+                                      </div>
                                     </div>
                                   )}
                                 </div>
