@@ -40,6 +40,7 @@ const STATUS_CONFIG: Record<
   {
     label: string;
     badgeClass: string;
+    textColor: string;
     Icon: React.ComponentType<{ className?: string }>;
     dotColor: string;
   }
@@ -47,30 +48,35 @@ const STATUS_CONFIG: Record<
   NOT_STARTED: {
     label: "Not Started",
     badgeClass: "bg-[var(--surface-inset)] text-[var(--text-muted)] border border-[var(--border-subtle)]",
+    textColor: "text-[var(--text-muted)]",
     Icon: Circle,
     dotColor: "bg-gray-400",
   },
   LEARNING: {
     label: "Learning",
     badgeClass: "bg-blue-500/15 text-blue-600 dark:text-blue-300 border border-blue-500/30",
+    textColor: "text-blue-600 dark:text-blue-400",
     Icon: CircleDot,
     dotColor: "bg-blue-500",
   },
   STUDIED: {
     label: "Studied",
     badgeClass: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30",
+    textColor: "text-emerald-600 dark:text-emerald-400",
     Icon: CheckCircle2,
     dotColor: "bg-emerald-500",
   },
   NEEDS_REVISION: {
     label: "Needs Revision",
     badgeClass: "bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30",
+    textColor: "text-amber-600 dark:text-amber-400",
     Icon: Flame,
     dotColor: "bg-amber-500",
   },
   UNDERSTOOD: {
     label: "Mastered",
     badgeClass: "bg-[var(--pale-sage)] text-[var(--forest-green)] border border-[var(--sage)]/50",
+    textColor: "text-[var(--forest-green)]",
     Icon: Sparkles,
     dotColor: "bg-[var(--forest-green)]",
   },
@@ -467,128 +473,77 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
             </div>
           </form>
         ) : (
-          <div>
-            <div className="space-y-1.5">
-              <div className="inline-flex items-center space-x-1.5 paper-badge px-2.5 py-0.5 text-[11px] font-bold">
-                <BookOpen className="h-3 w-3 text-[var(--forest-green)]" />
-                <span>Learning Area</span>
-              </div>
-              <h1 className="text-xl sm:text-3xl font-black text-[var(--text-heading)] leading-tight">
+          <div className="space-y-2.5">
+            <div>
+              <h1 className="text-xl sm:text-2xl font-black text-[var(--text-heading)] leading-tight">
                 {subject.name}
               </h1>
-              {subject.description ? (
-                <p className="text-xs sm:text-sm text-[var(--text-secondary)] max-w-2xl leading-relaxed">
+              {subject.description && (
+                <p className="text-xs sm:text-sm text-[var(--text-secondary)] mt-1 line-clamp-2 leading-relaxed">
                   {subject.description}
-                </p>
-              ) : (
-                <p className="text-xs text-[var(--text-muted)] italic">
-                  Add chapters and study topics below to map out your mastery path.
                 </p>
               )}
             </div>
 
             {/* Seamless Overall Mastery Progress Bar */}
-            <div className="mt-2.5 p-2 sm:p-2.5 rounded-xl bg-[var(--surface-secondary)] border border-[var(--border-default)] flex items-center justify-between gap-2.5">
-              <div className="flex items-center min-w-0">
-                <span className="text-xs font-bold text-[var(--text-heading)] truncate">Overall Mastery</span>
+            <div className="flex items-center gap-3 pt-0.5">
+              <div className="flex-1 h-2 bg-[var(--surface-secondary)] rounded-full overflow-hidden border border-[var(--border-subtle)]">
+                <div
+                  className="h-full bg-[var(--forest-green)] transition-all duration-500 rounded-full"
+                  style={{ width: `${overallMasteryPct}%` }}
+                />
               </div>
-              <div className="flex items-center space-x-2.5 shrink-0">
-                <div className="w-24 sm:w-36 h-2 bg-[var(--border-default)] rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-[var(--forest-green)] transition-all duration-500 rounded-full"
-                    style={{ width: `${overallMasteryPct}%` }}
-                  />
+              <span className="text-xs font-bold text-[var(--forest-green)] shrink-0">
+                {overallMasteryPct}% Mastered
+              </span>
+            </div>
+
+            {/* Compact Glanceable Metrics Row (replaces 4 bulky rectangle boxes) */}
+            <div className="grid grid-cols-4 gap-2 pt-2 border-t border-[var(--border-subtle)]/50 text-center">
+              <div className="py-0.5">
+                <div className="text-xs sm:text-sm font-black text-[var(--text-heading)]">
+                  {formatMinutes(metrics.totalTimeStudiedMinutes)}
                 </div>
-                <span className="text-xs font-black text-[var(--forest-green)] min-w-[32px] text-right">
-                  {overallMasteryPct}%
-                </span>
+                <div className="text-[10px] text-[var(--text-muted)] font-bold">Studied</div>
+              </div>
+              <div className="py-0.5">
+                <div className="text-xs sm:text-sm font-black text-[var(--forest-green)]">
+                  {metrics.topicsTrackedCount}
+                </div>
+                <div className="text-[10px] text-[var(--text-muted)] font-bold">Topics</div>
+              </div>
+              <div className="py-0.5">
+                <div className="text-xs sm:text-sm font-black text-[var(--forest-green)]">
+                  {metrics.activeDaysCount}
+                </div>
+                <div className="text-[10px] text-[var(--text-muted)] font-bold">Days</div>
+              </div>
+              <div className="py-0.5">
+                <div className="text-xs sm:text-sm font-black text-[#C2410C]">
+                  {metrics.topicsNeedingRevisionCount}
+                </div>
+                <div className="text-[10px] text-[var(--text-muted)] font-bold">Revise</div>
               </div>
             </div>
           </div>
         )}
-
-        {/* 4 Analytics Metrics Cards with Balanced Proportions */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5 pt-1">
-          <div className="paper-card bg-[var(--surface-secondary)] p-2 sm:p-3 border border-[var(--border-default)] card-lift">
-            <div className="flex items-center justify-between text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
-              <span>Time Studied</span>
-              <Clock className="h-3.5 w-3.5 text-[var(--forest-green)]" />
-            </div>
-            <div className="text-lg sm:text-2xl font-black text-[var(--text-heading)] mt-1">
-              {formatMinutes(metrics.totalTimeStudiedMinutes)}
-            </div>
-          </div>
-
-          <div className="paper-card bg-[var(--surface-secondary)] p-2 sm:p-3 border border-[var(--border-default)] card-lift">
-            <div className="flex items-center justify-between text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
-              <span>Topics Tracked</span>
-              <BookOpen className="h-3.5 w-3.5 text-[var(--forest-green)]" />
-            </div>
-            <div className="text-lg sm:text-2xl font-black text-[var(--forest-green)] mt-1">
-              {metrics.topicsTrackedCount}
-            </div>
-          </div>
-
-          <div className="paper-card bg-[var(--surface-secondary)] p-2 sm:p-3 border border-[var(--border-default)] card-lift">
-            <div className="flex items-center justify-between text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
-              <span>Active Days</span>
-              <Zap className="h-3.5 w-3.5 text-[var(--forest-green)]" />
-            </div>
-            <div className="text-lg sm:text-2xl font-black text-[var(--forest-green)] mt-1">
-              {metrics.activeDaysCount}
-            </div>
-          </div>
-
-          <div className="paper-card bg-[var(--surface-secondary)] p-2 sm:p-3 border border-[var(--border-default)] card-lift">
-            <div className="flex items-center justify-between text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
-              <span>Needs Revision</span>
-              <Flame className="h-3.5 w-3.5 text-[#C2410C]" />
-            </div>
-            <div className="text-lg sm:text-2xl font-black text-[#C2410C] mt-1">
-              {metrics.topicsNeedingRevisionCount}
-            </div>
-          </div>
-        </div>
       </div>
 
-      {/* Continue Learning Spotlight Hero Card */}
-      <div className="paper-card bg-[var(--surface-secondary)] p-3 sm:p-4 border border-[var(--border-default)] card-lift">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="space-y-1">
-            <div className="text-[11px] font-extrabold uppercase tracking-wider text-[var(--forest-green)] flex items-center space-x-1.5">
-              <span className="flex h-2 w-2 rounded-full bg-[var(--forest-green)] animate-pulse" />
-              <span>Next Recommended Action</span>
-            </div>
-            {continueLearning && continueLearning.lastTopicTitle ? (
-              <div>
-                <h3 className="text-base sm:text-lg font-bold text-[var(--text-heading)]">
-                  {continueLearning.lastTopicTitle}
-                </h3>
-                <div className="text-xs text-[var(--text-muted)] mt-0.5">
-                  Last session:{" "}
-                  <span className="text-[var(--text-heading)] font-semibold">
-                    {formatDate(continueLearning.lastStudiedAt)}
-                  </span>
-                  {continueLearning.lastDurationMinutes
-                    ? ` · ${continueLearning.lastDurationMinutes} mins`
-                    : ""}
-                </div>
-                {continueLearning.nextStep && (
-                  <div className="mt-2 text-xs text-[var(--forest-green)] bg-[var(--pale-sage)] border border-[var(--sage)]/40 px-2.5 py-1 rounded-md inline-flex items-center space-x-1.5 font-bold">
-                    <Target className="h-3.5 w-3.5 text-[var(--crimson)]" />
-                    <span>Next: {continueLearning.nextStep}</span>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div>
-                <h3 className="text-sm sm:text-base font-bold text-[var(--text-heading)]">
-                  Ready to study {subject.name}?
-                </h3>
-                <p className="text-xs text-[var(--text-muted)]">
-                  Pick a topic below or log your first study session to start your momentum loop.
-                </p>
-              </div>
+      {/* Quick Resume Learning Banner - Only shown when there is an active recent topic */}
+      {continueLearning?.lastTopicTitle && (
+        <div className="paper-card bg-[var(--surface-secondary)] p-2.5 sm:p-3 border border-[var(--border-subtle)] rounded-xl flex items-center justify-between gap-2.5">
+          <div className="flex items-center space-x-2 min-w-0">
+            <span className="flex h-2 w-2 rounded-full bg-[var(--forest-green)] animate-pulse shrink-0" />
+            <span className="text-xs text-[var(--text-muted)] font-bold shrink-0 hidden sm:inline">
+              Resume:
+            </span>
+            <span className="text-xs sm:text-sm font-bold text-[var(--text-heading)] truncate">
+              {continueLearning.lastTopicTitle}
+            </span>
+            {continueLearning.nextStep && (
+              <span className="text-xs text-[var(--crimson)] font-medium truncate hidden md:inline">
+                · Next: {continueLearning.nextStep}
+              </span>
             )}
           </div>
 
@@ -600,27 +555,26 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
               }
               setShowSessionModal(true);
             }}
-            className="paper-btn-primary px-4 py-2 sm:px-5 sm:py-2.5 text-xs font-bold shadow-xs flex items-center justify-center space-x-2 shrink-0 cursor-pointer active:scale-95"
+            className="paper-btn-primary px-3 py-1 sm:px-4 sm:py-1.5 text-xs font-bold shadow-xs flex items-center space-x-1.5 shrink-0 cursor-pointer active:scale-95"
           >
-            <Play className="h-3.5 w-3.5 fill-current" />
-            <span>Resume Learning</span>
+            <Play className="h-3 w-3 fill-current" />
+            <span>Resume</span>
           </button>
         </div>
-      </div>
+      )}
 
-      {/* Workspace Tabs with Responsive Titles */}
+      {/* Workspace Tabs - Streamlined labels */}
       <div className="flex border-b border-[var(--border-default)] space-x-1 sm:space-x-6 text-xs sm:text-sm font-bold text-[var(--text-muted)] overflow-x-auto custom-scrollbar">
         <button
           onClick={() => setActiveTab("structure")}
-          className={`pb-2.5 pt-1 px-2.5 sm:px-2 transition-all flex items-center space-x-1.5 border-b-2 whitespace-nowrap cursor-pointer shrink-0 ${
+          className={`pb-2.5 pt-1 px-3 sm:px-2 transition-all flex items-center space-x-1.5 border-b-2 whitespace-nowrap cursor-pointer shrink-0 ${
             activeTab === "structure"
               ? "border-[var(--forest-green)] text-[var(--text-heading)] font-black"
               : "border-transparent hover:text-[var(--text-heading)]"
           }`}
         >
-          <Layers className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-          <span className="sm:hidden">Structure</span>
-          <span className="hidden sm:inline">Learning Structure</span>
+          <Layers className="h-3.5 w-3.5" />
+          <span>Topics</span>
           <span
             className={`px-1.5 py-0.2 rounded-full text-[10px] sm:text-[11px] font-bold ${
               activeTab === "structure"
@@ -634,15 +588,14 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
 
         <button
           onClick={() => setActiveTab("sessions")}
-          className={`pb-2.5 pt-1 px-2.5 sm:px-2 transition-all flex items-center space-x-1.5 border-b-2 whitespace-nowrap cursor-pointer shrink-0 ${
+          className={`pb-2.5 pt-1 px-3 sm:px-2 transition-all flex items-center space-x-1.5 border-b-2 whitespace-nowrap cursor-pointer shrink-0 ${
             activeTab === "sessions"
               ? "border-[var(--forest-green)] text-[var(--text-heading)] font-black"
               : "border-transparent hover:text-[var(--text-heading)]"
           }`}
         >
-          <History className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-          <span className="sm:hidden">Sessions</span>
-          <span className="hidden sm:inline">Study Sessions</span>
+          <History className="h-3.5 w-3.5" />
+          <span>Sessions</span>
           <span
             className={`px-1.5 py-0.2 rounded-full text-[10px] sm:text-[11px] font-bold ${
               activeTab === "sessions"
@@ -656,15 +609,14 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
 
         <button
           onClick={() => setActiveTab("revision")}
-          className={`pb-2.5 pt-1 px-2.5 sm:px-2 transition-all flex items-center space-x-1.5 border-b-2 whitespace-nowrap cursor-pointer shrink-0 ${
+          className={`pb-2.5 pt-1 px-3 sm:px-2 transition-all flex items-center space-x-1.5 border-b-2 whitespace-nowrap cursor-pointer shrink-0 ${
             activeTab === "revision"
               ? "border-[var(--forest-green)] text-[var(--text-heading)] font-black"
               : "border-transparent hover:text-[var(--text-heading)]"
           }`}
         >
-          <Flame className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#C2410C]" />
-          <span className="sm:hidden">Revision</span>
-          <span className="hidden sm:inline">Understanding & Revision</span>
+          <Flame className="h-3.5 w-3.5 text-[#C2410C]" />
+          <span>Revision</span>
           <span
             className={`px-1.5 py-0.2 rounded-full text-[10px] sm:text-[11px] font-bold ${
               topicsNeedingRevision.length > 0
@@ -678,20 +630,15 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
       </div>
 
       {/* ==========================================
-          TAB 1: STRUCTURE & TOPICS (REDESIGNED)
+          TAB 1: STRUCTURE & TOPICS
           ========================================== */}
       {activeTab === "structure" && (
         <div className="space-y-3 sm:space-y-4">
-          {/* Section Header */}
-          <div className="flex items-center justify-between gap-2 pb-2 border-b border-[var(--border-subtle)]">
-            <div>
-              <h2 className="text-base sm:text-xl font-black text-[var(--text-heading)]">
-                Learning Structure
-              </h2>
-              <p className="text-[11px] sm:text-xs text-[var(--text-muted)]">
-                Organize your study into chapters, topics, mastery ratings, and next actions.
-              </p>
-            </div>
+          {/* Section Toolbar (Clean, no text clutter) */}
+          <div className="flex items-center justify-between gap-2 pb-1">
+            <span className="text-xs font-bold text-[var(--text-muted)]">
+              {chapters.length} {chapters.length === 1 ? "Chapter" : "Chapters"}
+            </span>
             <div className="flex items-center space-x-2 shrink-0">
               {chapters.length > 0 && (
                 <button
@@ -704,7 +651,7 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
                       setCollapsedChapterIds(new Set(chapters.map((c) => c.id)));
                     }
                   }}
-                  className="paper-btn-secondary px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs font-bold flex items-center space-x-1.5 cursor-pointer active:scale-95"
+                  className="paper-btn-secondary px-2.5 py-1 text-xs font-bold flex items-center space-x-1 cursor-pointer active:scale-95"
                   title={
                     chapters.every((c) => collapsedChapterIds.has(c.id))
                       ? "Expand all chapters"
@@ -721,7 +668,7 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
               )}
               <button
                 onClick={() => setShowAddChapter(true)}
-                className="paper-btn-primary px-3 sm:px-4 py-1.5 sm:py-2 text-xs font-bold flex items-center space-x-1 shadow-xs shrink-0 cursor-pointer active:scale-95"
+                className="paper-btn-primary px-3 py-1 text-xs font-bold flex items-center space-x-1 shadow-xs shrink-0 cursor-pointer active:scale-95"
               >
                 <Plus className="h-3.5 w-3.5" />
                 <span>Add Chapter</span>
@@ -863,7 +810,7 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
                             )}
                           </div>
                           {chapter.description && (
-                            <p className="text-[11px] text-[var(--text-muted)] truncate">
+                            <p className="text-[11px] text-[var(--text-muted)] truncate hidden sm:block">
                               {chapter.description}
                             </p>
                           )}
@@ -900,32 +847,27 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
                       {chapterTopics.length > 0 ? (
                         chapterTopics.map((topic) => {
                           const statusInfo = STATUS_CONFIG[topic.status || "NOT_STARTED"];
-                          const StatusIcon = statusInfo.Icon;
 
                           return (
                             <div
                               key={topic.id}
                               onClick={() => openEditTopicModal(topic)}
-                              className="paper-card bg-[var(--surface-primary)] p-2.5 sm:p-3 rounded-lg border border-[var(--border-default)] hover:border-[var(--forest-green)] transition-all card-lift space-y-2 shadow-2xs cursor-pointer group active:scale-[0.99]"
+                              className="paper-card bg-[var(--surface-primary)] p-3 sm:p-3.5 rounded-xl border border-[var(--border-default)] hover:border-[var(--forest-green)] transition-all card-lift space-y-2 shadow-2xs cursor-pointer group active:scale-[0.99]"
                             >
-                              {/* Row 1: Status Pill (left) & Mastery Level Meter + Quick Study (right) */}
+                              {/* Row 1: Organic Status (left) & Mastery Dots + Circular Quick Study (right) */}
                               <div className="flex items-center justify-between gap-2">
-                                <span
-                                  className={`px-2 py-0.5 rounded-md text-[10px] sm:text-[11px] font-bold inline-flex items-center space-x-1 shrink-0 ${statusInfo.badgeClass}`}
-                                >
-                                  <StatusIcon className="h-3 w-3" />
-                                  <span>{statusInfo.label}</span>
-                                </span>
+                                <div className="inline-flex items-center space-x-1.5 text-xs font-semibold">
+                                  <span className={`h-2 w-2 rounded-full ${statusInfo.dotColor} shrink-0`} />
+                                  <span className={statusInfo.textColor}>{statusInfo.label}</span>
+                                </div>
 
-                                <div className="flex items-center gap-1.5 shrink-0">
-                                  {/* Minimalist Mastery Meter (Replaces 5 gold stars) */}
+                                <div className="flex items-center gap-2 shrink-0">
+                                  {/* Clean Borderless Mastery Indicator */}
                                   <div
-                                    className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-[var(--surface-secondary)] border border-[var(--border-subtle)]"
+                                    className="flex items-center gap-1.5 text-xs font-semibold text-[var(--text-muted)]"
                                     title={`Mastery: Level ${topic.confidence || 1} of 5`}
                                   >
-                                    <span className="text-[10px] font-bold text-[var(--text-muted)]">
-                                      L{topic.confidence || 1}
-                                    </span>
+                                    <span className="text-[11px] font-bold">L{topic.confidence || 1}</span>
                                     <div className="flex items-center gap-0.5">
                                       {[1, 2, 3, 4, 5].map((lvl) => (
                                         <span
@@ -933,24 +875,23 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
                                           className={`h-1.5 w-1.5 rounded-full transition-colors ${
                                             lvl <= (topic.confidence || 1)
                                               ? "bg-[var(--forest-green)]"
-                                              : "bg-[var(--border-strong)]/30"
+                                              : "bg-[var(--border-strong)]/25"
                                           }`}
                                         />
                                       ))}
                                     </div>
                                   </div>
 
-                                  {/* Quick Study Button (Compact, non-intrusive) */}
+                                  {/* Sleek Circular Play Action (breaks rectangular monotony) */}
                                   <button
                                     onClick={(e) => {
                                       e.stopPropagation();
                                       startQuickSessionForTopic(topic);
                                     }}
-                                    className="btn-study px-2 sm:px-2.5 py-1 text-[11px] font-bold inline-flex items-center gap-1 cursor-pointer active:scale-95 shadow-2xs"
+                                    className="h-7 w-7 rounded-full bg-[var(--surface-secondary)] hover:bg-[var(--forest-green)] text-[var(--forest-green)] hover:text-white flex items-center justify-center transition-all cursor-pointer active:scale-95 shadow-2xs shrink-0"
                                     title="Start study session for this topic"
                                   >
-                                    <Play className="h-3 w-3 fill-current" />
-                                    <span className="hidden sm:inline">Study</span>
+                                    <Play className="h-3 w-3 fill-current ml-0.5" />
                                   </button>
                                 </div>
                               </div>
@@ -962,37 +903,26 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
                                 </h4>
                               </div>
 
-                              {/* Row 3: Structured Notes & Next Steps Inset */}
+                              {/* Row 3: Seamless Typography Notes & Next Steps (No bulky rectangle box) */}
                               {(topic.notes || topic.resources || topic.nextStep) && (
-                                <div className="paper-inset bg-[var(--surface-secondary)] p-2 sm:p-2.5 rounded-lg text-xs space-y-1 border border-[var(--border-subtle)] text-[var(--text-secondary)]">
+                                <div className="pt-1.5 border-t border-[var(--border-subtle)]/40 space-y-1 text-xs">
                                   {topic.notes && (
-                                    <div className="flex items-start space-x-1.5">
-                                      <span className="font-bold text-[var(--text-heading)] shrink-0 flex items-center space-x-1">
-                                        <FileText className="h-3 w-3 text-[var(--text-muted)] mt-0.5" />
-                                        <span>Notes:</span>
-                                      </span>
+                                    <div className="flex items-start space-x-1.5 text-[var(--text-secondary)]">
+                                      <FileText className="h-3 w-3 text-[var(--text-muted)] mt-0.5 shrink-0" />
                                       <span className="leading-relaxed break-words">{topic.notes}</span>
                                     </div>
                                   )}
 
                                   {topic.nextStep && (
-                                    <div className="flex items-start space-x-1.5">
-                                      <span className="font-bold text-[var(--crimson)] shrink-0 flex items-center space-x-1">
-                                        <Target className="h-3 w-3 text-[var(--crimson)] mt-0.5" />
-                                        <span>Next:</span>
-                                      </span>
-                                      <span className="font-medium text-[var(--text-heading)] break-words">
-                                        {topic.nextStep}
-                                      </span>
+                                    <div className="flex items-start space-x-1.5 text-[var(--crimson)] font-medium">
+                                      <Target className="h-3 w-3 mt-0.5 shrink-0" />
+                                      <span className="leading-relaxed break-words">{topic.nextStep}</span>
                                     </div>
                                   )}
 
                                   {topic.resources && (
-                                    <div className="flex items-start space-x-1.5">
-                                      <span className="font-bold text-[var(--forest-green)] shrink-0 flex items-center space-x-1">
-                                        <ExternalLink className="h-3 w-3 text-[var(--forest-green)] mt-0.5" />
-                                        <span>Resources:</span>
-                                      </span>
+                                    <div className="flex items-start space-x-1.5 text-[var(--forest-green)] font-medium">
+                                      <ExternalLink className="h-3 w-3 mt-0.5 shrink-0" />
                                       <span className="truncate">{topic.resources}</span>
                                     </div>
                                   )}
@@ -1132,12 +1062,10 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
                     <div className="flex items-center space-x-3 self-end sm:self-center">
                       {session.confidence && (
                         <div
-                          className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-[var(--surface-secondary)] border border-[var(--border-subtle)]"
+                          className="flex items-center gap-1.5 text-xs font-semibold text-[var(--text-muted)]"
                           title={`Confidence: L${session.confidence}/5`}
                         >
-                          <span className="text-[10px] font-bold text-[var(--text-muted)]">
-                            L{session.confidence}
-                          </span>
+                          <span className="text-[11px] font-bold">L{session.confidence}</span>
                           <div className="flex items-center gap-0.5">
                             {[1, 2, 3, 4, 5].map((s) => (
                               <span
@@ -1145,7 +1073,7 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
                                 className={`h-1.5 w-1.5 rounded-full transition-colors ${
                                   s <= session.confidence!
                                     ? "bg-[var(--forest-green)]"
-                                    : "bg-[var(--border-strong)]/30"
+                                    : "bg-[var(--border-strong)]/25"
                                 }`}
                               />
                             ))}
