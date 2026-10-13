@@ -1,33 +1,21 @@
 <svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="bgGradM" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#C5374C"/>
-      <stop offset="50%" stop-color="#B83245"/>
-      <stop offset="100%" stop-color="#8E1F30"/>
+    <linearGradient id="arcGradM" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#B83245"/>
+      <stop offset="40%" stop-color="#244633"/>
+      <stop offset="100%" stop-color="#244633"/>
     </linearGradient>
-    <radialGradient id="ambientGradM" cx="50%" cy="30%" r="70%">
-      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.18"/>
-      <stop offset="100%" stop-color="#000000" stop-opacity="0.25"/>
-    </radialGradient>
-    <filter id="kShadowM" x="-20%" y="-20%" width="140%" height="140%">
-      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#4A0E18" flood-opacity="0.6"/>
-    </filter>
   </defs>
 
-  <!-- Edge-to-edge background for Android Maskable spec -->
-  <rect width="512" height="512" fill="url(#bgGradM)"/>
-  <rect width="512" height="512" fill="url(#ambientGradM)"/>
+  <!-- Full edge-to-edge bleed background for maskable spec -->
+  <rect width="512" height="512" fill="#F4EFE3"/>
 
-  <!-- Inner circle safe area accent -->
-  <circle cx="256" cy="256" r="185" fill="none" stroke="#F5E6CC" stroke-width="3" stroke-opacity="0.35"/>
+  <!-- Centered round loader positioned within safe zone -->
+  <g transform="translate(256, 256)">
+    <!-- Subtle circular track -->
+    <circle cx="0" cy="0" r="120" fill="none" stroke="#E2DAC8" stroke-width="16"/>
 
-  <!-- Stylized Modern Geometric "K" Icon inside safe zone -->
-  <g filter="url(#kShadowM)">
-    <!-- Vertical stem -->
-    <rect x="162" y="148" width="50" height="216" rx="16" fill="#FFFFFF"/>
-    <!-- Top-right diagonal arm -->
-    <path d="M 206 260 L 318 152 C 326 144 338 144 346 152 C 354 160 354 172 346 180 L 240 282 Z" fill="#FFFFFF"/>
-    <!-- Bottom-right diagonal arm -->
-    <path d="M 226 242 L 324 336 C 332 344 332 356 324 364 C 316 372 304 372 296 364 L 206 270 Z" fill="#FFFFFF"/>
+    <!-- Dynamic round spinning arc (forest green to crimson) -->
+    <circle cx="0" cy="0" r="120" fill="none" stroke="url(#arcGradM)" stroke-width="18" stroke-linecap="round" stroke-dasharray="754" stroke-dashoffset="260" transform="rotate(-45)"/>
   </g>
 </svg>

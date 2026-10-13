@@ -1,33 +1,21 @@
 <svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#C5374C"/>
-      <stop offset="50%" stop-color="#B83245"/>
-      <stop offset="100%" stop-color="#8E1F30"/>
+    <linearGradient id="arcGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#B83245"/>
+      <stop offset="40%" stop-color="#244633"/>
+      <stop offset="100%" stop-color="#244633"/>
     </linearGradient>
-    <radialGradient id="ambientGrad" cx="50%" cy="30%" r="70%">
-      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.18"/>
-      <stop offset="100%" stop-color="#000000" stop-opacity="0.25"/>
-    </radialGradient>
-    <filter id="kShadow" x="-20%" y="-20%" width="140%" height="140%">
-      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#4A0E18" flood-opacity="0.6"/>
-    </filter>
   </defs>
 
-  <!-- Squircle Base with smooth corners -->
-  <rect x="16" y="16" width="480" height="480" rx="108" fill="url(#bgGrad)"/>
-  <rect x="16" y="16" width="480" height="480" rx="108" fill="url(#ambientGrad)"/>
+  <!-- Background matching Kaizu paper tone -->
+  <rect width="512" height="512" rx="112" fill="#F4EFE3"/>
 
-  <!-- Subtle refined gold rim -->
-  <rect x="22" y="22" width="468" height="468" rx="102" fill="none" stroke="#F5E6CC" stroke-width="4" stroke-opacity="0.45"/>
+  <!-- Centered round loader matching KaizuLoader -->
+  <g transform="translate(256, 256)">
+    <!-- Subtle circular track -->
+    <circle cx="0" cy="0" r="120" fill="none" stroke="#E2DAC8" stroke-width="16"/>
 
-  <!-- Stylized Modern Geometric "K" Icon -->
-  <g filter="url(#kShadow)">
-    <!-- Vertical stem -->
-    <rect x="146" y="128" width="56" height="256" rx="18" fill="#FFFFFF"/>
-    <!-- Top-right diagonal arm -->
-    <path d="M 196 262 L 328 136 C 336 128 350 128 358 136 C 366 144 366 158 358 166 L 236 284 Z" fill="#FFFFFF"/>
-    <!-- Bottom-right diagonal arm -->
-    <path d="M 218 242 L 332 350 C 340 358 340 372 332 380 C 324 388 310 388 302 380 L 196 274 Z" fill="#FFFFFF"/>
+    <!-- Dynamic round spinning arc (forest green to crimson) -->
+    <circle cx="0" cy="0" r="120" fill="none" stroke="url(#arcGrad)" stroke-width="18" stroke-linecap="round" stroke-dasharray="754" stroke-dashoffset="260" transform="rotate(-45)"/>
   </g>
 </svg>

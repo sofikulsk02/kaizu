@@ -1,5 +1,5 @@
 // Kaizu PWA Service Worker
-const CACHE_NAME = "kaizu-cache-v2";
+const CACHE_NAME = "kaizu-cache-v3";
 
 const PRECACHE_ASSETS = [
   "/",
@@ -7,6 +7,7 @@ const PRECACHE_ASSETS = [
   "/washi-bg.jpg",
   "/icons/icon-192.png",
   "/icons/icon-512.png",
+  "/icons/icon-maskable-512.png",
   "/icons/apple-touch-icon.png",
 ];
 
