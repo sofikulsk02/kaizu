@@ -31,6 +31,92 @@ import { LoginScreen } from "../components/LoginScreen";
 import { MichiAssistant } from "../components/assistant";
 import { KaizuLoader } from "../components/KaizuLoader";
 
+const VALID_TABS = ["dashboard", "subjects", "goals", "projects", "activity", "settings"];
+
+function buildUrl(
+  tab: string,
+  subjectId?: string | null,
+  goalId?: string | null,
+  projectId?: string | null
+): string {
+  if (tab === "dashboard" && !subjectId && !goalId && !projectId) {
+    return "/";
+  }
+  const params = new URLSearchParams();
+  if (tab && tab !== "dashboard") params.set("tab", tab);
+  if (subjectId) params.set("subjectId", subjectId);
+  if (goalId) params.set("goalId", goalId);
+  if (projectId) params.set("projectId", projectId);
+
+  const qs = params.toString();
+  return qs ? `/?${qs}` : "/";
+}
+
+function persistNav(
+  tab: string,
+  subjectId?: string | null,
+  goalId?: string | null,
+  projectId?: string | null
+) {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(
+      "kaizu_last_view",
+      JSON.stringify({
+        tab,
+        subjectId: subjectId || null,
+        goalId: goalId || null,
+        projectId: projectId || null,
+      })
+    );
+  } catch (e) {}
+}
+
+function getInitialNav(): {
+  tab: string;
+  subjectId: string | null;
+  goalId: string | null;
+  projectId: string | null;
+} {
+  if (typeof window === "undefined") {
+    return { tab: "dashboard", subjectId: null, goalId: null, projectId: null };
+  }
+
+  // 1. URL search params take highest priority on reload
+  const params = new URLSearchParams(window.location.search);
+  const tabFromUrl = params.get("tab");
+  const subjectIdFromUrl = params.get("subjectId");
+  const goalIdFromUrl = params.get("goalId");
+  const projectIdFromUrl = params.get("projectId");
+
+  if (tabFromUrl && VALID_TABS.includes(tabFromUrl)) {
+    return {
+      tab: tabFromUrl,
+      subjectId: subjectIdFromUrl || null,
+      goalId: goalIdFromUrl || null,
+      projectId: projectIdFromUrl || null,
+    };
+  }
+
+  // 2. Fallback to localStorage for PWA resume
+  try {
+    const saved = localStorage.getItem("kaizu_last_view");
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (parsed.tab && VALID_TABS.includes(parsed.tab)) {
+        return {
+          tab: parsed.tab,
+          subjectId: parsed.subjectId || null,
+          goalId: parsed.goalId || null,
+          projectId: parsed.projectId || null,
+        };
+      }
+    }
+  } catch (e) {}
+
+  return { tab: "dashboard", subjectId: null, goalId: null, projectId: null };
+}
+
 interface NavHistoryState {
   tab?: string;
   subjectId?: string | null;
@@ -111,18 +197,44 @@ export default function Page() {
     isSidebarOpenRef.current = isSidebarOpen;
   }, [isSidebarOpen]);
 
-  // 1. Instant Client Hydration: Load cached state immediately (0ms start on mobile)
+  // 1. Instant Client Hydration: Load cached state & restore exact active page on refresh (0ms start)
   useEffect(() => {
     try {
       const cachedUser = localStorage.getItem("kaizu_cached_user");
       const cachedSubs = localStorage.getItem("kaizu_cached_subjects");
       const cachedGoals = localStorage.getItem("kaizu_cached_goals");
 
+      const initial = getInitialNav();
+      if (initial.tab) {
+        setActiveTab(initial.tab);
+        activeTabRef.current = initial.tab;
+      }
+
+      let parsedSubs: Subject[] = [];
+      if (cachedSubs) {
+        parsedSubs = JSON.parse(cachedSubs);
+        setSubjects(parsedSubs);
+      }
+
+      if (cachedGoals) {
+        setGoals(JSON.parse(cachedGoals));
+      }
+
+      if (initial.subjectId && parsedSubs.length > 0) {
+        const found = parsedSubs.find((s) => s.id === initial.subjectId);
+        if (found) {
+          setSelectedSubject(found);
+          selectedSubjectRef.current = found;
+        }
+      }
+
+      if (initial.projectId) {
+        setSelectedProjectId(initial.projectId);
+        selectedProjectIdRef.current = initial.projectId;
+      }
+
       if (cachedUser) {
         setActiveUser(JSON.parse(cachedUser));
-        if (cachedSubs) setSubjects(JSON.parse(cachedSubs));
-        if (cachedGoals) setGoals(JSON.parse(cachedGoals));
-        // Unblock UI immediately so user sees their dashboard in 0ms!
         setLoading(false);
       }
     } catch (e) {
@@ -172,22 +284,27 @@ export default function Page() {
         localStorage.setItem("kaizu_cached_goals", JSON.stringify(gls));
       } catch (e) {}
 
-      // Refresh currently open subject if still viewing it
-      if (activeTabRef.current === "subjects" && selectedSubjectRef.current) {
+      // Refresh or load subject if currently viewing or restored from URL on refresh
+      const initial = getInitialNav();
+      const currentSubId = selectedSubjectRef.current?.id || (activeTabRef.current === "subjects" ? initial.subjectId : null);
+      if (activeTabRef.current === "subjects" && currentSubId) {
         try {
-          const updatedSubject = await Api.getSubjectById(selectedSubjectRef.current.id);
-          if (activeTabRef.current === "subjects" && selectedSubjectRef.current?.id === updatedSubject.id) {
+          const updatedSubject = await Api.getSubjectById(currentSubId);
+          if (activeTabRef.current === "subjects") {
             setSelectedSubject(updatedSubject);
+            selectedSubjectRef.current = updatedSubject;
           }
         } catch (e) {}
       }
 
-      // Refresh currently open goal if still viewing it
-      if (activeTabRef.current === "goals" && selectedGoalDetailRef.current) {
+      // Refresh or load goal if currently viewing or restored from URL on refresh
+      const currentGoalId = selectedGoalDetailRef.current?.id || (activeTabRef.current === "goals" ? initial.goalId : null);
+      if (activeTabRef.current === "goals" && currentGoalId) {
         try {
-          const updatedGoalDetail = await Api.getGoalById(selectedGoalDetailRef.current.id);
-          if (activeTabRef.current === "goals" && selectedGoalDetailRef.current?.id === updatedGoalDetail.id) {
+          const updatedGoalDetail = await Api.getGoalById(currentGoalId);
+          if (activeTabRef.current === "goals") {
             setSelectedGoalDetail(updatedGoalDetail);
+            selectedGoalDetailRef.current = updatedGoalDetail;
           }
         } catch (e) {}
       }
@@ -227,7 +344,11 @@ export default function Page() {
       if (token && userId) {
         setJwtToken(token);
         setActiveUserId(userId);
-        window.history.replaceState({}, document.title, window.location.pathname);
+        params.delete("token");
+        params.delete("userId");
+        const remainingQuery = params.toString();
+        const cleanUrl = remainingQuery ? `${window.location.pathname}?${remainingQuery}` : window.location.pathname;
+        window.history.replaceState({}, document.title, cleanUrl);
       }
     }
 
@@ -239,38 +360,71 @@ export default function Page() {
     }
   }, [fetchData]);
 
-  // Push new navigation step into mobile history stack
+  // Push new navigation step into history stack
   const pushNav = (entry: Partial<NavHistoryState>) => {
     if (typeof window === "undefined") return;
     const nextDepth = (currentDepthRef.current || 0) + 1;
     currentDepthRef.current = nextDepth;
+    const tab = entry.tab ?? activeTabRef.current;
+    const subjectId = entry.subjectId !== undefined ? entry.subjectId : selectedSubjectRef.current?.id || null;
+    const goalId = entry.goalId !== undefined ? entry.goalId : selectedGoalDetailRef.current?.id || null;
+    const projectId = entry.projectId !== undefined ? entry.projectId : selectedProjectIdRef.current;
     const newState: NavHistoryState = {
-      tab: entry.tab ?? activeTabRef.current,
-      subjectId: entry.subjectId !== undefined ? entry.subjectId : selectedSubjectRef.current?.id || null,
-      goalId: entry.goalId !== undefined ? entry.goalId : selectedGoalDetailRef.current?.id || null,
-      projectId: entry.projectId !== undefined ? entry.projectId : selectedProjectIdRef.current,
+      tab,
+      subjectId,
+      goalId,
+      projectId,
       modal: entry.modal ?? null,
       drawer: entry.drawer ?? null,
       isSettings: entry.isSettings ?? false,
       depth: nextDepth,
     };
-    window.history.pushState(newState, "");
+    const url = buildUrl(tab, subjectId, goalId, projectId);
+    window.history.pushState(newState, "", url);
+    persistNav(tab, subjectId, goalId, projectId);
+  };
+
+  const replaceNav = (entry: Partial<NavHistoryState>) => {
+    if (typeof window === "undefined") return;
+    const tab = entry.tab ?? activeTabRef.current;
+    const subjectId = entry.subjectId !== undefined ? entry.subjectId : selectedSubjectRef.current?.id || null;
+    const goalId = entry.goalId !== undefined ? entry.goalId : selectedGoalDetailRef.current?.id || null;
+    const projectId = entry.projectId !== undefined ? entry.projectId : selectedProjectIdRef.current;
+    const newState: NavHistoryState = {
+      tab,
+      subjectId,
+      goalId,
+      projectId,
+      modal: entry.modal ?? null,
+      drawer: entry.drawer ?? null,
+      isSettings: entry.isSettings ?? false,
+      depth: currentDepthRef.current || 0,
+    };
+    const url = buildUrl(tab, subjectId, goalId, projectId);
+    window.history.replaceState(newState, "", url);
+    persistNav(tab, subjectId, goalId, projectId);
   };
 
   // Dedicated handlers to return cleanly to section listings (Subjects, Goals, Projects)
   const handleBackFromSubject = () => {
     setSelectedSubject(null);
+    selectedSubjectRef.current = null;
     setActiveTab("subjects");
+    replaceNav({ tab: "subjects", subjectId: null, goalId: null, projectId: null });
   };
 
   const handleBackFromGoal = () => {
     setSelectedGoalDetail(null);
+    selectedGoalDetailRef.current = null;
     setActiveTab("goals");
+    replaceNav({ tab: "goals", goalId: null, subjectId: null, projectId: null });
   };
 
   const handleBackFromProject = () => {
     setSelectedProjectId(null);
+    selectedProjectIdRef.current = null;
     setActiveTab("projects");
+    replaceNav({ tab: "projects", projectId: null, subjectId: null, goalId: null });
   };
 
   // Unified in-app Back handler (used for settings and general fallback)
@@ -280,18 +434,23 @@ export default function Page() {
       setSelectedSubject(previousView.selectedSubject);
       setSelectedGoalDetail(previousView.selectedGoalDetail);
       setSelectedProjectId(previousView.selectedProjectId);
+      replaceNav({
+        tab: previousView.tab,
+        subjectId: previousView.selectedSubject?.id || null,
+        goalId: previousView.selectedGoalDetail?.id || null,
+        projectId: previousView.selectedProjectId || null,
+        isSettings: false,
+      });
       setPreviousView(null);
     } else if (selectedSubjectRef.current) {
-      setSelectedSubject(null);
-      setActiveTab("subjects");
+      handleBackFromSubject();
     } else if (selectedGoalDetailRef.current) {
-      setSelectedGoalDetail(null);
-      setActiveTab("goals");
+      handleBackFromGoal();
     } else if (selectedProjectIdRef.current) {
-      setSelectedProjectId(null);
-      setActiveTab("projects");
+      handleBackFromProject();
     } else if (activeTabRef.current !== "dashboard") {
       setActiveTab("dashboard");
+      replaceNav({ tab: "dashboard", subjectId: null, goalId: null, projectId: null });
     }
   };
 
@@ -323,9 +482,22 @@ export default function Page() {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    // Ensure root entry starts at depth 0
-    window.history.replaceState({ tab: "dashboard", depth: 0 }, "");
+    // Ensure root entry starts with the actual current state instead of forcing dashboard
+    const initial = getInitialNav();
+    const initialUrl = buildUrl(initial.tab, initial.subjectId, initial.goalId, initial.projectId);
+    window.history.replaceState(
+      {
+        tab: initial.tab,
+        subjectId: initial.subjectId,
+        goalId: initial.goalId,
+        projectId: initial.projectId,
+        depth: 0,
+      },
+      "",
+      initialUrl
+    );
     currentDepthRef.current = 0;
+    persistNav(initial.tab, initial.subjectId, initial.goalId, initial.projectId);
 
     const handlePopState = (event: PopStateEvent) => {
       const state = event.state as NavHistoryState | null;
@@ -357,15 +529,25 @@ export default function Page() {
           setActiveTab(state.tab);
         }
 
-        if (!state.subjectId && selectedSubjectRef.current) {
+        if (state.subjectId) {
+          if (selectedSubjectRef.current?.id !== state.subjectId) {
+            Api.getSubjectById(state.subjectId).then(setSelectedSubject).catch(() => {});
+          }
+        } else if (selectedSubjectRef.current) {
           setSelectedSubject(null);
         }
 
-        if (!state.goalId && selectedGoalDetailRef.current) {
+        if (state.goalId) {
+          if (selectedGoalDetailRef.current?.id !== state.goalId) {
+            Api.getGoalById(state.goalId).then(setSelectedGoalDetail).catch(() => {});
+          }
+        } else if (selectedGoalDetailRef.current) {
           setSelectedGoalDetail(null);
         }
 
-        if (!state.projectId && selectedProjectIdRef.current) {
+        if (state.projectId) {
+          setSelectedProjectId(state.projectId);
+        } else if (selectedProjectIdRef.current) {
           setSelectedProjectId(null);
         }
 
@@ -373,22 +555,17 @@ export default function Page() {
           setPreviousView(null);
         }
 
+        persistNav(state.tab || "dashboard", state.subjectId, state.goalId, state.projectId);
         return;
       }
 
       // 4. Fallback if popped to root without state:
-      if (selectedSubjectRef.current) {
-        setSelectedSubject(null);
-        setActiveTab("subjects");
-      } else if (selectedGoalDetailRef.current) {
-        setSelectedGoalDetail(null);
-        setActiveTab("goals");
-      } else if (selectedProjectIdRef.current) {
-        setSelectedProjectId(null);
-        setActiveTab("projects");
-      } else if (activeTabRef.current !== "dashboard") {
-        setActiveTab("dashboard");
-      }
+      const initialFromUrl = getInitialNav();
+      setActiveTab(initialFromUrl.tab);
+      setSelectedSubject(null);
+      setSelectedGoalDetail(null);
+      setSelectedProjectId(null);
+      persistNav(initialFromUrl.tab, null, null, null);
     };
 
     window.addEventListener("popstate", handlePopState);
@@ -414,7 +591,7 @@ export default function Page() {
       setSelectedGoalDetail(null);
       setSelectedProjectId(null);
       setActiveTab("subjects");
-      pushNav({ tab: "subjects", subjectId: detail.id });
+      pushNav({ tab: "subjects", subjectId: detail.id, goalId: null, projectId: null });
     } catch (err: any) {
       alert(err.message || "Failed to load subject details");
     } finally {
@@ -430,7 +607,7 @@ export default function Page() {
       setSelectedSubject(null);
       setSelectedProjectId(null);
       setActiveTab("goals");
-      pushNav({ tab: "goals", goalId: detail.id });
+      pushNav({ tab: "goals", goalId: detail.id, subjectId: null, projectId: null });
     } catch (err: any) {
       alert(err.message || "Failed to load goal workspace");
     } finally {
@@ -444,7 +621,7 @@ export default function Page() {
     setSelectedSubject(null);
     setSelectedGoalDetail(null);
     setActiveTab("projects");
-    pushNav({ tab: "projects", projectId });
+    pushNav({ tab: "projects", projectId, subjectId: null, goalId: null });
     setTimeout(() => setLoadingProjectId(null), 300);
   };
 
@@ -476,6 +653,7 @@ export default function Page() {
     setSelectedSubject(null);
     setSelectedGoalDetail(null);
     setSelectedProjectId(null);
+    replaceNav({ tab: "dashboard", subjectId: null, goalId: null, projectId: null });
     fetchData();
   };
 
@@ -494,7 +672,7 @@ export default function Page() {
     if (tab !== "settings") {
       setPreviousView(null);
     }
-    pushNav({ tab });
+    pushNav({ tab, subjectId: null, goalId: null, projectId: null });
   };
 
   const isSettingsOpen =
@@ -515,7 +693,7 @@ export default function Page() {
       });
       resetSelection();
       setActiveTab("settings");
-      pushNav({ tab: "settings", isSettings: true });
+      pushNav({ tab: "settings", isSettings: true, subjectId: null, goalId: null, projectId: null });
     }
   };
 
@@ -588,6 +766,8 @@ export default function Page() {
                 onBack={handleBackFromSubject}
                 onRefresh={refreshCurrentSubject}
               />
+            ) : getInitialNav().subjectId ? (
+              <KaizuLoader />
             ) : (
               <SubjectsView
                 subjects={subjects}
@@ -606,6 +786,8 @@ export default function Page() {
                 onBack={handleBackFromGoal}
                 onRefresh={refreshCurrentGoal}
               />
+            ) : getInitialNav().goalId ? (
+              <KaizuLoader />
             ) : (
               <GoalsView
                 goals={goals}
@@ -650,6 +832,7 @@ export default function Page() {
           fetchData();
           setActiveTab("subjects");
           setSelectedSubject(null);
+          replaceNav({ tab: "subjects", subjectId: null, goalId: null, projectId: null });
         }}
       />
 
@@ -660,6 +843,7 @@ export default function Page() {
           fetchData();
           setActiveTab("goals");
           setSelectedGoalDetail(null);
+          replaceNav({ tab: "goals", goalId: null, subjectId: null, projectId: null });
         }}
       />
 
