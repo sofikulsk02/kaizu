@@ -1,13 +1,13 @@
 "use client";
 
 import React from "react";
-import { PanelLeftClose, PanelLeft, Plus } from "lucide-react";
+import { PanelLeftClose, PanelLeft } from "lucide-react";
 
 interface NavbarProps {
   activeUser: { id: string; name: string; email: string };
   isSidebarOpen: boolean;
   onToggleSidebar: () => void;
-  onOpenQuickAdd: () => void;
+  onOpenQuickAdd?: () => void;
   onSelectTab: (tab: string) => void;
   onToggleSettings?: () => void;
   isSettingsOpen?: boolean;
@@ -59,14 +59,6 @@ export const Navbar: React.FC<NavbarProps> = ({
 
       {/* Right Controls */}
       <div className="flex items-center space-x-2 sm:space-x-3 shrink-0">
-        <button
-          onClick={onOpenQuickAdd}
-          className="paper-btn-primary flex items-center space-x-1.5 px-3 sm:px-4 py-2 text-xs font-bold shadow-xs cursor-pointer active:scale-95"
-        >
-          <Plus className="h-3.5 w-3.5" />
-          <span className="hidden sm:inline">Quick Add</span>
-          <span className="sm:hidden">Add</span>
-        </button>
 
         <button
           onClick={onToggleSettings || (() => onSelectTab("settings"))}
