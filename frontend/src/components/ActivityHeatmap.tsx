@@ -166,9 +166,6 @@ export const ActivityHeatmap: React.FC = () => {
           <h2 className="mt-1 text-base font-black text-[var(--text-heading)] sm:text-lg">
             Consistency & Activity Heatmap
           </h2>
-          <p className="text-[11px] text-[var(--text-muted)] mt-0.5">
-            Opening Kaizu daily logs your habit loop. Visual record of your daily progress.
-          </p>
         </div>
 
         {/* Stats Badges — 3 even columns on mobile */}
@@ -212,13 +209,10 @@ export const ActivityHeatmap: React.FC = () => {
                 <span className="text-[var(--text-muted)] text-[11px] font-semibold">{hoveredCell.formattedDate}</span>
               </span>
             ) : (
-              <span className="text-[var(--text-muted)] text-[11px] italic">Tap or hover over any day to see details</span>
+              <span>hover to see activity</span>
             )}
           </div>
 
-          <span className="text-[10px] text-[var(--text-muted)] font-medium shrink-0 sm:hidden">
-            Scroll for full year →
-          </span>
         </div>
 
         {/* Scrollable Heatmap Table */}
