@@ -152,10 +152,10 @@ export const SubjectsView: React.FC<SubjectsViewProps> = ({
 
   return (
     <div className="space-y-3 sm:space-y-4">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3">
-        <div>
+      <div className="flex items-center justify-between gap-2.5 sm:gap-3">
+        <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <h1 className="text-xl font-black text-[var(--text-heading)] sm:text-2xl">Subjects</h1>
+            <h1 className="text-xl font-black text-[var(--text-heading)] sm:text-2xl truncate">Subjects</h1>
             {!isSearchActive && subjects.length > 1 && (
               <span className="text-[10px] font-semibold text-[var(--text-muted)] bg-[var(--surface-secondary)] px-2 py-0.5 rounded-full border border-[var(--border-subtle)] hidden sm:inline-flex items-center gap-1">
                 <GripVertical className="h-2.5 w-2.5" />
@@ -163,14 +163,11 @@ export const SubjectsView: React.FC<SubjectsViewProps> = ({
               </span>
             )}
           </div>
-          <p className="text-xs text-[var(--text-muted)]">
-            Areas of learning or practice. Drag to arrange your preferred sequence.
-          </p>
         </div>
 
         <button
           onClick={onOpenCreateSubject}
-          className="paper-btn-primary inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold self-start sm:self-center cursor-pointer active:scale-95 transition-all shadow-xs"
+          className="paper-btn-primary inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 sm:py-2 text-xs font-bold shrink-0 cursor-pointer active:scale-95 transition-all shadow-xs"
         >
           <Plus className="h-4 w-4" />
           <span>Create Subject</span>
@@ -264,21 +261,6 @@ export const SubjectsView: React.FC<SubjectsViewProps> = ({
                         <span>{subject.chapterCount || 0} chapters</span>
                       </span>
                     </div>
-
-                    {/* Drag Grip Handle */}
-                    {!isSearchActive && (
-                      <div
-                        title="Drag to rearrange"
-                        onClick={(e) => e.stopPropagation()}
-                        onTouchStart={() => handleTouchStart(subject.id)}
-                        onTouchMove={handleTouchMove}
-                        onTouchEnd={handleTouchEnd}
-                        style={{ touchAction: "none" }}
-                        className="p-1 rounded text-[var(--text-muted)] opacity-40 group-hover:opacity-100 hover:text-[var(--text-heading)] hover:bg-[var(--surface-secondary)] cursor-grab active:cursor-grabbing transition-opacity"
-                      >
-                        <GripVertical className="h-4 w-4" />
-                      </div>
-                    )}
                   </div>
 
                   <div>

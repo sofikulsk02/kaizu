@@ -9,7 +9,7 @@ import {
   getLocalDateString,
   ActivityStats,
 } from "../lib/activityStorage";
-import { Flame, Zap, Calendar, Activity, Lightbulb } from "lucide-react";
+import { Flame, Zap, Calendar, Lightbulb } from "lucide-react";
 
 const MONTH_NAMES = [
   "Jan",
@@ -63,6 +63,19 @@ export const ActivityHeatmap: React.FC = () => {
     setActivityMap(freshMap);
     setStats(computeStreakStats(freshMap));
   };
+
+  const todayInfo = useMemo(() => {
+    const today = new Date();
+    const dateStr = getLocalDateString(today);
+    const count = activityMap[dateStr] || 0;
+    const formattedDate = today.toLocaleDateString("en-US", {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+    return { count, formattedDate };
+  }, [activityMap]);
 
   // Generate 52 weeks of days ending at the end of the current week (Saturday)
   const { weeks, monthHeaders } = useMemo(() => {
@@ -159,11 +172,7 @@ export const ActivityHeatmap: React.FC = () => {
       {/* Top Header & Streak Stats */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div>
-          <div className="inline-flex items-center space-x-1 bg-[var(--pale-sage)] px-2 py-0.5 text-[10px] font-bold text-[var(--forest-green)] rounded">
-            <Activity className="h-3 w-3" />
-            <span>Daily Kaizen Activity</span>
-          </div>
-          <h2 className="mt-1 text-base font-black text-[var(--text-heading)] sm:text-lg">
+          <h2 className="text-base font-black text-[var(--text-heading)] sm:text-lg">
             Consistency & Activity Heatmap
           </h2>
         </div>
@@ -209,7 +218,12 @@ export const ActivityHeatmap: React.FC = () => {
                 <span className="text-[var(--text-muted)] text-[11px] font-semibold">{hoveredCell.formattedDate}</span>
               </span>
             ) : (
-              <span>hover to see activity</span>
+              <span className="inline-flex items-center flex-wrap gap-1.5">
+                <span className="bg-[var(--pale-sage)] px-2 py-0.5 text-[11px] text-[var(--forest-green)] font-extrabold rounded">
+                  Today: {todayInfo.count > 0 ? `${todayInfo.count} ${todayInfo.count === 1 ? "activity" : "activities"}` : "No activity"}
+                </span>
+                <span className="text-[var(--text-muted)] text-[11px] font-semibold">{todayInfo.formattedDate}</span>
+              </span>
             )}
           </div>
 
