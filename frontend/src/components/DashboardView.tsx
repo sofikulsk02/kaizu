@@ -228,15 +228,15 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </div>
 
             {loadingSubjectId === recentSubject.id ? (
-              <div className="flex items-center gap-1.5 text-xs font-bold text-[var(--crimson)] animate-pulse shrink-0 pl-2">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-[var(--crimson)] animate-pulse shrink-0">
                 <div className="h-2.5 w-2.5 rounded-full border-2 border-[var(--crimson)] border-t-transparent animate-spin" />
                 <span>Opening...</span>
               </div>
             ) : (
-              <div className="flex items-center gap-1 text-xs font-bold text-[var(--forest-green)] shrink-0 pl-2">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold text-[var(--text-heading)] bg-[var(--surface-secondary)] border border-[var(--border-default)] shadow-2xs group-hover:border-[var(--forest-green)] group-hover:text-[var(--forest-green)] group-hover:bg-[var(--surface-hover)] group-hover:shadow-xs active:scale-95 transition-all shrink-0 cursor-pointer">
                 <span>Resume</span>
-                <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
-              </div>
+                <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
+              </span>
             )}
           </div>
         ) : (

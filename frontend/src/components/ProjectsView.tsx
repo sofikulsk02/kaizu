@@ -432,9 +432,9 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({ onSelectProject, loa
                         <span>Opening project...</span>
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1 text-xs font-black text-[var(--crimson)] group-hover:underline">
-                        <span>Open project</span>
-                        <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold text-[var(--text-heading)] bg-[var(--surface-secondary)] border border-[var(--border-default)] shadow-2xs group-hover:border-[var(--forest-green)] group-hover:text-[var(--forest-green)] group-hover:bg-[var(--surface-hover)] group-hover:shadow-xs active:scale-95 transition-all cursor-pointer">
+                        <span>View</span>
+                        <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
                       </span>
                     )}
                   </div>

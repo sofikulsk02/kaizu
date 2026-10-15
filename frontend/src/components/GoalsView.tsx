@@ -314,10 +314,10 @@ export const GoalsView: React.FC<GoalsViewProps> = ({
                       <span>Opening workspace...</span>
                     </div>
                   ) : (
-                    <div className="inline-flex items-center gap-1 text-[var(--crimson)] font-bold text-xs group-hover:underline">
-                      <span>Open Workspace</span>
-                      <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
-                    </div>
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold text-[var(--text-heading)] bg-[var(--surface-secondary)] border border-[var(--border-default)] shadow-2xs group-hover:border-[var(--forest-green)] group-hover:text-[var(--forest-green)] group-hover:bg-[var(--surface-hover)] group-hover:shadow-xs active:scale-95 transition-all cursor-pointer">
+                      <span>View</span>
+                      <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
+                    </span>
                   )}
 
                   <button
