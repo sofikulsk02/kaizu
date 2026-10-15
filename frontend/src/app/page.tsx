@@ -200,9 +200,9 @@ export default function Page() {
   // 1. Instant Client Hydration: Load cached state & restore exact active page on refresh (0ms start)
   useEffect(() => {
     try {
+      const currentUserId = getActiveUserId();
       const cachedUser = localStorage.getItem("kaizu_cached_user");
-      const cachedSubs = localStorage.getItem("kaizu_cached_subjects");
-      const cachedGoals = localStorage.getItem("kaizu_cached_goals");
+      const parsedUser = cachedUser ? JSON.parse(cachedUser) : null;
 
       const initial = getInitialNav();
       if (initial.tab) {
@@ -210,32 +210,43 @@ export default function Page() {
         activeTabRef.current = initial.tab;
       }
 
-      let parsedSubs: Subject[] = [];
-      if (cachedSubs) {
-        parsedSubs = JSON.parse(cachedSubs);
-        setSubjects(parsedSubs);
-      }
+      // Only hydrate cache if it belongs to the currently active user session!
+      if (parsedUser && currentUserId && parsedUser.id === currentUserId) {
+        setActiveUser(parsedUser);
+        const cachedSubs = localStorage.getItem(`kaizu_cached_subjects_${parsedUser.id}`) || localStorage.getItem("kaizu_cached_subjects");
+        const cachedGoals = localStorage.getItem(`kaizu_cached_goals_${parsedUser.id}`) || localStorage.getItem("kaizu_cached_goals");
 
-      if (cachedGoals) {
-        setGoals(JSON.parse(cachedGoals));
-      }
-
-      if (initial.subjectId && parsedSubs.length > 0) {
-        const found = parsedSubs.find((s) => s.id === initial.subjectId);
-        if (found) {
-          setSelectedSubject(found);
-          selectedSubjectRef.current = found;
+        let parsedSubs: Subject[] = [];
+        if (cachedSubs) {
+          parsedSubs = JSON.parse(cachedSubs);
+          setSubjects(parsedSubs);
         }
-      }
 
-      if (initial.projectId) {
-        setSelectedProjectId(initial.projectId);
-        selectedProjectIdRef.current = initial.projectId;
-      }
+        if (cachedGoals) {
+          setGoals(JSON.parse(cachedGoals));
+        }
 
-      if (cachedUser) {
-        setActiveUser(JSON.parse(cachedUser));
+        if (initial.subjectId && parsedSubs.length > 0) {
+          const found = parsedSubs.find((s) => s.id === initial.subjectId);
+          if (found) {
+            setSelectedSubject(found);
+            selectedSubjectRef.current = found;
+          }
+        }
+
+        if (initial.projectId) {
+          setSelectedProjectId(initial.projectId);
+          selectedProjectIdRef.current = initial.projectId;
+        }
+
         setLoading(false);
+      } else {
+        // Different user or no user authenticated
+        if (!currentUserId) {
+          setActiveUser(null);
+          setSubjects([]);
+          setGoals([]);
+        }
       }
     } catch (e) {
       // Ignore cache parse errors
@@ -273,15 +284,40 @@ export default function Page() {
         Api.getGoals(),
       ]);
 
+      if (user?.id) {
+        setActiveUserId(user.id);
+      }
       setActiveUser(user);
       setSubjects(subs);
       setGoals(gls);
 
-      // Save fresh data to client cache for next instant startup
+      // Safe Account-Based Migration:
+      // If legacy unscoped activity records exist and have not yet been assigned to an owner,
+      // only the primary account with history (Account 1 with subjects/goals) claims it!
+      try {
+        const legacyActivity = localStorage.getItem("kaizu_activity_records");
+        const legacyOwner = localStorage.getItem("kaizu_legacy_activity_owner");
+        if (legacyActivity && !legacyOwner && user?.id) {
+          if (subs.length > 0 || gls.length > 0) {
+            localStorage.setItem("kaizu_legacy_activity_owner", user.id);
+            localStorage.setItem(`kaizu_activity_records_${user.id}`, legacyActivity);
+            const legacyReflections = localStorage.getItem("kaizu_daily_reflections");
+            if (legacyReflections) {
+              localStorage.setItem(`kaizu_daily_reflections_${user.id}`, legacyReflections);
+            }
+            localStorage.removeItem("kaizu_activity_records");
+            localStorage.removeItem("kaizu_daily_reflections");
+          }
+        }
+      } catch (e) {}
+
+      // Save fresh data to user-scoped client cache
       try {
         localStorage.setItem("kaizu_cached_user", JSON.stringify(user));
-        localStorage.setItem("kaizu_cached_subjects", JSON.stringify(subs));
-        localStorage.setItem("kaizu_cached_goals", JSON.stringify(gls));
+        if (user?.id) {
+          localStorage.setItem(`kaizu_cached_subjects_${user.id}`, JSON.stringify(subs));
+          localStorage.setItem(`kaizu_cached_goals_${user.id}`, JSON.stringify(gls));
+        }
       } catch (e) {}
 
       // Refresh or load subject if currently viewing or restored from URL on refresh
@@ -628,6 +664,9 @@ export default function Page() {
   const handleReorderSubjects = async (newSubjects: Subject[]) => {
     setSubjects(newSubjects);
     try {
+      if (activeUser?.id) {
+        localStorage.setItem(`kaizu_cached_subjects_${activeUser.id}`, JSON.stringify(newSubjects));
+      }
       localStorage.setItem("kaizu_cached_subjects", JSON.stringify(newSubjects));
     } catch (e) {}
     try {
@@ -640,6 +679,9 @@ export default function Page() {
   const handleReorderGoals = async (newGoals: Goal[]) => {
     setGoals(newGoals);
     try {
+      if (activeUser?.id) {
+        localStorage.setItem(`kaizu_cached_goals_${activeUser.id}`, JSON.stringify(newGoals));
+      }
       localStorage.setItem("kaizu_cached_goals", JSON.stringify(newGoals));
     } catch (e) {}
     try {
@@ -650,6 +692,9 @@ export default function Page() {
   };
 
   const handleUserChanged = () => {
+    setActiveUser(null);
+    setSubjects([]);
+    setGoals([]);
     setSelectedSubject(null);
     setSelectedGoalDetail(null);
     setSelectedProjectId(null);
@@ -815,7 +860,7 @@ export default function Page() {
           )}
 
           {activeTab === "activity" && (
-            <ActivityView subjects={subjects} goals={goals} />
+            <ActivityView subjects={subjects} goals={goals} userId={activeUser?.id} />
           )}
 
           {activeTab === "settings" && (

@@ -346,6 +346,10 @@ export function clearAuth() {
   if (typeof window !== "undefined") {
     localStorage.removeItem("kaizu_jwt_token");
     localStorage.removeItem("kaizu_user_id");
+    localStorage.removeItem("kaizu_cached_user");
+    localStorage.removeItem("kaizu_cached_subjects");
+    localStorage.removeItem("kaizu_cached_goals");
+    localStorage.removeItem("kaizu_last_view");
   }
 }
 

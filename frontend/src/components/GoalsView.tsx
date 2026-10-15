@@ -290,21 +290,6 @@ export const GoalsView: React.FC<GoalsViewProps> = ({
                       >
                         {goal.status}
                       </span>
-
-                      {/* Drag Grip Handle */}
-                      {!isFilterActive && (
-                        <div
-                          title="Drag to rearrange"
-                          onClick={(e) => e.stopPropagation()}
-                          onTouchStart={() => handleTouchStart(goal.id)}
-                          onTouchMove={handleTouchMove}
-                          onTouchEnd={handleTouchEnd}
-                          style={{ touchAction: "none" }}
-                          className="p-1 rounded text-[var(--text-muted)] opacity-40 group-hover:opacity-100 hover:text-[var(--text-heading)] hover:bg-[var(--surface-secondary)] cursor-grab active:cursor-grabbing transition-opacity"
-                        >
-                          <GripVertical className="h-4 w-4" />
-                        </div>
-                      )}
                     </div>
                   </div>
 

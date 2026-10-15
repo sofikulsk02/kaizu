@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { Api, Goal } from "../lib/api";
+import { recordTodayActivity } from "../lib/activityStorage";
 import { Zap, X, Check } from "lucide-react";
 import { Portal } from "./Portal";
 
@@ -34,6 +35,7 @@ export const QuickCaptureModal: React.FC<QuickCaptureModalProps> = ({
 
     try {
       const res = await Api.quickCapture(input.trim(), selectedGoalId || undefined);
+      recordTodayActivity(1);
       setParsedFeedback(
         `Logged: "${res.summary}" ${res.durationMinutes ? `(${res.durationMinutes} mins)` : ""}`
       );

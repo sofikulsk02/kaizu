@@ -8,9 +8,10 @@ import { BookOpen, Target, Calendar } from "lucide-react";
 interface ActivityViewProps {
   subjects: Subject[];
   goals: Goal[];
+  userId?: string;
 }
 
-export const ActivityView: React.FC<ActivityViewProps> = ({ subjects, goals }) => {
+export const ActivityView: React.FC<ActivityViewProps> = ({ subjects, goals, userId }) => {
   return (
     <div className="space-y-4">
       <div>
@@ -21,7 +22,7 @@ export const ActivityView: React.FC<ActivityViewProps> = ({ subjects, goals }) =
       </div>
 
       {/* Heatmap Grid */}
-      <ActivityHeatmap />
+      <ActivityHeatmap userId={userId} />
 
       {/* Action Evidence List */}
       <div className="paper-card p-4 sm:p-5 space-y-3.5 border border-[var(--border-default)]">

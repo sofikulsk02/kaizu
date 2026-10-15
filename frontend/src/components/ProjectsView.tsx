@@ -394,21 +394,6 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({ onSelectProject, loa
                       <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold shrink-0 ${statusInfo.badgeClass}`}>
                         {statusInfo.label}
                       </span>
-
-                      {/* Drag Grip Handle */}
-                      {!isFilterActive && (
-                        <div
-                          title="Drag to rearrange"
-                          onClick={(e) => e.stopPropagation()}
-                          onTouchStart={() => handleTouchStart(project.id)}
-                          onTouchMove={handleTouchMove}
-                          onTouchEnd={handleTouchEnd}
-                          style={{ touchAction: "none" }}
-                          className="p-1 rounded text-[var(--text-muted)] opacity-40 group-hover:opacity-100 hover:text-[var(--text-heading)] hover:bg-[var(--surface-secondary)] cursor-grab active:cursor-grabbing transition-opacity"
-                        >
-                          <GripVertical className="h-4 w-4" />
-                        </div>
-                      )}
                     </div>
                   </div>
 

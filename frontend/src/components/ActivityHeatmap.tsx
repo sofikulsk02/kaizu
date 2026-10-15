@@ -40,7 +40,11 @@ interface WeekInfo {
   monthLabel?: string;
 }
 
-export const ActivityHeatmap: React.FC = () => {
+interface ActivityHeatmapProps {
+  userId?: string;
+}
+
+export const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ userId }) => {
   const [activityMap, setActivityMap] = useState<Record<string, number>>({});
   const [stats, setStats] = useState<ActivityStats>({
     totalActiveDays: 0,
@@ -52,14 +56,14 @@ export const ActivityHeatmap: React.FC = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Record today's visit automatically on mount
-    const updatedMap = recordTodayActivity(1);
+    // Record today's visit automatically on mount for this specific user
+    const updatedMap = recordTodayActivity(1, userId);
     setActivityMap(updatedMap);
     setStats(computeStreakStats(updatedMap));
-  }, []);
+  }, [userId]);
 
   const handleResetHistory = () => {
-    const freshMap = resetActivityHistory();
+    const freshMap = resetActivityHistory(userId);
     setActivityMap(freshMap);
     setStats(computeStreakStats(freshMap));
   };

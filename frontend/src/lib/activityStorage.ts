@@ -1,3 +1,5 @@
+import { getActiveUserId } from "./api";
+
 export interface ActivityStats {
   totalActiveDays: number;
   currentStreak: number;
@@ -12,17 +14,42 @@ export function getLocalDateString(date: Date = new Date()): string {
   return `${yyyy}-${mm}-${dd}`;
 }
 
-const STORAGE_KEY = "kaizu_activity_records";
+export function getActivityStorageKey(userId?: string | null): string {
+  const uid = userId || (typeof window !== "undefined" ? getActiveUserId() : null);
+  return uid ? `kaizu_activity_records_${uid}` : "kaizu_activity_records_guest";
+}
 
-export function getActivityMap(): Record<string, number> {
+export function getReflectionsStorageKey(userId?: string | null): string {
+  const uid = userId || (typeof window !== "undefined" ? getActiveUserId() : null);
+  return uid ? `kaizu_daily_reflections_${uid}` : "kaizu_daily_reflections_guest";
+}
+
+export function getActivityMap(userId?: string | null): Record<string, number> {
   if (typeof window === "undefined") return {};
-  
-  const raw = localStorage.getItem(STORAGE_KEY);
+
+  const key = getActivityStorageKey(userId);
+  const raw = localStorage.getItem(key);
+
   if (!raw) {
-    // Starting completely fresh from today!
+    // Check if this specific user was assigned as the owner of legacy 5-day records
+    const legacyOwner = localStorage.getItem("kaizu_legacy_activity_owner");
+    const uid = userId || getActiveUserId();
+
+    if (legacyOwner && uid === legacyOwner) {
+      const legacyRaw = localStorage.getItem("kaizu_activity_records");
+      if (legacyRaw) {
+        try {
+          const parsed = JSON.parse(legacyRaw);
+          localStorage.setItem(key, JSON.stringify(parsed));
+          return parsed;
+        } catch {}
+      }
+    }
+
+    // New/different accounts always start with a clean fresh slate for today
     const todayStr = getLocalDateString();
     const initialMap = { [todayStr]: 1 };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(initialMap));
+    localStorage.setItem(key, JSON.stringify(initialMap));
     return initialMap;
   }
 
@@ -31,29 +58,31 @@ export function getActivityMap(): Record<string, number> {
   } catch {
     const todayStr = getLocalDateString();
     const initialMap = { [todayStr]: 1 };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(initialMap));
+    localStorage.setItem(key, JSON.stringify(initialMap));
     return initialMap;
   }
 }
 
-export function recordTodayActivity(incrementBy: number = 1): Record<string, number> {
+export function recordTodayActivity(incrementBy: number = 1, userId?: string | null): Record<string, number> {
   if (typeof window === "undefined") return {};
 
-  const map = getActivityMap();
+  const key = getActivityStorageKey(userId);
+  const map = getActivityMap(userId);
   const todayStr = getLocalDateString();
   const currentCount = map[todayStr] || 0;
-  
+
   map[todayStr] = currentCount + incrementBy;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(map));
+  localStorage.setItem(key, JSON.stringify(map));
   return map;
 }
 
-export function resetActivityHistory(): Record<string, number> {
+export function resetActivityHistory(userId?: string | null): Record<string, number> {
   if (typeof window === "undefined") return {};
 
+  const key = getActivityStorageKey(userId);
   const todayStr = getLocalDateString();
   const freshMap = { [todayStr]: 1 };
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(freshMap));
+  localStorage.setItem(key, JSON.stringify(freshMap));
   return freshMap;
 }
 
@@ -108,7 +137,7 @@ export function computeStreakStats(map: Record<string, number>): ActivityStats {
   if (dates.length > 0) {
     const startDate = new Date(dates[0]);
     const endDate = new Date(dates[dates.length - 1]);
-    
+
     // Iterate day by day from first date to last date
     for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
       const dStr = getLocalDateString(d);
@@ -139,13 +168,12 @@ export interface DailyReflection {
   savedAt: string;
 }
 
-const REFLECTIONS_KEY = "kaizu_daily_reflections";
-
-export function getTodayReflection(): DailyReflection | null {
+export function getTodayReflection(userId?: string | null): DailyReflection | null {
   if (typeof window === "undefined") return null;
   const todayStr = getLocalDateString();
+  const key = getReflectionsStorageKey(userId);
   try {
-    const raw = localStorage.getItem(REFLECTIONS_KEY);
+    const raw = localStorage.getItem(key);
     if (!raw) return null;
     const all = JSON.parse(raw) as Record<string, DailyReflection>;
     return all[todayStr] || null;
@@ -154,12 +182,16 @@ export function getTodayReflection(): DailyReflection | null {
   }
 }
 
-export function saveDailyReflection(reflection: {
-  wentWell: string;
-  difficulty: string;
-  changeTomorrow: string;
-}): DailyReflection {
+export function saveDailyReflection(
+  reflection: {
+    wentWell: string;
+    difficulty: string;
+    changeTomorrow: string;
+  },
+  userId?: string | null
+): DailyReflection {
   const todayStr = getLocalDateString();
+  const key = getReflectionsStorageKey(userId);
   const entry: DailyReflection = {
     date: todayStr,
     wentWell: reflection.wentWell.trim(),
@@ -170,14 +202,14 @@ export function saveDailyReflection(reflection: {
 
   if (typeof window !== "undefined") {
     try {
-      const raw = localStorage.getItem(REFLECTIONS_KEY);
+      const raw = localStorage.getItem(key);
       const all: Record<string, DailyReflection> = raw ? JSON.parse(raw) : {};
       all[todayStr] = entry;
-      localStorage.setItem(REFLECTIONS_KEY, JSON.stringify(all));
+      localStorage.setItem(key, JSON.stringify(all));
     } catch (e) {}
 
-    // Record activity on the heatmap
-    recordTodayActivity(1);
+    // Record activity on the heatmap for this specific account
+    recordTodayActivity(1, userId);
   }
 
   return entry;

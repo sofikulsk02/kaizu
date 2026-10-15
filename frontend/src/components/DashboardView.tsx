@@ -87,17 +87,23 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   const [reflectionSavedNotice, setReflectionSavedNotice] = useState(false);
 
   useEffect(() => {
-    const map = getActivityMap();
+    if (!user?.id) return;
+    const map = getActivityMap(user.id);
     setActivityStats(computeStreakStats(map));
 
-    const today = getTodayReflection();
+    const today = getTodayReflection(user.id);
     if (today) {
       setReflection(today);
       setWentWell(today.wentWell);
       setDifficulty(today.difficulty);
       setChangeTomorrow(today.changeTomorrow);
+    } else {
+      setReflection(null);
+      setWentWell("");
+      setDifficulty("");
+      setChangeTomorrow("");
     }
-  }, []);
+  }, [user?.id]);
 
   const handleSaveReflection = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -107,15 +113,15 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       wentWell,
       difficulty,
       changeTomorrow,
-    });
+    }, user?.id);
     setReflection(saved);
     setIsWritingReflection(false);
     setIsEditingReflection(false);
     setReflectionSavedNotice(true);
     setTimeout(() => setReflectionSavedNotice(false), 3000);
 
-    // Refresh streak & active stats immediately
-    const map = getActivityMap();
+    // Refresh streak & active stats immediately for this specific user
+    const map = getActivityMap(user?.id);
     setActivityStats(computeStreakStats(map));
 
     // Also link to first active goal if available in the backend
@@ -735,7 +741,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       </div>
 
       {/* Activity Heatmap Grid */}
-      <ActivityHeatmap />
+      <ActivityHeatmap userId={user?.id} />
     </div>
   );
 };
