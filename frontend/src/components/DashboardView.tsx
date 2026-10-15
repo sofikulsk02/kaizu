@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Subject, Goal, Api } from "../lib/api";
+import { Subject, Goal, Api, User } from "../lib/api";
 import { ActivityHeatmap } from "./ActivityHeatmap";
 import {
   getActivityMap,
@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 
 interface DashboardViewProps {
+  user?: User | null;
   subjects: Subject[];
   goals: Goal[];
   onSelectTab: (tab: string) => void;
@@ -39,6 +40,7 @@ interface DashboardViewProps {
 }
 
 export const DashboardView: React.FC<DashboardViewProps> = ({
+  user,
   subjects,
   goals,
   onSelectTab,

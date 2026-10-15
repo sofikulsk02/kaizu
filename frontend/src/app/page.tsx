@@ -9,6 +9,7 @@ import {
   User,
   setJwtToken,
   setActiveUserId,
+  getActiveUserId,
   clearAuth,
   isAuthenticated,
 } from "../lib/api";
@@ -792,6 +793,7 @@ export default function Page() {
           {/* Active Tab View Routing */}
           {activeTab === "dashboard" && (
             <DashboardView
+              user={activeUser}
               subjects={subjects}
               goals={goals}
               onSelectTab={handleSelectTab}
