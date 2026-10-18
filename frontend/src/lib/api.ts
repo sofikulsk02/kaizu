@@ -316,6 +316,28 @@ export interface CoachAnalysis {
   recurringBlockers: string[];
 }
 
+export interface Thought {
+  id: string;
+  userId: string;
+  title: string | null;
+  content: string;
+  isPinned: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateThoughtDto {
+  title?: string | null;
+  content: string;
+  isPinned?: boolean;
+}
+
+export interface UpdateThoughtDto {
+  title?: string | null;
+  content?: string;
+  isPinned?: boolean;
+}
+
 export function getActiveUserId(): string | null {
   if (typeof window !== "undefined") {
     return localStorage.getItem("kaizu_user_id");
@@ -643,6 +665,29 @@ export const Api = {
     }),
   deleteProjectNote: (projectId: string, noteId: string) =>
     request<{ success: boolean }>(`/projects/${projectId}/notes/${noteId}`, {
+      method: "DELETE",
+    }),
+
+  // ==========================================
+  // Thoughts: Personal Principles & Reminders
+  // ==========================================
+  getThoughts: (search?: string) => {
+    const q = search && search.trim() ? `?search=${encodeURIComponent(search.trim())}` : "";
+    return request<Thought[]>(`/thoughts${q}`);
+  },
+  getThoughtById: (id: string) => request<Thought>(`/thoughts/${id}`),
+  createThought: (data: CreateThoughtDto) =>
+    request<Thought>("/thoughts", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  updateThought: (id: string, data: UpdateThoughtDto) =>
+    request<Thought>(`/thoughts/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    }),
+  deleteThought: (id: string) =>
+    request<{ message: string }>(`/thoughts/${id}`, {
       method: "DELETE",
     }),
 

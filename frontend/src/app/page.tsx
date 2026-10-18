@@ -25,6 +25,7 @@ import { ProjectsView } from "../components/ProjectsView";
 import { ProjectDetailView } from "../components/ProjectDetailView";
 import { ActivityView } from "../components/ActivityView";
 import { SettingsView } from "../components/SettingsView";
+import { ThoughtsView } from "../components/ThoughtsView";
 import { CreateSubjectModal } from "../components/CreateSubjectModal";
 import { CreateGoalModal } from "../components/CreateGoalModal";
 import { QuickCaptureModal } from "../components/QuickCaptureModal";
@@ -32,7 +33,7 @@ import { LoginScreen } from "../components/LoginScreen";
 import { MichiAssistant } from "../components/assistant";
 import { KaizuLoader } from "../components/KaizuLoader";
 
-const VALID_TABS = ["dashboard", "subjects", "goals", "projects", "activity", "settings"];
+const VALID_TABS = ["dashboard", "subjects", "goals", "projects", "thoughts", "activity", "settings"];
 
 function buildUrl(
   tab: string,
@@ -859,6 +860,10 @@ export default function Page() {
                 loadingProjectId={loadingProjectId}
               />
             )
+          )}
+
+          {activeTab === "thoughts" && (
+            <ThoughtsView />
           )}
 
           {activeTab === "activity" && (

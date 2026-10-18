@@ -7,6 +7,7 @@ import topicRoutes from "../modules/topics";
 import goalRoutes from "../modules/goals";
 import { projectRoutes } from "../modules/projects";
 import assistantRoutes from "../modules/assistant";
+import thoughtRoutes from "../modules/thoughts";
 
 const router = Router();
 
@@ -28,6 +29,7 @@ router.use("/api/topics", topicRoutes);
 router.use("/api/goals", goalRoutes);
 router.use("/api/projects", projectRoutes);
 router.use("/api/assistant", assistantRoutes);
+router.use("/api/thoughts", thoughtRoutes);
 
 export default router;
 

@@ -6,6 +6,7 @@ import {
   BookOpen,
   Target,
   FolderKanban,
+  Feather,
   Activity,
   Settings,
 } from "lucide-react";
@@ -28,6 +29,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: "subjects", label: "Subjects", Icon: BookOpen },
     { id: "goals", label: "Goals", Icon: Target },
     { id: "projects", label: "Projects", Icon: FolderKanban },
+    { id: "thoughts", label: "Thoughts", Icon: Feather },
     { id: "activity", label: "Activity", Icon: Activity },
     { id: "settings", label: "Settings", Icon: Settings },
   ];

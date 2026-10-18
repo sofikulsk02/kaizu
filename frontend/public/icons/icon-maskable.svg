@@ -1,35 +1,47 @@
 <svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="spinnerGradM" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#244633" />
-      <stop offset="60%" stop-color="#B83245" />
-      <stop offset="100%" stop-color="#B83245" stop-opacity="0" />
+    <linearGradient id="bgGradM" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#C5374C"/>
+      <stop offset="45%" stop-color="#B83245"/>
+      <stop offset="100%" stop-color="#831A29"/>
     </linearGradient>
+    <radialGradient id="ambientGradM" cx="50%" cy="20%" r="75%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.16"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.22"/>
+    </radialGradient>
+    <filter id="markShadowM" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#3D0B13" flood-opacity="0.45"/>
+    </filter>
   </defs>
 
-  <!-- Full background bleed for maskable PWA spec -->
-  <rect width="512" height="512" fill="#F4EFE3" />
+  <!-- Full edge-to-edge bleed background for maskable spec -->
+  <rect width="512" height="512" fill="url(#bgGradM)"/>
+  <rect width="512" height="512" fill="url(#ambientGradM)"/>
 
-  <!-- Circular Base Track -->
-  <circle
-    cx="256"
-    cy="256"
-    r="72"
-    fill="none"
-    stroke="#DED6C7"
-    stroke-width="10"
-  />
+  <!-- Brand Emblem and Typography centered within 80% safe zone -->
+  <g filter="url(#markShadowM)">
+    <!-- Vertical Pillar -->
+    <rect x="173" y="144" width="36" height="152" rx="18" fill="#FFFFFF"/>
+    
+    <!-- Upper Ascending Progression Arm -->
+    <path d="M 239 218 L 321 146" stroke="#FFFFFF" stroke-width="36" stroke-linecap="round"/>
+    
+    <!-- Lower Progression Arm -->
+    <path d="M 239 222 L 321 294" stroke="#FFFFFF" stroke-width="36" stroke-linecap="round"/>
 
-  <!-- Active Spinner Arc -->
-  <circle
-    cx="256"
-    cy="256"
-    r="72"
-    fill="none"
-    stroke="url(#spinnerGradM)"
-    stroke-width="10"
-    stroke-linecap="round"
-    stroke-dasharray="160 300"
-    stroke-dashoffset="35"
-  />
+    <!-- Brand Wordmark -->
+    <text 
+      x="256" 
+      y="376" 
+      font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" 
+      font-size="36" 
+      font-weight="800" 
+      letter-spacing="9" 
+      text-anchor="middle" 
+      fill="#FFFDF8"
+    >KAIZU</text>
+
+    <!-- Subtle champagne accent bar -->
+    <rect x="236" y="402" width="40" height="4" rx="2" fill="#F5E6CC" fill-opacity="0.65"/>
+  </g>
 </svg>
