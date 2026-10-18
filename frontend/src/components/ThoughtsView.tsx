@@ -267,38 +267,38 @@ export const ThoughtsView: React.FC = () => {
   }, [filteredThoughts]);
 
   return (
-    <div className="space-y-5 sm:space-y-6 pb-12">
-      {/* 1. Header Section */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 border-b border-[var(--border-default)] pb-4 sm:pb-5">
-        <div>
-          <div className="flex items-center space-x-2.5">
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-[var(--text-heading)]">
+    <div className="space-y-4 sm:space-y-6 pb-12">
+      {/* 1. Header Section - Aligned in single row on mobile & desktop */}
+      <div className="flex items-center justify-between gap-3 border-b border-[var(--border-default)] pb-3 sm:pb-4">
+        <div className="min-w-0">
+          <div className="flex items-center space-x-2 sm:space-x-2.5">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight text-[var(--text-heading)] truncate">
               Thoughts
             </h1>
-            <span className="inline-flex items-center justify-center px-2.5 py-0.5 text-xs font-bold rounded-full bg-[var(--pale-sage)] text-[var(--deep-forest)] border border-[var(--border-default)]/50">
+            <span className="inline-flex items-center justify-center px-2 py-0.5 text-[10px] sm:text-xs font-bold rounded-full bg-[var(--pale-sage)] text-[var(--deep-forest)] border border-[var(--border-default)]/50 shrink-0">
               {(thoughts || []).length}
             </span>
           </div>
-          <p className="mt-1 text-xs sm:text-sm text-[var(--text-muted)] font-medium">
+          <p className="mt-0.5 text-xs sm:text-sm text-[var(--text-muted)] font-medium truncate">
             Things worth remembering.
           </p>
         </div>
 
         {/* Primary Action Button */}
-        <div className="flex items-center space-x-2.5">
+        <div className="flex items-center shrink-0">
           <button
             onClick={handleOpenCreate}
             id="new-thought-btn"
-            className="inline-flex items-center justify-center px-4 py-2.5 rounded-lg bg-[var(--forest-green)] hover:opacity-90 active:scale-95 text-white font-bold text-sm transition-all shadow-xs cursor-pointer select-none"
+            className="inline-flex items-center justify-center px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg bg-[var(--forest-green)] hover:opacity-90 active:scale-95 text-white font-bold text-xs sm:text-sm transition-all shadow-xs cursor-pointer select-none shrink-0"
           >
-            <Plus className="w-4 h-4 mr-1.5 shrink-0 stroke-[2.5]" />
-            New thought
+            <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 sm:mr-1.5 shrink-0 stroke-[2.5]" />
+            <span>New thought</span>
           </button>
         </div>
       </div>
 
-      {/* 2. Quick Writing Composer (Inline Card) */}
-      <div className="rounded-xl bg-[var(--surface-primary)] border border-[var(--border-default)] p-3 sm:p-4 shadow-xs transition-all hover:border-[var(--forest-green)]/40">
+      {/* 2. Quick Writing Composer (Inline Card) - Hidden on mobile view when collapsed */}
+      <div className={`${!isEditorOpen ? "hidden sm:block" : "block"} rounded-xl bg-[var(--surface-primary)] border border-[var(--border-default)] p-3 sm:p-4 shadow-xs transition-all hover:border-[var(--forest-green)]/40`}>
         {!isEditorOpen || editingThought ? (
           // Collapsed Prompt Button
           <div
@@ -393,9 +393,9 @@ export const ThoughtsView: React.FC = () => {
         )}
       </div>
 
-      {/* 3. Search Bar */}
+      {/* 3. Search Bar - Hidden on mobile view */}
       {((thoughts && thoughts.length > 0) || searchQuery) && (
-        <div className="relative max-w-md">
+        <div className="hidden sm:block relative max-w-md">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[var(--text-muted)]">
             <Search className="w-4 h-4" />
           </div>
@@ -552,9 +552,9 @@ export const ThoughtsView: React.FC = () => {
       {/* 9. Modal Editor (used when editing existing thought or clicking + New Thought when desired) */}
       {isEditorOpen && editingThought && (
         <Portal>
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/45 backdrop-blur-[2px] transition-all">
+          <div className="fixed inset-0 z-[100] overflow-y-auto flex items-center justify-center p-3 sm:p-4 pt-16 sm:pt-20 pb-8 bg-black/50 backdrop-blur-xs transition-all">
             <div
-              className="w-full max-w-lg rounded-2xl bg-[var(--surface-dialog)] border border-[var(--border-default)] shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in fade-in zoom-in-95 duration-150"
+              className="w-full max-w-lg rounded-2xl bg-[var(--surface-dialog)] border border-[var(--border-default)] shadow-2xl overflow-hidden flex flex-col max-h-[85vh] my-auto animate-in fade-in zoom-in-95 duration-150"
               role="dialog"
               aria-modal="true"
             >
@@ -661,7 +661,7 @@ export const ThoughtsView: React.FC = () => {
       {/* 10. Delete Confirmation Dialog */}
       {deletingThought && (
         <Portal>
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/45 backdrop-blur-[2px]">
+          <div className="fixed inset-0 z-[100] overflow-y-auto flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
             <div
               className="w-full max-w-sm rounded-2xl bg-[var(--surface-dialog)] border border-[var(--border-default)] p-5 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150"
               role="alertdialog"

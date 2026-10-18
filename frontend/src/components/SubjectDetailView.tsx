@@ -23,11 +23,9 @@ import {
   Layers,
   History,
   AlertTriangle,
-  ChevronDown,
-  ChevronRight,
-  ChevronsUpDown,
 } from "lucide-react";
 import { Subject, Chapter, Topic, StudySession, TopicStatus, Api } from "../lib/api";
+import { Portal } from "./Portal";
 
 interface SubjectDetailViewProps {
   subject: Subject;
@@ -139,11 +137,11 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
   const [topicNextStep, setTopicNextStep] = useState("");
   const [topicRevisionDate, setTopicRevisionDate] = useState("");
 
-  // Collapsed chapters state
-  const [collapsedChapterIds, setCollapsedChapterIds] = useState<Set<string>>(new Set());
+  // Expanded chapters state (collapsed by default per user requirement)
+  const [expandedChapterIds, setExpandedChapterIds] = useState<Set<string>>(new Set());
 
   const toggleChapterCollapse = (chapterId: string) => {
-    setCollapsedChapterIds((prev) => {
+    setExpandedChapterIds((prev) => {
       const next = new Set(prev);
       if (next.has(chapterId)) {
         next.delete(chapterId);
@@ -156,13 +154,10 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
 
   const handleOpenAddTopic = (chapterId: string) => {
     setActiveChapterForTopic(chapterId);
-    setCollapsedChapterIds((prev) => {
-      if (prev.has(chapterId)) {
-        const next = new Set(prev);
-        next.delete(chapterId);
-        return next;
-      }
-      return prev;
+    setExpandedChapterIds((prev) => {
+      const next = new Set(prev);
+      next.add(chapterId);
+      return next;
     });
   };
 
@@ -640,32 +635,6 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
               {chapters.length} {chapters.length === 1 ? "Chapter" : "Chapters"}
             </span>
             <div className="flex items-center space-x-2 shrink-0">
-              {chapters.length > 0 && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    const allCollapsed = chapters.every((c) => collapsedChapterIds.has(c.id));
-                    if (allCollapsed) {
-                      setCollapsedChapterIds(new Set());
-                    } else {
-                      setCollapsedChapterIds(new Set(chapters.map((c) => c.id)));
-                    }
-                  }}
-                  className="paper-btn-secondary px-2.5 py-1 text-xs font-bold flex items-center space-x-1 cursor-pointer active:scale-95"
-                  title={
-                    chapters.every((c) => collapsedChapterIds.has(c.id))
-                      ? "Expand all chapters"
-                      : "Collapse all chapters"
-                  }
-                >
-                  <ChevronsUpDown className="h-3.5 w-3.5 text-[var(--text-muted)]" />
-                  <span>
-                    {chapters.every((c) => collapsedChapterIds.has(c.id))
-                      ? "Expand All"
-                      : "Collapse All"}
-                  </span>
-                </button>
-              )}
               <button
                 onClick={() => setShowAddChapter(true)}
                 className="paper-btn-primary px-3 py-1 text-xs font-bold flex items-center space-x-1 shadow-xs shrink-0 cursor-pointer active:scale-95"
@@ -761,7 +730,7 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
             <div className="space-y-3 sm:space-y-3.5">
               {chapters.map((chapter, cIndex) => {
                 const chapterTopics = chapter.topics || [];
-                const isCollapsed = collapsedChapterIds.has(chapter.id);
+                const isExpanded = expandedChapterIds.has(chapter.id);
                 const masteredCount = chapterTopics.filter(
                   (t) => t.status === "STUDIED" || t.status === "UNDERSTOOD"
                 ).length;
@@ -771,31 +740,28 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
                     key={chapter.id}
                     className="paper-card p-3 sm:p-4 space-y-2.5 border border-[var(--border-default)] rounded-xl shadow-2xs hover:border-[var(--border-strong)] transition-all"
                   >
-                    {/* Chapter Header Card - Clickable to toggle collapse */}
+                    {/* Chapter Header Card - Clickable to toggle collapse on touch/click */}
                     <div
                       onClick={() => toggleChapterCollapse(chapter.id)}
-                      className={`flex items-center justify-between gap-2 cursor-pointer select-none rounded-lg group transition-colors ${
-                        !isCollapsed ? "pb-2.5 border-b border-[var(--border-subtle)]" : ""
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          toggleChapterCollapse(chapter.id);
+                        }
+                      }}
+                      role="button"
+                      tabIndex={0}
+                      aria-expanded={isExpanded}
+                      className={`flex items-center justify-between gap-2 cursor-pointer select-none rounded-lg group transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--forest-green)] ${
+                        isExpanded ? "pb-2.5 border-b border-[var(--border-subtle)]" : ""
                       }`}
                     >
-                      <div className="flex items-center space-x-2.5 min-w-0">
-                        {/* Collapse / Expand Chevron Icon */}
-                        <div
-                          className="text-[var(--text-muted)] group-hover:text-[var(--forest-green)] transition-colors p-0.5 shrink-0"
-                          title={isCollapsed ? "Expand chapter" : "Collapse chapter"}
-                        >
-                          {isCollapsed ? (
-                            <ChevronRight className="h-4 w-4" />
-                          ) : (
-                            <ChevronDown className="h-4 w-4" />
-                          )}
-                        </div>
-
+                      <div className="flex items-center space-x-2.5 min-w-0 flex-1">
                         {/* Chapter Number Badge */}
                         <div className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-lg bg-[var(--forest-green)] text-white font-black text-xs shrink-0 shadow-2xs">
                           {String(cIndex + 1).padStart(2, "0")}
                         </div>
-                        <div className="min-w-0">
+                        <div className="min-w-0 flex-1">
                           <div className="flex items-center space-x-2 flex-wrap">
                             <h3 className="font-extrabold text-[var(--text-heading)] text-sm sm:text-base truncate group-hover:text-[var(--forest-green)] transition-colors">
                               {chapter.title}
@@ -803,7 +769,7 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
                             <span className="text-[10px] font-bold text-[var(--text-muted)] bg-[var(--surface-secondary)] px-1.5 py-0.5 rounded shrink-0">
                               {chapterTopics.length} {chapterTopics.length === 1 ? "topic" : "topics"}
                             </span>
-                            {isCollapsed && chapterTopics.length > 0 && (
+                            {!isExpanded && chapterTopics.length > 0 && (
                               <span className="text-[10px] font-semibold text-[var(--forest-green)] bg-[var(--forest-green)]/10 px-1.5 py-0.5 rounded shrink-0">
                                 {masteredCount}/{chapterTopics.length} mastered
                               </span>
@@ -841,9 +807,9 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
                       </div>
                     </div>
 
-                    {/* Topics List Container - Hidden when collapsed */}
-                    {!isCollapsed && (
-                      <div className="space-y-2 pt-0.5">
+                    {/* Topics List Container - Hidden when collapsed (default closed) */}
+                    {isExpanded && (
+                      <div className="space-y-1.5 pt-0.5">
                       {chapterTopics.length > 0 ? (
                         chapterTopics.map((topic) => {
                           const statusInfo = STATUS_CONFIG[topic.status || "NOT_STARTED"];
@@ -852,91 +818,44 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
                             <div
                               key={topic.id}
                               onClick={() => openEditTopicModal(topic)}
-                              className="paper-card bg-[var(--surface-primary)] p-3 sm:p-3.5 rounded-xl border border-[var(--border-default)] hover:border-[var(--forest-green)] transition-all card-lift space-y-2 shadow-2xs cursor-pointer group active:scale-[0.99]"
+                              className="paper-card bg-[var(--surface-primary)] px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-lg border border-[var(--border-default)] hover:border-[var(--forest-green)]/60 hover:bg-[var(--surface-hover)] transition-all cursor-pointer shadow-2xs flex items-center justify-between gap-3 group active:scale-[0.99]"
                             >
-                              {/* Row 1: Organic Status (left) & Mastery Dots + Circular Quick Study (right) */}
-                              <div className="flex items-center justify-between gap-2">
-                                <div className="inline-flex items-center space-x-1.5 text-xs font-semibold">
-                                  <span className={`h-2 w-2 rounded-full ${statusInfo.dotColor} shrink-0`} />
-                                  <span className={statusInfo.textColor}>{statusInfo.label}</span>
-                                </div>
-
-                                <div className="flex items-center gap-2 shrink-0">
-                                  {/* Clean Borderless Mastery Indicator */}
-                                  <div
-                                    className="flex items-center gap-1.5 text-xs font-semibold text-[var(--text-muted)]"
-                                    title={`Mastery: Level ${topic.confidence || 1} of 5`}
-                                  >
-                                    <span className="text-[11px] font-bold">L{topic.confidence || 1}</span>
-                                    <div className="flex items-center gap-0.5">
-                                      {[1, 2, 3, 4, 5].map((lvl) => (
-                                        <span
-                                          key={lvl}
-                                          className={`h-1.5 w-1.5 rounded-full transition-colors ${
-                                            lvl <= (topic.confidence || 1)
-                                              ? "bg-[var(--forest-green)]"
-                                              : "bg-[var(--border-strong)]/25"
-                                          }`}
-                                        />
-                                      ))}
-                                    </div>
-                                  </div>
-
-                                  {/* Sleek Circular Play Action (breaks rectangular monotony) */}
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      startQuickSessionForTopic(topic);
-                                    }}
-                                    className="h-7 w-7 rounded-full bg-[var(--surface-secondary)] hover:bg-[var(--forest-green)] text-[var(--forest-green)] hover:text-white flex items-center justify-center transition-all cursor-pointer active:scale-95 shadow-2xs shrink-0"
-                                    title="Start study session for this topic"
-                                  >
-                                    <Play className="h-3 w-3 fill-current ml-0.5" />
-                                  </button>
-                                </div>
-                              </div>
-
-                              {/* Row 2: Topic Title */}
-                              <div>
-                                <h4 className="font-extrabold text-[var(--text-heading)] text-sm sm:text-base leading-snug break-words group-hover:text-[var(--forest-green)] transition-colors">
+                              {/* Left: Status Dot + Topic Title + Subtle Note Snippet */}
+                              <div className="flex items-center space-x-2.5 min-w-0 flex-1">
+                                <span
+                                  className={`h-2 w-2 rounded-full ${statusInfo.dotColor} shrink-0`}
+                                  title={statusInfo.label}
+                                />
+                                <span className="font-bold text-xs sm:text-sm text-[var(--text-heading)] group-hover:text-[var(--forest-green)] transition-colors truncate">
                                   {topic.title}
-                                </h4>
+                                </span>
+                                {topic.notes && (
+                                  <span className="text-[11px] text-[var(--text-muted)] truncate max-w-[200px] hidden md:inline opacity-70">
+                                    · {topic.notes}
+                                  </span>
+                                )}
                               </div>
 
-                              {/* Sub-topics / Notes & Next Steps Box */}
-                              {(topic.notes || topic.resources || topic.nextStep) && (
-                                <div className="bg-[var(--surface-secondary)]/70 p-2.5 sm:p-3 rounded-lg border border-[var(--border-subtle)] space-y-1.5 text-xs">
-                                  {topic.notes && (
-                                    <div className="flex items-start space-x-2 text-[var(--text-secondary)]">
-                                      <FileText className="h-3.5 w-3.5 text-[var(--text-muted)] mt-0.5 shrink-0" />
-                                      <div className="leading-relaxed break-words">
-                                        <span className="font-bold text-[var(--text-heading)] mr-1">Notes:</span>
-                                        <span>{topic.notes}</span>
-                                      </div>
-                                    </div>
-                                  )}
+                              {/* Right: Status Pill Badge + Quick Study Action */}
+                              <div className="flex items-center space-x-2 shrink-0">
+                                <span
+                                  className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${statusInfo.badgeClass} shrink-0`}
+                                >
+                                  {statusInfo.label}
+                                </span>
 
-                                  {topic.nextStep && (
-                                    <div className="flex items-start space-x-2 text-[var(--crimson)]">
-                                      <Target className="h-3.5 w-3.5 mt-0.5 shrink-0" />
-                                      <div className="leading-relaxed break-words font-medium">
-                                        <span className="font-bold mr-1">Next:</span>
-                                        <span>{topic.nextStep}</span>
-                                      </div>
-                                    </div>
-                                  )}
-
-                                  {topic.resources && (
-                                    <div className="flex items-start space-x-2 text-[var(--forest-green)]">
-                                      <ExternalLink className="h-3.5 w-3.5 mt-0.5 shrink-0" />
-                                      <div className="leading-relaxed truncate font-medium">
-                                        <span className="font-bold mr-1">Resources:</span>
-                                        <span className="underline">{topic.resources}</span>
-                                      </div>
-                                    </div>
-                                  )}
-                                </div>
-                              )}
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    startQuickSessionForTopic(topic);
+                                  }}
+                                  className="h-6 w-6 rounded-full hover:bg-[var(--forest-green)] hover:text-white text-[var(--text-muted)] flex items-center justify-center transition-colors cursor-pointer shrink-0"
+                                  title="Start study session for this topic"
+                                >
+                                  <Play className="h-3 w-3 fill-current ml-0.5" />
+                                </button>
+                              </div>
                             </div>
                           );
                         })
@@ -1207,9 +1126,24 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
           MODAL: LOG STUDY SESSION
           ========================================== */}
       {showSessionModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
-          <div className="paper-modal bg-[var(--surface-primary)] w-full max-w-xl p-6 sm:p-7 space-y-5 rounded-2xl border border-[var(--border-strong)] shadow-2xl max-h-[92vh] overflow-y-auto">
-            <div className="flex items-center justify-between border-b border-[var(--border-default)] pb-4">
+        <Portal>
+          <div
+            className="fixed inset-0 z-[100] overflow-y-auto bg-black/60 backdrop-blur-xs p-3 sm:p-4"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) setShowSessionModal(false);
+            }}
+          >
+            <div
+              className="flex min-h-full items-center justify-center pt-16 sm:pt-20 pb-8"
+              onClick={(e) => {
+                if (e.target === e.currentTarget) setShowSessionModal(false);
+              }}
+            >
+              <div
+                className="paper-modal bg-[var(--surface-primary)] w-full max-w-xl p-5 sm:p-7 space-y-4 rounded-2xl border border-[var(--border-strong)] shadow-2xl relative my-auto animate-in fade-in zoom-in-95 duration-150"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex items-center justify-between border-b border-[var(--border-default)] pb-4">
               <div>
                 <h3 className="text-lg font-black text-[var(--text-heading)]">
                   Log a Study Session
@@ -1369,7 +1303,7 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
                 <button
                   type="submit"
                   disabled={loading}
-                  className="paper-btn-primary px-6 py-2 text-xs font-bold shadow-xs"
+                  className="paper-btn-primary px-6 py-2 text-xs font-bold shadow-xs cursor-pointer active:scale-95"
                 >
                   Save Study Session
                 </button>
@@ -1377,15 +1311,32 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
             </form>
           </div>
         </div>
-      )}
+      </div>
+    </Portal>
+  )}
 
       {/* ==========================================
           MODAL: EDIT TOPIC DETAILS & MASTERY
           ========================================== */}
       {editingTopic && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
-          <div className="paper-modal bg-[var(--surface-primary)] w-full max-w-lg p-6 sm:p-7 space-y-5 rounded-2xl border border-[var(--border-strong)] shadow-2xl max-h-[92vh] overflow-y-auto">
-            <div className="flex items-center justify-between border-b border-[var(--border-default)] pb-4">
+        <Portal>
+          <div
+            className="fixed inset-0 z-[100] overflow-y-auto bg-black/60 backdrop-blur-xs p-3 sm:p-4"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) setEditingTopic(null);
+            }}
+          >
+            <div
+              className="flex min-h-full items-center justify-center pt-16 sm:pt-20 pb-8"
+              onClick={(e) => {
+                if (e.target === e.currentTarget) setEditingTopic(null);
+              }}
+            >
+              <div
+                className="paper-modal bg-[var(--surface-primary)] w-full max-w-lg p-5 sm:p-6 space-y-4 rounded-2xl border border-[var(--border-strong)] shadow-2xl relative my-auto animate-in fade-in zoom-in-95 duration-150"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex items-center justify-between border-b border-[var(--border-default)] pb-3">
               <div>
                 <h3 className="text-lg font-black text-[var(--text-heading)]">
                   {editingTopic.title}
@@ -1549,7 +1500,9 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
             </form>
           </div>
         </div>
-      )}
+      </div>
+    </Portal>
+  )}
     </div>
   );
 };
