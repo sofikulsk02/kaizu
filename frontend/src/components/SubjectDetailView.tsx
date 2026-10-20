@@ -23,6 +23,7 @@ import {
   Layers,
   History,
   AlertTriangle,
+  Loader2,
 } from "lucide-react";
 import { Subject, Chapter, Topic, StudySession, TopicStatus, Api } from "../lib/api";
 import { Portal } from "./Portal";
@@ -153,6 +154,7 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
   };
 
   const handleOpenAddTopic = (chapterId: string) => {
+    setTopicError(null);
     setActiveChapterForTopic(chapterId);
     setExpandedChapterIds((prev) => {
       const next = new Set(prev);
@@ -163,6 +165,15 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Dedicated action loaders and inline error feedback
+  const [isCreatingChapter, setIsCreatingChapter] = useState(false);
+  const [chapterError, setChapterError] = useState<string | null>(null);
+  const [creatingTopicChapterId, setCreatingTopicChapterId] = useState<string | null>(null);
+  const [topicError, setTopicError] = useState<string | null>(null);
+  const [isUpdatingSubject, setIsUpdatingSubject] = useState(false);
+  const [isLoggingSession, setIsLoggingSession] = useState(false);
+  const [isSavingTopic, setIsSavingTopic] = useState(false);
 
   const chapters = subject.chapters || [];
   const studySessions = subject.studySessions || [];
@@ -198,45 +209,54 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
   // --- Handlers ---
   const handleCreateChapter = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newChapterTitle.trim()) return;
-    setLoading(true);
+    const trimmedTitle = newChapterTitle.trim();
+    if (!trimmedTitle || isCreatingChapter) return;
+    setIsCreatingChapter(true);
+    setChapterError(null);
     setError(null);
     try {
-      await Api.createChapter(subject.id, {
-        title: newChapterTitle.trim(),
+      const res = await Api.createChapter(subject.id, {
+        title: trimmedTitle,
         description: newChapterDesc.trim() || undefined,
       });
+      if (res && res.id) {
+        setExpandedChapterIds((prev) => new Set([...prev, res.id]));
+      }
       setNewChapterTitle("");
       setNewChapterDesc("");
       setShowAddChapter(false);
-      onRefresh();
+      await Promise.resolve(onRefresh());
     } catch (err: any) {
+      setChapterError(err.message || "Failed to create chapter");
       setError(err.message || "Failed to create chapter");
     } finally {
-      setLoading(false);
+      setIsCreatingChapter(false);
     }
   };
 
   const handleCreateTopic = async (chapterId: string) => {
-    if (!newTopicTitle.trim()) return;
-    setLoading(true);
+    const trimmedTitle = newTopicTitle.trim();
+    if (!trimmedTitle || creatingTopicChapterId) return;
+    setCreatingTopicChapterId(chapterId);
+    setTopicError(null);
     setError(null);
     try {
-      await Api.createTopic(chapterId, { title: newTopicTitle.trim() });
+      await Api.createTopic(chapterId, { title: trimmedTitle });
       setNewTopicTitle("");
       setActiveChapterForTopic(null);
-      onRefresh();
+      await Promise.resolve(onRefresh());
     } catch (err: any) {
+      setTopicError(err.message || "Failed to create topic");
       setError(err.message || "Failed to create topic");
     } finally {
-      setLoading(false);
+      setCreatingTopicChapterId(null);
     }
   };
 
   const handleUpdateSubject = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!editSubjectName.trim()) return;
-    setLoading(true);
+    if (!editSubjectName.trim() || isUpdatingSubject) return;
+    setIsUpdatingSubject(true);
     setError(null);
     try {
       await Api.updateSubject(subject.id, {
@@ -244,11 +264,11 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
         description: editSubjectDesc.trim() || undefined,
       });
       setEditingSubject(false);
-      onRefresh();
+      await Promise.resolve(onRefresh());
     } catch (err: any) {
       setError(err.message || "Failed to update subject");
     } finally {
-      setLoading(false);
+      setIsUpdatingSubject(false);
     }
   };
 
@@ -291,8 +311,8 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
 
   const handleLogStudySession = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!sessionSummary.trim()) return;
-    setLoading(true);
+    if (!sessionSummary.trim() || isLoggingSession) return;
+    setIsLoggingSession(true);
     setError(null);
     try {
       const selectedTopic = allTopics.find((t) => t.id === sessionTopicId);
@@ -309,11 +329,11 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
       setSessionSummary("");
       setSessionOutcome("");
       setSessionNextStep("");
-      onRefresh();
+      await Promise.resolve(onRefresh());
     } catch (err: any) {
       setError(err.message || "Failed to log study session");
     } finally {
-      setLoading(false);
+      setIsLoggingSession(false);
     }
   };
 
@@ -339,8 +359,8 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
 
   const handleSaveTopicDetails = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!editingTopic) return;
-    setLoading(true);
+    if (!editingTopic || isSavingTopic) return;
+    setIsSavingTopic(true);
     setError(null);
     try {
       await Api.updateTopic(editingTopic.id, {
@@ -352,11 +372,11 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
         revisionDate: topicRevisionDate ? new Date(topicRevisionDate).toISOString() : null,
       });
       setEditingTopic(null);
-      onRefresh();
+      await Promise.resolve(onRefresh());
     } catch (err: any) {
       setError(err.message || "Failed to update topic details");
     } finally {
-      setLoading(false);
+      setIsSavingTopic(false);
     }
   };
 
@@ -460,10 +480,17 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
               </button>
               <button
                 type="submit"
-                disabled={loading}
-                className="paper-btn-primary px-5 py-2 text-xs font-bold"
+                disabled={isUpdatingSubject}
+                className="paper-btn-primary px-5 py-2 text-xs font-bold flex items-center gap-1.5 cursor-pointer active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                Save Changes
+                {isUpdatingSubject ? (
+                  <>
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    <span>Saving...</span>
+                  </>
+                ) : (
+                  <span>Save Changes</span>
+                )}
               </button>
             </div>
           </form>
@@ -649,29 +676,56 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
           {showAddChapter && (
             <form
               onSubmit={handleCreateChapter}
-              className="paper-card bg-[var(--surface-secondary)] p-4 sm:p-6 space-y-3.5 border-2 border-[var(--forest-green)]/40 rounded-xl shadow-sm"
+              className="paper-card bg-[var(--surface-secondary)] p-4 sm:p-6 space-y-3.5 border-2 border-[var(--forest-green)]/40 rounded-xl shadow-sm animate-in fade-in zoom-in-95 duration-150"
             >
               <div className="flex items-center justify-between">
                 <h3 className="text-xs font-extrabold uppercase tracking-wider text-[var(--forest-green)] flex items-center space-x-2">
                   <BookOpen className="h-3.5 w-3.5" />
                   <span>Create New Chapter</span>
                 </h3>
-                <button
-                  type="button"
-                  onClick={() => setShowAddChapter(false)}
-                  className="text-xs text-[var(--text-muted)] hover:text-[var(--text-heading)] cursor-pointer flex items-center space-x-1"
-                >
-                  <X className="h-3.5 w-3.5" />
-                  <span>Close</span>
-                </button>
+                {isCreatingChapter ? (
+                  <span className="text-xs font-semibold text-[var(--forest-green)] flex items-center gap-1.5 animate-pulse">
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    <span>Saving chapter...</span>
+                  </span>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowAddChapter(false);
+                      setChapterError(null);
+                    }}
+                    className="text-xs text-[var(--text-muted)] hover:text-[var(--text-heading)] cursor-pointer flex items-center space-x-1"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                    <span>Close</span>
+                  </button>
+                )}
               </div>
+
+              {chapterError && (
+                <div className="p-2.5 rounded-lg border border-red-500/30 bg-red-500/10 text-xs font-semibold text-red-400 flex items-center justify-between">
+                  <span className="inline-flex items-center gap-1.5">
+                    <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-red-500" />
+                    <span>{chapterError}</span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setChapterError(null)}
+                    className="text-[10px] font-bold hover:underline cursor-pointer"
+                  >
+                    Dismiss
+                  </button>
+                </div>
+              )}
 
               <input
                 type="text"
                 placeholder="Chapter Title (e.g. Chapter 1: Transport Layer Protocols)"
                 value={newChapterTitle}
                 onChange={(e) => setNewChapterTitle(e.target.value)}
-                className="paper-input w-full px-4 py-2.5 text-sm font-semibold"
+                disabled={isCreatingChapter}
+                className="paper-input w-full px-4 py-2.5 text-sm font-semibold disabled:opacity-60"
                 autoFocus
                 required
               />
@@ -681,26 +735,61 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
                 placeholder="Brief Overview / Description (Optional)"
                 value={newChapterDesc}
                 onChange={(e) => setNewChapterDesc(e.target.value)}
-                className="paper-input w-full px-4 py-2.5 text-sm"
+                disabled={isCreatingChapter}
+                className="paper-input w-full px-4 py-2.5 text-sm disabled:opacity-60"
               />
 
               <div className="flex justify-end space-x-2.5 pt-2">
                 <button
                   type="button"
-                  onClick={() => setShowAddChapter(false)}
-                  className="paper-btn-secondary px-4 py-2 text-xs font-bold"
+                  onClick={() => {
+                    setShowAddChapter(false);
+                    setChapterError(null);
+                  }}
+                  disabled={isCreatingChapter}
+                  className="paper-btn-secondary px-4 py-2 text-xs font-bold disabled:opacity-50 cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  disabled={loading || !newChapterTitle.trim()}
-                  className="paper-btn-primary px-5 py-2 text-xs font-bold"
+                  disabled={isCreatingChapter || !newChapterTitle.trim()}
+                  className="paper-btn-primary px-5 py-2 text-xs font-bold flex items-center gap-1.5 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer active:scale-95"
                 >
-                  Save Chapter
+                  {isCreatingChapter ? (
+                    <>
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      <span>Saving Chapter...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="h-3.5 w-3.5" />
+                      <span>Save Chapter</span>
+                    </>
+                  )}
                 </button>
               </div>
             </form>
+          )}
+
+          {/* In-place Chapter Creation Skeleton Feedback */}
+          {isCreatingChapter && (
+            <div className="paper-card p-3 sm:p-4 space-y-2 border-2 border-dashed border-[var(--forest-green)]/50 rounded-xl shadow-2xs animate-pulse bg-[var(--surface-primary)]">
+              <div className="flex items-center space-x-2.5 min-w-0">
+                <div className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-lg bg-[var(--forest-green)] text-white font-black text-xs shrink-0 shadow-2xs">
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h3 className="font-extrabold text-[var(--text-heading)] text-sm sm:text-base truncate">
+                    {newChapterTitle || "New Chapter"}
+                  </h3>
+                  <p className="text-[11px] text-[var(--forest-green)] font-semibold flex items-center gap-1.5">
+                    <Loader2 className="h-2.5 w-2.5 animate-spin" />
+                    <span>Creating chapter in syllabus...</span>
+                  </p>
+                </div>
+              </div>
+            </div>
           )}
 
           {/* Empty State */}
@@ -865,20 +954,62 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
                         </div>
                       )}
 
+                      {/* In-place Topic Creation Placeholder feedback */}
+                      {creatingTopicChapterId === chapter.id && (
+                        <div className="paper-card bg-[var(--surface-primary)] px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-lg border border-dashed border-[var(--forest-green)]/60 flex items-center justify-between gap-3 animate-pulse">
+                          <div className="flex items-center space-x-2.5 min-w-0 flex-1">
+                            <span className="h-2 w-2 rounded-full bg-[var(--forest-green)] shrink-0 animate-ping" />
+                            <span className="font-bold text-xs sm:text-sm text-[var(--text-heading)] truncate">
+                              {newTopicTitle || "Adding topic..."}
+                            </span>
+                          </div>
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[var(--forest-green)]/15 text-[var(--forest-green)] shrink-0 flex items-center gap-1 font-semibold">
+                            <Loader2 className="h-2.5 w-2.5 animate-spin" />
+                            Adding to chapter...
+                          </span>
+                        </div>
+                      )}
+
                       {/* Add Topic Inline Accordion Form */}
                       {activeChapterForTopic === chapter.id && (
-                        <div className="p-3.5 rounded-xl bg-[var(--surface-secondary)] border border-[var(--forest-green)]/40 space-y-2.5">
-                          <div className="text-xs font-bold text-[var(--forest-green)] flex items-center space-x-1.5">
-                            <Plus className="h-3.5 w-3.5" />
-                            <span>Add New Topic to {chapter.title}</span>
+                        <div className="p-3 sm:p-3.5 rounded-xl bg-[var(--surface-secondary)] border border-[var(--forest-green)]/40 space-y-2.5 animate-in fade-in zoom-in-95 duration-150">
+                          <div className="text-xs font-bold text-[var(--forest-green)] flex items-center justify-between gap-2">
+                            <div className="flex items-center space-x-1.5 min-w-0">
+                              <Plus className="h-3.5 w-3.5 shrink-0" />
+                              <span className="truncate">Add New Topic to {chapter.title}</span>
+                            </div>
+                            {creatingTopicChapterId === chapter.id && (
+                              <span className="text-[11px] font-semibold text-[var(--forest-green)] flex items-center gap-1.5 animate-pulse shrink-0">
+                                <Loader2 className="h-3 w-3 animate-spin" />
+                                Adding topic...
+                              </span>
+                            )}
                           </div>
-                          <div className="flex items-center space-x-2">
+
+                          {topicError && (
+                            <div className="p-2 rounded-lg border border-red-500/30 bg-red-500/10 text-xs font-semibold text-red-400 flex items-center justify-between">
+                              <span className="inline-flex items-center gap-1 min-w-0">
+                                <AlertTriangle className="h-3 w-3 shrink-0 text-red-500" />
+                                <span className="truncate">{topicError}</span>
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => setTopicError(null)}
+                                className="text-[10px] font-bold hover:underline cursor-pointer shrink-0 ml-2"
+                              >
+                                Dismiss
+                              </button>
+                            </div>
+                          )}
+
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                             <input
                               type="text"
                               placeholder="e.g. TCP Handshake & Congestion Control"
                               value={newTopicTitle}
                               onChange={(e) => setNewTopicTitle(e.target.value)}
-                              className="paper-input flex-1 px-3.5 py-2 text-xs"
+                              disabled={creatingTopicChapterId === chapter.id}
+                              className="paper-input w-full sm:flex-1 min-w-0 px-3.5 py-2 text-xs disabled:opacity-60"
                               autoFocus
                               onKeyDown={(e) => {
                                 if (e.key === "Enter") {
@@ -887,19 +1018,40 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
                                 }
                               }}
                             />
-                            <button
-                              onClick={() => handleCreateTopic(chapter.id)}
-                              disabled={loading || !newTopicTitle.trim()}
-                              className="paper-btn-primary px-4 py-2 text-xs font-bold shadow-xs"
-                            >
-                              Add
-                            </button>
-                            <button
-                              onClick={() => setActiveChapterForTopic(null)}
-                              className="paper-btn-secondary px-3 py-2 text-xs font-bold"
-                            >
-                              Cancel
-                            </button>
+                            <div className="flex items-center justify-end space-x-2 shrink-0">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (!creatingTopicChapterId) {
+                                    setActiveChapterForTopic(null);
+                                    setNewTopicTitle("");
+                                    setTopicError(null);
+                                  }
+                                }}
+                                disabled={creatingTopicChapterId === chapter.id}
+                                className="paper-btn-secondary px-3.5 py-2 text-xs font-bold disabled:opacity-50 cursor-pointer"
+                              >
+                                Cancel
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleCreateTopic(chapter.id)}
+                                disabled={creatingTopicChapterId === chapter.id || !newTopicTitle.trim()}
+                                className="paper-btn-primary px-4 py-2 text-xs font-bold shadow-xs flex items-center gap-1.5 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer active:scale-95"
+                              >
+                                {creatingTopicChapterId === chapter.id ? (
+                                  <>
+                                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                    <span>Adding...</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Plus className="h-3.5 w-3.5" />
+                                    <span>Add</span>
+                                  </>
+                                )}
+                              </button>
+                            </div>
                           </div>
                         </div>
                       )}
@@ -1302,10 +1454,17 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
                 </button>
                 <button
                   type="submit"
-                  disabled={loading}
-                  className="paper-btn-primary px-6 py-2 text-xs font-bold shadow-xs cursor-pointer active:scale-95"
+                  disabled={isLoggingSession}
+                  className="paper-btn-primary px-6 py-2 text-xs font-bold shadow-xs cursor-pointer active:scale-95 flex items-center gap-1.5 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  Save Study Session
+                  {isLoggingSession ? (
+                    <>
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      <span>Saving Session...</span>
+                    </>
+                  ) : (
+                    <span>Save Study Session</span>
+                  )}
                 </button>
               </div>
             </form>
@@ -1490,10 +1649,17 @@ export const SubjectDetailView: React.FC<SubjectDetailViewProps> = ({
                   </button>
                   <button
                     type="submit"
-                    disabled={loading}
-                    className="paper-btn-primary px-5 py-2 text-xs font-bold shadow-xs cursor-pointer active:scale-95"
+                    disabled={isSavingTopic}
+                    className="paper-btn-primary px-5 py-2 text-xs font-bold shadow-xs cursor-pointer active:scale-95 flex items-center gap-1.5 disabled:opacity-60 disabled:cursor-not-allowed"
                   >
-                    Save Changes
+                    {isSavingTopic ? (
+                      <>
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        <span>Saving...</span>
+                      </>
+                    ) : (
+                      <span>Save Changes</span>
+                    )}
                   </button>
                 </div>
               </div>
